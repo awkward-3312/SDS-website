@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDS | Soluciones Digitales Seguras</title>
-    <link rel="stylesheet" href="home/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SDS | Soluciones Digitales Seguras</title>
+  <meta name="description" content="SDS - Protege, gestiona y optimiza tu mundo digital. Servicios: publicidad, hardware, software, diseño web, fotografía y más." />
+  <link rel="stylesheet" href="home/style.css">
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a href="index.html">
-            <img src="images/sds-logo.png" alt="SDS Logo" class="logo">
-        </a>        
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a href="../index.html" class="brand">
+      <img src="images/sds-logo.png" alt="SDS Logo" class="logo">
+    </a>
 
-        <ul class="menu">
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="services/services.html">Servicios</a></li>
-            <li><a href="products/products.html">Productos</a></li>
-            <li><a href="contact/contact.html">Contacto</a></li>
-        </ul>
-    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+      <span class="hamb"></span>
+    </button>
 
-    <!-- HERO -->
-    <section class="hero">
-        <div class="hero-text">
-            <h1>Soluciones Digitales Seguras</h1>
-            <p>Protege, gestiona y optimiza tu mundo digital.</p>
+    <ul class="menu" id="mainMenu">
+      <li><a class="home-link" href="../index.html">Inicio</a></li>
+      <li><a href="services/services.html">Servicios</a></li>
+      <li><a href="products/products.html">Productos</a></li>
+      <li><a href="contact/contact.html">Contacto</a></li>
+    </ul>
+  </nav>
 
-            <div class="buttons">
-                <a href="services/services.html" class="btn-yellow">Ver Servicios</a>
-                <a href="products/products.html" class="btn-red">Productos</a>
-            </div>
-        </div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1 class="reveal">Soluciones Digitales Seguras</h1>
+      <p class="reveal delay-1">Protege, gestiona y optimiza tu mundo digital.</p>
 
-        <div class="hero-img">
-            <img src="assets/img/tech-illustration.png" alt="Tech">
-        </div>
-    </section>
+      <div class="buttons reveal delay-2">
+        <a href="services/services.html" class="btn btn-yellow">Ver Servicios</a>
+        <a href="products/products.html" class="btn btn-red">Productos</a>
+      </div>
+    </div>
 
-    <script src="home/script.js"></script>
+    <div class="hero-img reveal delay-3">
+      <img src="assets/img/tech-illustration.png" alt="Ilustración tecnológica">
+    </div>
+  </section>
+
+  <script src="home/script.js"></script>
 </body>
 </html>
