@@ -60,3 +60,4 @@
     .footer-inner{flex-direction:column; gap:18px}
     .footer-bottom-inner{flex-direction:column-reverse; gap:12px; text-align:center}
   }
+  body{font-family:Poppins;background:#fff;margin:0;padding:0;}
