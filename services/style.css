@@ -1,0 +1,102 @@
+:root {
+    --cian: #00A7C6;
+    --rojo: #E52333;
+    --verde: #7AC943;
+    --amarillo: #FFCF24;
+    --azul-fondo: #0093D5;
+    --gris-texto: #333;
+    --blanco: #fff;
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+/* NAVBAR */
+.navbar {
+    width: 100%;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--blanco);
+}
+
+.logo {
+    height: 60px;
+}
+
+.menu {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: var(--gris-texto);
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.menu a:hover {
+    color: var(--cian);
+}
+
+/* HERO */
+.services-hero {
+    padding: 70px 40px;
+    background: linear-gradient(135deg, var(--azul-fondo), var(--cian));
+    color: var(--blanco);
+    text-align: center;
+}
+
+.services-hero h1 {
+    font-size: 46px;
+    font-weight: 800;
+}
+
+.services-hero p {
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+/* GRID */
+.services-grid {
+    padding: 60px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+/* CARDS */
+.service-card {
+    background: var(--blanco);
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-left: 8px solid var(--cian);
+}
+
+.service-card h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: var(--gris-texto);
+}
+
+.service-card ul li {
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: var(--gris-texto);
+}
+
+/* Colores por categoría */
+.publicidad { border-color: var(--amarillo); }
+.eventos     { border-color: var(--rojo); }
+.tecnologia  { border-color: var(--cian); }
+.hardware    { border-color: var(--verde); }
+.seguridad   { border-color: var(--azul-fondo); }
