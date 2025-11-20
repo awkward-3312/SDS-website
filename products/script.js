@@ -1,4 +1,4 @@
-/* products/script.js - adaptado a tabla products con columna stock */
+/* products/script.js - adaptado y mejorado (tarjeta clickeable, chips, contador, accesibilidad) */
 document.addEventListener('DOMContentLoaded', () => {
 
   /* CONFIG */
@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalPrice = () => document.getElementById('modalPrice');
   const modalVariants = () => document.getElementById('modalVariants');
 
+  const productCountEl = () => document.getElementById('productCount');
+  const categoryChipsEl = () => document.getElementById('categoryChips');
+
   let productsCache = [];
 
   /* helpers */
@@ -70,27 +73,65 @@ document.addEventListener('DOMContentLoaded', () => {
       .replaceAll("'", '&#039;');
   }
 
+  /* productCardHTML now includes tabindex and data-id so card can be focusable and clickable */
   function productCardHTML(p){
-    // ahora hay un stock único por producto
     const stock = Number(p.stock || 0);
     const inStock = stock > 0;
     const lowStock = inStock && stock < 5;
+
+    // build badge text
+    const badgeClass = inStock ? (lowStock ? 'stock-badge low' : 'stock-badge in') : 'stock-badge out';
+    const badgeText = inStock ? (lowStock ? 'Stock bajo' : 'En stock') : 'Agotado';
+    const badgeUnits = inStock ? ` — ${stock} unidades` : '';
+
+    // Ensure id is string
+    const id = p.id || p.product_id || '';
+
     return `
-      <div class="product-card" data-id="${p.id}">
-        <img loading="lazy" src="${p.image_url || 'assets/img/default.png'}" alt="${escapeHtml(p.title)}">
-        <h3>${escapeHtml(p.title)}</h3>
+      <div class="product-card" data-id="${id}" tabindex="0" role="button" aria-pressed="false">
+        <img loading="lazy" src="${p.image_url || 'assets/img/default.png'}" alt="${escapeHtml(p.title || '')}">
+        <h3>${escapeHtml(p.title || '')}</h3>
         <p>${escapeHtml(p.description || '')}</p>
-        <div class="price">${p.price ? 'L. ' + p.price : ''}</div>
-        <div class="stock-badge ${inStock ? 'in' : 'out'} ${lowStock ? 'low' : ''}">
-          ${inStock ? (lowStock ? 'Stock bajo' : 'En stock') : 'Agotado'}
-          ${inStock ? ` — ${stock} unidades` : ''}
+        <div class="price">${p.price ? 'L. ' + Number(p.price).toFixed(2) : ''}</div>
+        <div class="${badgeClass}">
+          ${badgeText}${badgeUnits}
         </div>
-        <!-- eliminada la lista de variants, ahora mostramos solo el stock -->
-        <a class="details-btn" href="#" data-id="${p.id}">Ver detalles</a>
+        <a class="details-btn" href="#" data-id="${id}">Ver detalles</a>
       </div>
     `;
   }
 
+  /* Render category chips (mobile-friendly) */
+  function renderCategoryChips(categories){
+    const wrapper = categoryChipsEl();
+    if (!wrapper) return;
+    wrapper.innerHTML = ''; // reset
+    const all = document.createElement('div');
+    all.className = 'chip active';
+    all.dataset.category = '';
+    all.textContent = 'Todas';
+    wrapper.appendChild(all);
+
+    categories.forEach(c => {
+      const ch = document.createElement('div');
+      ch.className = 'chip';
+      ch.dataset.category = c;
+      ch.textContent = c;
+      wrapper.appendChild(ch);
+    });
+
+    wrapper.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        wrapper.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        chip.classList.add('active');
+        const select = categoryFilter();
+        if (select) select.value = chip.dataset.category;
+        renderList(productsCache);
+      });
+    });
+  }
+
+  /* Renders the product grid and updates controls (category select, chips, count) */
   function renderList(data){
     const container = productsList();
     if (!container) {
@@ -98,14 +139,22 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // poblar categorias en el select (solo las no nulas)
+    // compute categories
     const cats = Array.from(new Set(data.map(d => d.category).filter(Boolean)));
     const catEl = categoryFilter();
-    if(catEl && catEl.options.length <= 1){
+    if (catEl && catEl.options.length <= 1){
+      // add default empty option first
+      const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Todas las categorías';
+      catEl.appendChild(empty);
       cats.forEach(c => {
         const o = document.createElement('option'); o.value = c; o.textContent = c;
         catEl.appendChild(o);
       });
+    }
+
+    // render chips once if container exists
+    if (categoryChipsEl() && categoryChipsEl().children.length === 0 && cats.length) {
+      renderCategoryChips(cats);
     }
 
     const q = (searchInput()?.value || '').trim().toLowerCase();
@@ -132,29 +181,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if(s === 'price_desc') list.sort((a,b)=> (Number(b.price)||0)-(Number(a.price)||0));
     if(s === 'title_asc') list.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
 
+    // update product count
+    const countEl = productCountEl();
+    if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? 'producto' : 'productos'} encontrados`;
+
+    // render cards
     container.innerHTML = list.map(productCardHTML).join('');
 
-    // attach detail handlers (delegation also handled globally)
+    // attach detail handlers for the visible buttons (keeps existing behavior)
     document.querySelectorAll('.details-btn').forEach(btn => {
-      btn.addEventListener('click', (e)=>{
-        e.preventDefault();
-        const id = btn.dataset.id;
-        openModalById(id);
-      });
+      // remove previous to avoid double-binding
+      btn.removeEventListener('click', onDetailsBtnClick);
+      btn.addEventListener('click', onDetailsBtnClick);
     });
   }
 
+  /* details button click handler */
+  function onDetailsBtnClick(e){
+    e.preventDefault();
+    const id = e.currentTarget.dataset.id;
+    if (id) openModalById(id);
+  }
+
+  /* Accessibility / keyboard: handle Escape */
   function handleEscapeClose(e){
     if (e.key === 'Escape') closeModal();
   }
-  
+
+  /* Open modal (fills content, focuses close button, locks scroll) */
   function openModalById(productId){
     const p = productsCache.find(x => String(x.id) === String(productId));
     if(!p) return;
-  
+
     const m = modal();
     const mImg = modalImg(), mTitle = modalTitle(), mDesc = modalDesc(), mPrice = modalPrice(), mVariants = modalVariants();
-  
+
     if (mImg) mImg.src = p.image_url || 'assets/img/default.png';
     if (mTitle) mTitle.textContent = p.title || '';
     if (mDesc) mDesc.textContent = p.description || '';
@@ -167,51 +228,46 @@ document.addEventListener('DOMContentLoaded', () => {
                                     `<div class="modal-stock out">Agotado</div>`;
       mVariants.innerHTML = stockHtml;
     }
-  
+
     if (!m) return;
-  
-    // Asegurar que modal-backdrop exista y la ventana esté visible
+
+    // show modal
     m.classList.add('show');
     m.setAttribute('aria-hidden','false');
-  
-    // bloquear scroll del body
+
+    // block body scroll
     document.body.style.overflow = 'hidden';
-  
-    // asegurar que la ventana esté en la zona visible (scroll to top of modal window)
+
+    // reset internal modal scroll & focus close
     const mw = m.querySelector('.modal-window');
     if (mw) {
-      // forzar scroll to top interno por si quedó previo scroll
       mw.scrollTop = 0;
-      // dar foco al close
       setTimeout(() => {
-        const closeBtn = m.querySelector('.modal-close');
+        const closeBtn = m.querySelector('.modal-close') || modalCloseBtn();
         if (closeBtn) closeBtn.focus();
       }, 40);
     }
-  
-    // escucha escape
+
+    // add escape listener
     document.addEventListener('keydown', handleEscapeClose);
   }
-  
+
   function closeModal(){
     const m = modal();
     if (!m) return;
-  
+
     document.removeEventListener('keydown', handleEscapeClose);
     m.classList.remove('show');
     m.setAttribute('aria-hidden','true');
-  
-    // restaurar scroll del body tras pequeña espera para las animaciones
-    setTimeout(() => {
-      document.body.style.overflow = '';
-    }, 180);
-  }  
+
+    // restore scroll after animation
+    setTimeout(()=> { document.body.style.overflow = ''; }, 180);
+  }
 
   /* LOAD: obtiene datos desde 'products' y convierte image_url -> publicUrl desde bucket */
   async function loadProducts(){
     console.log('[products] loadProducts start');
     try {
-      // ahora leemos directamente products
       const { data, error } = await supabase.from('products').select('*');
       if (error) {
         console.error('[products] Error al leer products:', error);
@@ -226,17 +282,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Normalizar: convertir image_url a publicUrl si está en bucket
+      // Normalize images: convert image_url to publicUrl if stored in bucket
       const normalized = data.map(d => {
         let imgPath = d.image_url || '';
         if (imgPath) {
           try {
-            // getPublicUrl es síncrono en supabase-js v2 y devuelve { data: { publicUrl } }
             const { data: pub, error: pubErr } = supabase.storage.from(BUCKET_NAME).getPublicUrl(imgPath);
             if (!pubErr && pub && pub.publicUrl) {
               imgPath = pub.publicUrl;
-            } // si hay error, dejamos imgPath como estaba
-          } catch(pubErr) {
+            }
+          } catch(pubErr){
             console.warn('[products] getPublicUrl fallo para', imgPath, pubErr);
           }
         }
@@ -258,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .channel('public:products')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
           console.log('Realtime: cambio detectado', payload);
-          // recargar toda la lista (opción simple y segura)
           loadProducts();
         });
 
@@ -320,25 +374,51 @@ document.addEventListener('DOMContentLoaded', () => {
     subscribeRealtime();
   })();
 
-  /* UI events (delegated handlers will use current DOM elements) */
+  /* UI events (delegated) */
+  // 1) delegated click handler to make whole card clickable but keep .details-btn behaviour
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.details-btn');
-    if (btn) {
-      e.preventDefault();
-      openModalById(btn.dataset.id);
+    // if the click was on details button, let its handler run (we attach it in renderList)
+    if (e.target.closest('.details-btn')) return;
+
+    // otherwise, if they clicked anywhere inside a product-card, open modal
+    const card = e.target.closest('.product-card');
+    if (card) {
+      const id = card.dataset.id || card.getAttribute('data-id');
+      if (id) openModalById(id);
     }
   });
 
+  // 2) keyboard support: Enter opens focused card
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const active = document.activeElement;
+      if (active && active.classList && active.classList.contains('product-card')) {
+        const id = active.dataset.id || active.getAttribute('data-id');
+        if (id) openModalById(id);
+      }
+    }
+  });
+
+  // modal close bindings (if elements exist)
+  const mClose = modalClose();
+  if (mClose) mClose.addEventListener('click', closeModal);
+  const mCloseBtn = modalCloseBtn();
+  if (mCloseBtn) mCloseBtn.addEventListener('click', closeModal);
+
+  // close when clicking backdrop
+  (function attachBackdropClose(){
+    const m = modal();
+    if (!m) return;
+    const backdrop = m.querySelector('.modal-backdrop');
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+  })();
+
+  // input/filter bindings
   const si = () => { const el = searchInput(); if (el) el.addEventListener('input', () => renderList(productsCache)); };
   const cf = () => { const el = categoryFilter(); if (el) el.addEventListener('change', () => renderList(productsCache)); };
   const sf = () => { const el = stockFilter(); if (el) el.addEventListener('change', () => renderList(productsCache)); };
   const ss = () => { const el = sortSelect(); if (el) el.addEventListener('change', () => renderList(productsCache)); };
 
   si(); cf(); sf(); ss();
-
-  modalClose()?.addEventListener('click', closeModal);
-  modalCloseBtn()?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
-  modal()?.querySelector('.modal-backdrop')?.addEventListener('click', closeModal);
 
 });
