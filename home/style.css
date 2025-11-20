@@ -35,8 +35,11 @@
   
   /* HERO */
   .hero{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:90px var(--container-padding); gap:40px;
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between;
+    padding:90px var(--container-padding); 
+    gap:40px;
     background: linear-gradient(135deg, var(--azul-fondo), var(--cian));
     color:var(--blanco);
   }
@@ -48,8 +51,65 @@
   .btn-yellow{ background:var(--amarillo); color:var(--gris) }
   .btn-red{ background:var(--rojo); color:var(--blanco) }
   
-  .hero-img img{ width:420px; max-width:38vw }
+  .hero-img img{
+    width: 380px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+  }
   
+  /* SLIDER HERO - añadir al final del archivo */
+.hero-slider {
+  position: relative;
+  width: 420px;           /* ancho del contenedor del hero (ajusta si quieres) */
+  height: 360px;          /* altura fija para que el hero no salte */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-slider .slide {
+  position: absolute;
+  inset: 0;               /* top:0; right:0; bottom:0; left:0 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity .8s ease-in-out;
+  will-change: opacity;
+}
+
+.hero-slider .slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.hero-slider img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Ajustes móviles: que el slider quede más pequeño y el texto encima */
+@media (max-width:1000px){
+  .hero-slider {
+    width: 320px;
+    height: 300px;
+    margin-top: 18px;
+  }
+  .hero { padding:70px 28px; flex-direction:column-reverse; text-align:center; gap:24px; }
+  .hero-text { max-width: 720px; }
+}
+
+/* Si quieres centrar el slider horizontalmente dentro del hero en pantallas grandes */
+@media (min-width:1001px){
+  /* opcional: ajustar la posición del slider respecto al texto */
+  .hero-slider { margin-left: 20px; }
+}
+
   /* reveal animations */
   .reveal{ opacity:0; transform:translateY(8px); animation:reveal .6s forwards .15s }
   .reveal.delay-1{ animation-delay:.25s }
