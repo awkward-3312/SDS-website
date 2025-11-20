@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SDS | Servicios</title>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +18,7 @@
     <nav class="navbar">
         <a href="../index.html">
             <img src="../images/sds-logo.png" alt="SDS Logo" class="logo">
-          </a>              
+        </a>
 
         <ul class="menu">
             <li><a href="../index.html">Inicio</a></li>
@@ -31,55 +37,100 @@
     <!-- SERVICES GRID -->
     <section class="services-grid">
 
-        <div class="service-card publicidad">
-            <h3>Publicidad & Contenido</h3>
-            <ul>
-                <li>Publicidad Empresarial</li>
-                <li>Publicidad para Eventos</li>
-                <li>Videos Publicitarios</li>
-                <li>Diseño Gráfico</li>
-                <li>Fotografía Profesional</li>
-            </ul>
-        </div>
+        <!-- PUBLICIDAD -->
+        <article class="service-card publicidad" role="button" tabindex="0">
+            <div class="card-media">
+                <i class="fa-solid fa-bullhorn card-icon"></i>
+            </div>
 
-        <div class="service-card eventos">
-            <h3>Eventos & Decoración</h3>
-            <ul>
-                <li>Decoración de Cumpleaños</li>
-                <li>Temáticas personalizadas</li>
-                <li>Cobertura foto/video</li>
-            </ul>
-        </div>
+            <div class="card-body">
+                <h3 class="card-title">Publicidad &amp; Contenido</h3>
+                <p class="card-lead">Publicidad empresarial, videos y diseño gráfico.</p>
 
-        <div class="service-card tecnologia">
-            <h3>Tecnología & Desarrollo</h3>
-            <ul>
-                <li>Desarrollo de Software</li>
-                <li>Programación de Sistemas</li>
-                <li>Diseño Web</li>
-                <li>Automatizaciones</li>
-            </ul>
-        </div>
+                <ul class="card-features">
+                    <li>Publicidad Empresarial</li>
+                    <li>Publicidad para Eventos</li>
+                    <li>Videos Publicitarios</li>
+                    <li>Diseño Gráfico</li>
+                    <li>Fotografía Profesional</li>
+                </ul>
+            </div>
+        </article>
 
-        <div class="service-card hardware">
-            <h3>Hardware & Mantenimiento</h3>
-            <ul>
-                <li>Montaje de equipos</li>
-                <li>Mantenimiento preventivo</li>
-                <li>Mantenimiento correctivo</li>
-                <li>Optimización de rendimiento</li>
-            </ul>
-        </div>
+        <!-- EVENTOS -->
+        <article class="service-card eventos" role="button" tabindex="0">
+            <div class="card-media">
+                <i class="fa-solid fa-calendar-days card-icon"></i>
+            </div>
 
-        <div class="service-card seguridad">
-            <h3>Seguridad & Soporte</h3>
-            <ul>
-                <li>Seguridad digital</li>
-                <li>Copias de respaldo</li>
-                <li>Recuperación de datos</li>
-                <li>Soporte técnico</li>
-            </ul>
-        </div>
+            <div class="card-body">
+                <h3 class="card-title">Eventos &amp; Decoración</h3>
+                <p class="card-lead">Decoraciones y temáticas personalizadas.</p>
+
+                <ul class="card-features">
+                    <li>Decoración de Cumpleaños</li>
+                    <li>Temáticas Personalizadas</li>
+                    <li>Cobertura Foto/Video</li>
+                </ul>
+            </div>
+        </article>
+
+        <!-- TECNOLOGÍA -->
+        <article class="service-card tecnologia" role="button" tabindex="0">
+            <div class="card-media">
+                <i class="fa-solid fa-code card-icon"></i>
+            </div>
+
+            <div class="card-body">
+                <h3 class="card-title">Tecnología &amp; Desarrollo</h3>
+                <p class="card-lead">Software, sistemas y automatizaciones.</p>
+
+                <ul class="card-features">
+                    <li>Desarrollo de Software</li>
+                    <li>Programación de Sistemas</li>
+                    <li>Diseño Web</li>
+                    <li>Automatizaciones</li>
+                </ul>
+            </div>
+        </article>
+
+        <!-- HARDWARE -->
+        <article class="service-card hardware" role="button" tabindex="0">
+            <div class="card-media">
+                <i class="fa-solid fa-computer card-icon"></i>
+            </div>
+
+            <div class="card-body">
+                <h3 class="card-title">Hardware &amp; Mantenimiento</h3>
+                <p class="card-lead">Reparación, mantenimiento y optimización.</p>
+
+                <ul class="card-features">
+                    <li>Montaje de Equipos</li>
+                    <li>Mantenimiento Preventivo</li>
+                    <li>Mantenimiento Correctivo</li>
+                    <li>Optimización de Rendimiento</li>
+                </ul>
+            </div>
+        </article>
+
+        <!-- SEGURIDAD -->
+        <article class="service-card seguridad" role="button" tabindex="0">
+            <div class="card-media">
+                <i class="fa-solid fa-shield-halved card-icon"></i>
+            </div>
+
+            <div class="card-body">
+                <h3 class="card-title">Seguridad &amp; Soporte</h3>
+                <p class="card-lead">Protección digital y soporte técnico.</p>
+
+                <ul class="card-features">
+                    <li>Seguridad Digital</li>
+                    <li>Copias de Respaldo</li>
+                    <li>Recuperación de Datos</li>
+                    <li>Soporte Técnico</li>
+                </ul>
+            </div>
+        </article>
 
     </section>
 
