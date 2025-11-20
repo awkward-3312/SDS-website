@@ -1,10 +1,13 @@
-/* products/script.js - adaptado y mejorado (tarjeta clickeable, chips, contador, accesibilidad) */
+/* products/script.js - versión corregida y robusta (focus restore, fallback image, selectores fijos) */
 document.addEventListener('DOMContentLoaded', () => {
 
   /* CONFIG */
   const SUPABASE_URL = 'https://rxerfllxwdalduuzndiv.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE';
   const BUCKET_NAME = 'Products';
+
+  // Fallback local image (ruta del archivo que subiste)
+  const DEFAULT_IMG = '/mnt/data/b379a345-57b4-42f0-a748-df0c92d8a389.png';
 
   /* --- DETECCIÓN ROBUSTA DEL UMD DE SUPABASE --- */
   const GLOBALS = {
@@ -50,18 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSelect = () => document.getElementById('sortSelect');
 
   const modal = () => document.getElementById('productModal');
-  const modalClose = () => document.getElementById('modalClose');
-  const modalCloseBtn = () => document.getElementById('modalCloseBtn');
+  const modalCloseBtn = () => document.getElementById('modalCloseBtn'); // coincide con tu HTML
   const modalImg = () => document.getElementById('modalImg');
   const modalTitle = () => document.getElementById('modalTitle');
   const modalDesc = () => document.getElementById('modalDesc');
   const modalPrice = () => document.getElementById('modalPrice');
   const modalVariants = () => document.getElementById('modalVariants');
+  const modalStock = () => document.getElementById('modalStock'); // <-- nuevo getter para stock
 
   const productCountEl = () => document.getElementById('productCount');
   const categoryChipsEl = () => document.getElementById('categoryChips');
 
   let productsCache = [];
+  let _previousFocus = null;
 
   /* helpers */
   function escapeHtml(str = '') {
@@ -87,16 +91,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure id is string
     const id = p.id || p.product_id || '';
 
+    const imgSrc = p.image_url && p.image_url.trim() ? p.image_url : DEFAULT_IMG;
+
+    // Use a button for details to avoid accidental navigation
     return `
-      <div class="product-card" data-id="${id}" tabindex="0" role="button" aria-pressed="false">
-        <img loading="lazy" src="${p.image_url || 'assets/img/default.png'}" alt="${escapeHtml(p.title || '')}">
+      <div class="product-card" data-id="${escapeHtml(String(id))}" tabindex="0" role="button" aria-pressed="false">
+        <img loading="lazy" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.title || '')}">
         <h3>${escapeHtml(p.title || '')}</h3>
         <p>${escapeHtml(p.description || '')}</p>
         <div class="price">${p.price ? 'L. ' + Number(p.price).toFixed(2) : ''}</div>
         <div class="${badgeClass}">
           ${badgeText}${badgeUnits}
         </div>
-        <a class="details-btn" href="#" data-id="${id}">Ver detalles</a>
+        <button class="details-btn" type="button" data-id="${escapeHtml(String(id))}">Ver detalles</button>
       </div>
     `;
   }
@@ -143,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cats = Array.from(new Set(data.map(d => d.category).filter(Boolean)));
     const catEl = categoryFilter();
     if (catEl && catEl.options.length <= 1){
-      // add default empty option first
+      // ensure we don't duplicate options
+      catEl.innerHTML = '';
       const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Todas las categorías';
       catEl.appendChild(empty);
       cats.forEach(c => {
@@ -188,11 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // render cards
     container.innerHTML = list.map(productCardHTML).join('');
 
-    // attach detail handlers for the visible buttons (keeps existing behavior)
-    document.querySelectorAll('.details-btn').forEach(btn => {
-      // remove previous to avoid double-binding
-      btn.removeEventListener('click', onDetailsBtnClick);
-      btn.addEventListener('click', onDetailsBtnClick);
+    // attach detail handlers for the visible buttons (not strictly necessary due to delegated click, but ok)
+    container.querySelectorAll('.details-btn').forEach(btn => {
+      // avoid duplicate handlers by clearing a possible marker
+      if (!btn._hasHandler) {
+        btn.addEventListener('click', onDetailsBtnClick);
+        btn._hasHandler = true;
+      }
     });
   }
 
@@ -211,25 +221,89 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Open modal (fills content, focuses close button, locks scroll) */
   function openModalById(productId){
     const p = productsCache.find(x => String(x.id) === String(productId));
-    if(!p) return;
+    if(!p) {
+      console.warn('openModalById: producto no encontrado', productId);
+      return;
+    }
 
     const m = modal();
-    const mImg = modalImg(), mTitle = modalTitle(), mDesc = modalDesc(), mPrice = modalPrice(), mVariants = modalVariants();
+    const mImg = modalImg(), mTitle = modalTitle(), mDesc = modalDesc(), mPrice = modalPrice(), mVariants = modalVariants(), mStockEl = modalStock();
 
-    if (mImg) mImg.src = p.image_url || 'assets/img/default.png';
+    if (mImg) mImg.src = p.image_url && p.image_url.trim() ? p.image_url : DEFAULT_IMG;
     if (mTitle) mTitle.textContent = p.title || '';
     if (mDesc) mDesc.textContent = p.description || '';
+
+    // Price -> goes to modalPrice
     if (mPrice) {
       mPrice.innerHTML = `<div class="modal-price"><div class="amount">${p.price ? 'L. ' + Number(p.price).toFixed(2) : ''}</div><div class="label">Precio</div></div>`;
     }
-    if (mVariants) {
+
+    // Stock -> goes to modalStock (not modalVariants)
+    if (mStockEl) {
       const stock = Number(p.stock || 0);
-      const stockHtml = stock > 0 ? `<div class="modal-stock">Principal <strong style="margin-left:8px;">${stock} unidades</strong></div>` :
-                                    `<div class="modal-stock out">Agotado</div>`;
-      mVariants.innerHTML = stockHtml;
+      if (stock > 0) {
+        mStockEl.innerHTML = `<div class="modal-stock in">En stock <strong style="margin-left:8px;">${stock} unidades</strong></div>`;
+        mStockEl.classList.remove('out');
+      } else {
+        mStockEl.innerHTML = `<div class="modal-stock out">Agotado</div>`;
+        mStockEl.classList.add('out');
+      }
+    }
+
+    // Variants: only populate modalVariants if product has variants (sizes/colors)
+    if (mVariants) {
+      // Clear previous variants
+      mVariants.innerHTML = '';
+
+      // Example: if your product object contains sizes/colors arrays, populate selects
+      const hasSizes = Array.isArray(p.sizes) && p.sizes.length > 0;
+      const hasColors = Array.isArray(p.colors) && p.colors.length > 0;
+
+      if (hasSizes) {
+        const label = document.createElement('label');
+        label.className = 'option-row';
+        label.htmlFor = 'select-talla';
+        label.textContent = 'Talla';
+        const select = document.createElement('select');
+        select.id = 'select-talla';
+        select.name = 'size';
+        select.style.marginLeft = '8px';
+        p.sizes.forEach(s => {
+          const o = document.createElement('option'); o.value = s; o.textContent = s;
+          select.appendChild(o);
+        });
+        label.appendChild(select);
+        mVariants.appendChild(label);
+      }
+
+      if (hasColors) {
+        const labelC = document.createElement('label');
+        labelC.className = 'option-row';
+        labelC.htmlFor = 'select-color';
+        labelC.textContent = 'Color';
+        const selectC = document.createElement('select');
+        selectC.id = 'select-color';
+        selectC.name = 'color';
+        selectC.style.marginLeft = '8px';
+        p.colors.forEach(c => {
+          const o = document.createElement('option'); o.value = c; o.textContent = c;
+          selectC.appendChild(o);
+        });
+        labelC.appendChild(selectC);
+        mVariants.appendChild(labelC);
+      }
+
+      // If no variants, optionally show a small hint (or leave empty)
+      if (!hasSizes && !hasColors) {
+        // keep empty to avoid layout jump; you could show a note if desired
+        // mVariants.innerHTML = `<p class="variant-note">Sin variantes</p>`;
+      }
     }
 
     if (!m) return;
+
+    // store previously focused element
+    _previousFocus = document.activeElement;
 
     // show modal
     m.classList.add('show');
@@ -243,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mw) {
       mw.scrollTop = 0;
       setTimeout(() => {
-        const closeBtn = m.querySelector('.modal-close') || modalCloseBtn();
+        const closeBtn = modalCloseBtn();
         if (closeBtn) closeBtn.focus();
       }, 40);
     }
@@ -261,7 +335,12 @@ document.addEventListener('DOMContentLoaded', () => {
     m.setAttribute('aria-hidden','true');
 
     // restore scroll after animation
-    setTimeout(()=> { document.body.style.overflow = ''; }, 180);
+    setTimeout(()=> {
+      document.body.style.overflow = '';
+      if (_previousFocus && typeof _previousFocus.focus === 'function') {
+        _previousFocus.focus();
+      }
+    }, 180);
   }
 
   /* LOAD: obtiene datos desde 'products' y convierte image_url -> publicUrl desde bucket */
@@ -283,10 +362,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Normalize images: convert image_url to publicUrl if stored in bucket
-      const normalized = data.map(d => {
+      const normalized = await Promise.all(data.map(async (d) => {
         let imgPath = d.image_url || '';
         if (imgPath) {
           try {
+            // getPublicUrl is synchronous in the UMD wrapper returning { data: { publicUrl }, error }
             const { data: pub, error: pubErr } = supabase.storage.from(BUCKET_NAME).getPublicUrl(imgPath);
             if (!pubErr && pub && pub.publicUrl) {
               imgPath = pub.publicUrl;
@@ -295,8 +375,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('[products] getPublicUrl fallo para', imgPath, pubErr);
           }
         }
-        return { ...d, image_url: imgPath };
-      });
+        return { ...d, image_url: imgPath || DEFAULT_IMG };
+      }));
 
       productsCache = normalized;
       renderList(productsCache);
@@ -399,18 +479,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // modal close bindings (if elements exist)
-  const mClose = modalClose();
-  if (mClose) mClose.addEventListener('click', closeModal);
-  const mCloseBtn = modalCloseBtn();
-  if (mCloseBtn) mCloseBtn.addEventListener('click', closeModal);
+  // modal close bindings (if element exists)
+  (function attachModalClose(){
+    const mClose = modalCloseBtn();
+    if (mClose) mClose.addEventListener('click', closeModal);
 
-  // close when clicking backdrop
-  (function attachBackdropClose(){
+    // close when clicking backdrop
     const m = modal();
-    if (!m) return;
-    const backdrop = m.querySelector('.modal-backdrop');
-    if (backdrop) backdrop.addEventListener('click', closeModal);
+    if (m) {
+      const backdrop = m.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.addEventListener('click', closeModal);
+    }
   })();
 
   // input/filter bindings

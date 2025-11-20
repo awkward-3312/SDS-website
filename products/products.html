@@ -1,95 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDS | Productos</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDS | Productos</title>
+  <meta name="description" content="Catálogo de productos personalizados. Busca, filtra y añade al carrito." />
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Preload (si tienes una imagen hero estática) -->
+  <!-- <link rel="preload" as="image" href="../images/hero-products.jpg"> -->
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a href="../index.html">
-            <img src="../images/sds-logo.png" alt="SDS Logo" class="logo">
-          </a>                
+  <!-- Skip link para usuarios de teclado/lectores -->
+  <a class="skip-link" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+    Ir al contenido
+  </a>
 
-        <ul class="menu">
-            <li><a href="../index.html">Inicio</a></li>
-            <li><a href="../services/services.html">Servicios</a></li>
-            <li><a href="#">Productos</a></li>
-            <li><a href="../contact/contact.html">Contacto</a></li>
-        </ul>
-    </nav>
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+    <a class="brand" href="../index.html">
+      <img src="../images/sds-logo.png" alt="Soluciones Digitales Seguras (SDS)" class="logo">
+    </a>
+
+    <!-- Botón hamburger para mobile (controlado por tu JS) -->
+    <button id="navToggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
+      <span class="hamb" aria-hidden="true"></span>
+    </button>
+
+    <ul id="mainMenu" class="menu" role="menubar">
+      <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
+      <li role="none"><a role="menuitem" href="../services/services.html">Servicios</a></li>
+      <li role="none"><a role="menuitem" href="#" aria-current="page">Productos</a></li>
+      <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main" tabindex="-1">
 
     <!-- HERO -->
-    <header class="products-hero">
-        <h1>Productos Disponibles</h1>
-        <p>Productos personalizados a tu gusto para tu hogar o negocio.</p>
+    <header class="products-hero" role="region" aria-label="Encabezado de productos">
+      <h1>Productos Disponibles</h1>
+      <p>Productos personalizados a tu gusto para tu hogar o negocio.</p>
     </header>
 
-<!-- CONTROLES: búsqueda, categoría, stock y orden -->
-<section class="products-controls">
-  <div class="control-row">
-    <input id="searchInput" type="search" placeholder="Buscar producto..." />
+    <!-- CONTROLES: búsqueda, categoría, stock y orden -->
+    <section class="products-controls" aria-label="Controles de búsqueda y filtro">
+      <div class="control-row">
+        <label for="searchInput" class="visually-hidden">Buscar producto</label>
+        <input id="searchInput" type="search" placeholder="Buscar producto..." aria-controls="products-list" />
 
-    <select id="categoryFilter">
-      <option value="">Todas las categorías</option>
-      <!-- Opcional: puedes llenar dinámicamente -->
-    </select>
+        <label for="categoryFilter" class="visually-hidden">Filtrar por categoría</label>
+        <select id="categoryFilter" aria-controls="products-list">
+          <option value="">Todas las categorías</option>
+          <!-- Opcional: puedes llenar dinámicamente -->
+        </select>
 
-    <select id="stockFilter">
-      <option value="all">Todos</option>
-      <option value="instock">Solo en stock</option>
-      <option value="low">Stock bajo (&lt;5)</option>
-      <option value="out">Agotados</option>
-    </select>
+        <label for="stockFilter" class="visually-hidden">Filtrar por stock</label>
+        <select id="stockFilter" aria-controls="products-list">
+          <option value="all">Todos</option>
+          <option value="instock">Solo en stock</option>
+          <option value="low">Stock bajo (&lt;5)</option>
+          <option value="out">Agotados</option>
+        </select>
 
-    <select id="sortSelect">
-      <option value="relevance">Más relevantes</option>
-      <option value="price_asc">Precio ↑</option>
-      <option value="price_desc">Precio ↓</option>
-      <option value="title_asc">Nombre A-Z</option>
-    </select>
-  </div>
-</section>
-
-<!-- CONTADOR Y CHIPS DE CATEGORÍA (AQUÍ) -->
-<div style="max-width:var(--max-width-controls); margin: 0 auto;">
-  <p id="productCount" class="product-count" aria-live="polite"></p>
-  <div id="categoryChips" class="category-chips" role="toolbar" aria-label="Filtrar por categoría"></div>
-</div>
-
-<!-- AREA PRODUCTOS -->
-<section id="catalogo">
-  <div id="products-list" class="products-grid"></div>
-</section>
-
-<!-- MODAL DETALLES (CORREGIDO) -->
-<div id="productModal" class="modal" aria-hidden="true">
-  <div class="modal-backdrop"></div> <!-- sin id -->
-  <div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">×</button>
-    <div class="modal-content">
-      <div class="modal-left">
-        <img id="modalImg" src="" alt="">
+        <label for="sortSelect" class="visually-hidden">Ordenar</label>
+        <select id="sortSelect" aria-controls="products-list">
+          <option value="relevance">Más relevantes</option>
+          <option value="price_asc">Precio ↑</option>
+          <option value="price_desc">Precio ↓</option>
+          <option value="title_asc">Nombre A-Z</option>
+        </select>
       </div>
-      <div class="modal-info">
-        <h3 id="modalTitle"></h3>
-        <p id="modalDesc"></p>
-        <div id="modalPrice" class="price"></div>
-        <div id="modalVariants"></div>
-        <div class="modal-cta">
-          <a href="#" class="btn">Agregar al carrito</a>
-        </div>
+    </section>
+
+    <!-- CONTADOR Y CHIPS DE CATEGORÍA -->
+    <section aria-label="Resumen de resultados" class="results-summary" style="max-width:var(--max-width-controls); margin: 0 auto;">
+      <p id="productCount" class="product-count" aria-live="polite"></p>
+      <div id="categoryChips" class="category-chips" role="toolbar" aria-label="Filtrar por categoría">
+        <!-- chips dinámicos aquí -->
+      </div>
+    </section>
+
+    <!-- AREA PRODUCTOS: lista semántica -->
+    <section id="catalogo" aria-label="Catálogo de productos">
+      <!-- products-list actúa como listado para screen readers -->
+      <ul id="products-list" class="products-grid" role="list">
+        <!-- Los elementos de producto se generarán dinámicamente como <li role="listitem"> -->
+      </ul>
+    </section>
+
+    <!-- Plantilla de tarjeta de producto (para clonar desde JS) -->
+    <template id="productCardTemplate">
+      <li class="product-card" role="listitem">
+        <article class="card" data-product-id="" data-category="" data-has-sizes="false" tabindex="0">
+          <div class="card-media">
+            <img class="card-img" src="" alt="" width="400" height="320" loading="lazy">
+          </div>
+          <div class="card-body">
+            <h3 class="card-title"></h3>
+            <p class="card-excerpt"></p>
+            <div class="card-meta">
+              <div class="card-price" aria-hidden="true"></div>
+              <div class="card-stock" aria-live="polite"></div>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-ghost view-details" type="button" aria-haspopup="dialog" aria-controls="productModal">Ver detalles</button>
+              <button class="btn btn-primary quick-add" type="button">Agregar</button>
+            </div>
+          </div>
+        </article>
+      </li>
+    </template>
+
+  </main>
+
+  <!-- MODAL DETALLES (mejorado y accesible) -->
+  <!-- Usamos un dialog-role con backdrop. aria-hidden="true" por defecto -->
+  <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" id="modalBackdrop" data-close="true"></div>
+
+    <div class="modal-window" role="document">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">×</button>
+
+      <div class="modal-content" role="group" aria-label="Detalle del producto">
+
+        <!-- IZQUIERDA: MEDIA -->
+        <aside class="modal-left" aria-label="Imágenes del producto">
+          <div class="media-inner">
+            <img id="modalImg" src="" alt="" width="560" height="560" loading="eager">
+          </div>
+
+          <!-- THUMBS (opcional) -->
+          <div id="modalThumbs" class="modal-thumbs" aria-hidden="true"></div>
+
+          <!-- acciones rápidas -->
+          <div class="media-actions">
+            <button class="icon-btn" id="favBtn" aria-label="Agregar a favoritos">♡</button>
+            <button class="icon-btn" id="giftBtn" aria-label="Marcar como regalo">🎁</button>
+          </div>
+        </aside>
+
+        <!-- DERECHA: INFO -->
+        <main class="modal-info" id="modalInfo">
+          <p class="product-brand" id="modalBrand" aria-hidden="true"></p>
+          <h2 id="modalTitle"></h2>
+          <p id="modalDesc" class="product-desc"></p>
+
+          <div class="price-row">
+            <div id="modalPrice" class="price" aria-live="polite"></div>
+            <div id="modalStock" class="stock" aria-live="polite"></div>
+          </div>
+
+          <!-- VARIANTES: controladas desde JS -->
+          <div id="modalVariants" class="product-options" aria-controls="modalInfo">
+            <!-- Ejemplo de control condicional: label con id label-talla -> hidden si no aplica -->
+            <label id="label-talla" class="option-row" for="select-talla" hidden>
+              Talla
+              <select id="select-talla" name="size"></select>
+            </label>
+
+            <label id="label-color" class="option-row" for="select-color">
+              Color
+              <select id="select-color" name="color"></select>
+            </label>
+          </div>
+
+          <!-- CTA + cantidad + ayuda -->
+          <div class="actions-row">
+            <button id="addToCart" class="btn btn-primary">Agregar al Carrito</button>
+
+            <div class="qty-wishlist" aria-hidden="false">
+              <div class="qty" role="group" aria-label="Cantidad">
+                <button class="qty-btn" id="qty-dec" type="button" aria-label="Disminuir cantidad">−</button>
+                <input id="qty" type="number" value="1" min="1" inputmode="numeric" aria-label="Cantidad a comprar" />
+                <button class="qty-btn" id="qty-inc" type="button" aria-label="Aumentar cantidad">+</button>
+              </div>
+
+              <button id="helpBtn" class="btn btn-outline" type="button">Solicitar ayuda</button>
+            </div>
+          </div>
+
+          <p class="microcopy" id="modalShipping">Envío estimado: 3-5 días hábiles</p>
+        </main>
+
       </div>
     </div>
   </div>
-</div>
 
-<!-- SCRIPTS: ajusta la ruta según dónde guardaste tu JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/umd/supabase.min.js"></script>
-<script src="../products/script.js"></script>
+  <!-- Scripts: supabase + script  -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/umd/supabase.min.js"></script>
+  <script src="../products/script.js"></script>
 
 </body>
 </html>
