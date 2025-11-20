@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SDS | Contacto</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-M7jH6u0eYlBqgPpRjz4VZY6bGQJQ0HxTAtZtVQmLz9ZFZFpFEtQL0fp7hRr5P6S2ezUgaCbo1zO1xwB4gvT7Ug==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
     <!-- NAVBAR -->
     <nav class="navbar">
         <a href="../index.html">
-            <img src="../images/sds-logo.png" alt="SDS Logo" class="logo">
-          </a>               
+            <img src="../images/sds-logo.png" alt="SDS Logo" class="logo" />
+        </a>
 
         <ul class="menu">
             <li><a href="../index.html">Inicio</a></li>
@@ -31,34 +32,55 @@
     <!-- MAIN CONTAINER -->
     <section class="contact-container">
 
-        <!-- FORMULARIO -->
-        <div class="contact-form">
-            <h2>Envíanos un mensaje</h2>
+        <!-- INFO + MAP: reemplaza el formulario por este bloque -->
+        <div class="contact-info-map">
+            <!-- TARJETA DE INFORMACIÓN -->
+            <aside class="contact-info-card" aria-labelledby="info-title">
+                <h2 id="info-title">Información</h2>
 
-            <form id="formContacto">
-                <input type="text" id="nombre" placeholder="Nombre completo" required>
-                <input type="email" id="correo" placeholder="Correo electrónico" required>
-                <input type="text" id="asunto" placeholder="Asunto" required>
-                <textarea id="mensaje" placeholder="Tu mensaje..." rows="5" required></textarea>
+                <p><i class="fa-solid fa-location-dot"></i> <strong>Ubicación:</strong> Honduras</p>
+                <p><i class="fa-solid fa-phone"></i> <strong>Teléfono:</strong> <a href="tel:+50497135177">+504 9713-5177</a></p>
+                <p><i class="fa-solid fa-envelope"></i> <strong>Email:</strong> <a href="mailto:solucionesdigitales@gmail.com">solucionesdigitales@gmail.com</a></p>
+                <p><i class="fa-brands fa-whatsapp"></i> <strong>WhatsApp:</strong> <a href="https://api.whatsapp.com/send?phone=50497135177" target="_blank" rel="noopener noreferrer">+504 9713-5177</a></p>
+                
+                <h3><i class="fa-solid fa-clock"></i> Horarios</h3>
+                <p>Lunes a Viernes: 8:00 AM - 5:00 PM</p>
+                <p>Sábados: 9:00 AM - 12:00 MD</p>                
 
-                <button type="submit" class="btn">Enviar</button>
-            </form>
+                <div class="contact-actions">
+                    <a
+                      id="btn-open-maps"
+                      class="btn btn-primary icon-btn"
+                      href="https://maps.app.goo.gl/GGwMKSTcUmfTmZVU6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Abrir ubicación en Google Maps para ver cómo llegar y más información"
+                      title="Ver ubicación y cómo llegar en Google Maps"
+                    >
+                      <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+                      <span class="btn-text">Ver ubicación y cómo llegar</span>
+                    </a>
+                  </div>                           
+            </aside>
 
-            <p id="estado"></p>
-        </div>
+            <!-- MAPA EMBEBIDO (responsive) -->
+            <div class="contact-map-card" aria-hidden="false">
+                <div class="map-wrapper" role="application" aria-label="Mapa de la ubicación">
+                    <!-- iframe de fallback: búsqueda por texto. Si tienes el embed (Compartir → Insertar mapa), reemplaza el src por ese. -->
+                    <iframe
+                        src="https://www.google.com/maps?q=15.478070854990595,-87.99211742398515&z=17&output=embed"
+                        width="600"
+                        height="450"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Mapa ubicación - Soluciones Digitales Seguras">
+                    </iframe>
+                </div>
 
-        <!-- INFO -->
-        <div class="contact-info">
-            <h2>Información</h2>
-
-            <p>📍 Ubicación: Honduras</p>
-            <p>📞 Teléfono: +504 0000-0000</p>
-            <p>📧 Email: solucionesdigitales@gmail.com</p>
-            <p>💬 WhatsApp: +504 0000-0000</p>
-
-            <h3>Horarios</h3>
-            <p>Lunes a Viernes: 8:00 AM - 5:00 PM</p>
-            <p>Sábados: 9:00 AM - 12:00 MD</p>
+                <p class="map-note">Si el marcador no es exacto, usa "Abrir en Google Maps" para ver la ubicación precisa en la app o en el sitio de Google Maps.</p>
+            </div>
         </div>
 
     </section>
