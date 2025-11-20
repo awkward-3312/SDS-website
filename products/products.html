@@ -24,55 +24,59 @@
 
     <!-- HERO -->
     <header class="products-hero">
-        <h1>Productos Tecnológicos</h1>
-        <p>Equipos, accesorios y soluciones digitales seguras para tu hogar o negocio.</p>
+        <h1>Productos Disponibles</h1>
+        <p>Productos personalizados a tu gusto para tu hogar o negocio.</p>
     </header>
 
-    <!-- PRODUCTS GRID -->
-    <section class="products-grid">
-
-        <!-- Producto 1 -->
-        <div class="product-card">
-            <img src="../assets/img/usb.png" alt="USB">
-            <h3>Memorias USB</h3>
-            <p>Almacenamiento rápido y seguro.</p>
-            <a href="#" class="btn">Ver más</a>
+<!-- CONTROLES: búsqueda, categoría, stock y orden -->
+<section class="products-controls">
+    <div class="control-row">
+      <input id="searchInput" type="search" placeholder="Buscar producto..." />
+  
+      <select id="categoryFilter">
+        <option value="">Todas las categorías</option>
+        <!-- Opcional: puedes llenar dinámicamente -->
+      </select>
+  
+      <select id="stockFilter">
+        <option value="all">Todos</option>
+        <option value="instock">Solo en stock</option>
+        <option value="low">Stock bajo (&lt;5)</option>
+        <option value="out">Agotados</option>
+      </select>
+  
+      <select id="sortSelect">
+        <option value="relevance">Más relevantes</option>
+        <option value="price_asc">Precio ↑</option>
+        <option value="price_desc">Precio ↓</option>
+        <option value="title_asc">Nombre A-Z</option>
+      </select>
+    </div>
+  </section>
+  
+  <!-- AREA PRODUCTOS (ya existente) -->
+  <section id="catalogo">
+    <div id="products-list" class="products-grid"></div>
+  </section>
+  
+  <!-- MODAL DETALLES -->
+  <div id="productModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" id="modalClose"></div>
+    <div class="modal-window" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">×</button>
+      <div class="modal-content">
+        <img id="modalImg" src="" alt="">
+        <div class="modal-info">
+          <h3 id="modalTitle"></h3>
+          <p id="modalDesc"></p>
+          <div id="modalPrice" class="price"></div>
+          <div id="modalVariants"></div>
         </div>
-
-        <!-- Producto 2 -->
-        <div class="product-card">
-            <img src="../assets/img/sd.png" alt="SD">
-            <h3>Tarjetas SD</h3>
-            <p>Ideal para cámaras, drones y más.</p>
-            <a href="#" class="btn">Ver más</a>
-        </div>
-
-        <!-- Producto 3 -->
-        <div class="product-card">
-            <img src="../assets/img/hdd.png" alt="HDD">
-            <h3>Discos Duros</h3>
-            <p>Almacenamiento masivo para empresas.</p>
-            <a href="#" class="btn">Ver más</a>
-        </div>
-
-        <!-- Producto 4 -->
-        <div class="product-card">
-            <img src="../assets/img/accessories.png" alt="Accesorios">
-            <h3>Accesorios</h3>
-            <p>Cables, adaptadores, herramientas y más.</p>
-            <a href="#" class="btn">Ver más</a>
-        </div>
-
-        <!-- Producto 5 -->
-        <div class="product-card">
-            <img src="../assets/img/security.png" alt="Seguridad">
-            <h3>Equipos de Seguridad</h3>
-            <p>Cámaras, DVR, sistemas de vigilancia.</p>
-            <a href="#" class="btn">Ver más</a>
-        </div>
-
-    </section>
-
-    <script src="script.js"></script>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/umd/supabase.min.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
