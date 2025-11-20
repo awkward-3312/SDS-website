@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* CONFIG */
   const SUPABASE_URL = 'https://rxerfllxwdalduuzndiv.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTEY';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE';
   const BUCKET_NAME = 'Products';
 
   /* --- DETECCIÓN ROBUSTA DEL UMD DE SUPABASE --- */
@@ -203,19 +203,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function subscribeRealtime(){
-    try {
-      supabase
-        .channel('public:product_variants')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'product_variants' }, payload => {
-          console.log('Cambio detectado en product_variants:', payload);
-          loadProducts();
-        })
-        .subscribe();
-    } catch(e) {
-      console.warn('subscribeRealtime error:', e);
-    }
+// (intento realtime + fallback polling)
+function subscribeRealtime(){
+  try {
+    const channel = supabase
+      .channel('public:product_variants')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_variants' }, payload => {
+        console.log('Realtime: cambio detectado', payload);
+        loadProducts();
+      });
+
+    channel.subscribe(status => {
+      console.log('Realtime status:', status);
+      if (status === 'SUBSCRIBED') {
+        console.log('Realtime suscripción OK');
+      } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+        console.warn('Realtime no disponible, activando fallback polling.');
+        startPollingFallback();
+      }
+    });
+
+    channel.on('unhandled_rejection', () => {
+      console.warn('Realtime: unhandled_rejection -> fallback polling');
+      startPollingFallback();
+    });
+
+  } catch (e) {
+    console.warn('subscribeRealtime catch -> fallback polling', e);
+    startPollingFallback();
   }
+}
+
+// polling simple (recarga loadProducts cada X ms)
+let _pollingInterval = null;
+function startPollingFallback(intervalMs = 15000) {
+  if (_pollingInterval) return;
+  _pollingInterval = setInterval(() => {
+    console.log('Polling fallback: recargando productos');
+    loadProducts();
+  }, intervalMs);
+}
+function stopPollingFallback(){
+  if (_pollingInterval) { clearInterval(_pollingInterval); _pollingInterval = null; }
+}
 
   /* DEBUG helpers (temporal) */
   window._productsDebug = {
