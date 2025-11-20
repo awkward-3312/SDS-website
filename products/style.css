@@ -203,55 +203,117 @@
     box-shadow:0 8px 20px rgba(3,105,161,0.12);
   }
   
-  /* MODAL (detalles) */
-  .modal{ display:none; position:fixed; inset:0; z-index:120; align-items:center; justify-content:center; }
-  .modal.show{ display:flex; }
-  .modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.45); }
-  .modal-window{
-    position:relative;
-    z-index:130;
-    width:90%;
-    max-width:900px;
-    background:var(--blanco);
-    border-radius:12px;
-    box-shadow:0 20px 60px rgba(0,0,0,.25);
-    overflow:hidden;
+/* ===== MODAL: centrado, alto máximo y scroll interno ===== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    align-items: center;
+    justify-content: center;
+    overflow: auto; /* por si viewport pequeño */
   }
-  .modal-close{ position:absolute; right:14px; top:10px; background:none; border:0; font-size:26px; cursor:pointer; }
-  .modal-content{ display:flex; gap:18px; padding:20px; align-items:flex-start; }
-  .modal-content img{ width:340px; height:auto; object-fit:contain; border-radius:8px; background:#fafafa; padding:12px; }
-  .modal-info{ flex:1; }
-  .modal-info h3{ margin-bottom:8px; font-size:22px; }
-  .modal-info p{ color:#555; margin-bottom:12px; }
+  .modal.show { display: flex; }
   
-  /* Variantes dentro del modal */
-  #modalVariants .variant-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
-  #modalVariants .variant-row .vname{ font-weight:600; min-width:60px; }
-  #modalVariants .variant-row .vstock{ font-size:14px; color:#666; }
-  
-  /* Pequeños fixes / utilidades */
-  /* Elimina bullets en cualquier ul dentro de grid */
-  .products-grid ul, .product-card ul { margin:0; padding:0; list-style:none; }
-  
-  /* Pequeño punto negro (si aparece) */
-  .product-card::before{ content:''; display:block; width:0; height:0; }
-  
-  /* RESPONSIVE */
-  @media (max-width: 1024px){
-    .products-hero h1{ font-size:40px; }
-    .modal-content img{ width:280px; }
+  /* Backdrop: cubre toda la pantalla y desenfoca */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3,6,23,0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 122;
   }
-  @media (max-width:800px){
-    .modal-content{ flex-direction:column; align-items:center; text-align:center; }
-    .modal-content img{ width:80%; }
-    .control-row{ flex-direction:column; gap:10px; padding:10px; }
-    #products-list.products-grid { padding:12px; gap:12px; }
-    .product-card { min-height:280px; padding:14px; }
-    .product-card img { width:110px; height:110px; }
-    .products-hero { padding:48px 20px; }
+  
+  /* Ventana modal: centrada, limitada en alto y con scroll interno */
+  .modal-window {
+    position: relative;
+    z-index: 130;
+    width: 92%;
+    max-width: 860px;                 /* ancho cómodo */
+    max-height: calc(100vh - 80px);   /* asegura que nunca se salga de la pantalla */
+    background: var(--blanco);
+    border-radius: 14px;
+    box-shadow: 0 30px 80px rgba(3,22,45,0.35);
+    overflow: auto;                   /* scroll interno si el contenido excede la altura */
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform .18s ease, opacity .18s ease;
+    display: flex;
+    flex-direction: column;
   }
-  @media (max-width:420px){
-    .products-hero h1{ font-size:28px; }
-    .menu{ gap:12px; font-size:14px; }
+  
+  /* Close dentro de la ventana, siempre visible y accesible */
+  .modal-close {
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    background: rgba(0,0,0,0.06);
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #0f1724;
+    cursor: pointer;
+    z-index: 140;
+    box-shadow: 0 6px 18px rgba(3,22,45,0.08);
+  }
+  .modal-close:hover { transform: translateY(-2px); background: rgba(0,0,0,0.09); }
+  
+  /* Contenido: image + info en filas, pero con wrap si el alto es pequeño */
+  .modal-content {
+    display: flex;
+    gap: 22px;
+    padding: 22px 26px 28px 26px;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Panel imagen: ocupa menos espacio para que el texto no quede muy a la derecha */
+  .modal-left {
+    flex: 0 0 260px;   /* reduce tamaño para no dominar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: linear-gradient(180deg,#fafbfc,#ffffff);
+    border-radius: 10px;
+  }
+  
+  /* Imagen: más contenida y responsiva */
+  .modal-content img {
+    width: 220px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+  }
+  
+  /* Info: más compacta, texto más legible */
+  .modal-info {
+    flex: 1;
+    min-width: 0; /* para que los textos puedan truncar/ajustar en narrow viewports */
+  }
+  .modal-info h3 { font-size: 26px; margin: 0 0 6px; }
+  .modal-info p { font-size: 15px; color: #4d5b63; margin: 0 0 12px; line-height: 1.45; }
+  
+  /* Price + stock en bloque compacto */
+  .modal-price { margin-bottom: 10px; }
+  .modal-price .amount { font-size: 22px; font-weight: 900; color: var(--cian); }
+  .modal-stock { display:inline-flex; align-items:center; gap:10px; padding:8px 12px; border-radius:999px; font-weight:700; }
+  
+  /* En pantallas pequeñas, pasar a columna y ajustar tamaños */
+  @media (max-width: 880px) {
+    .modal-window { max-width: 720px; margin: 24px; }
+    .modal-content { flex-direction: column; align-items: center; padding: 18px; }
+    .modal-left { width: 100%; flex: 0 0 auto; max-width: 360px; }
+    .modal-content img { width: 60%; }
+    .modal-info h3 { font-size: 22px; text-align: center; }
+    .modal-info p { text-align: center; }
   }
   
