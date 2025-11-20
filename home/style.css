@@ -1,149 +1,301 @@
 :root{
-    --cian:#00A7C6; --rojo:#E52333; --verde:#7AC943; --amarillo:#FFCF24;
-    --azul-fondo:#0093D5; --gris:#333; --blanco:#fff;
-    --container-padding: 40px;
-  }
-  
-  /* Reset básico */
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;font-family:"Poppins",sans-serif;color:var(--gris);background:#fff}
-  
-  /* NAVBAR */
-  .navbar{
-    width:100%;display:flex;align-items:center;justify-content:space-between;
-    padding:18px var(--container-padding);position:sticky;top:0;z-index:60;
-    background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.75));
-    transition:box-shadow .18s ease, backdrop-filter .18s ease;
-    backdrop-filter: blur(2px);
-  }
-  .navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08) }
-  
-  .brand .logo{ height:56px; display:block }
-  
-  /* Menu desktop */
-  .menu{ list-style:none; display:flex; gap:22px; align-items:center }
-  .menu a{ text-decoration:none; color:var(--gris); font-weight:500; transition:color .16s }
-  .menu a:hover{ color:var(--cian) }
-  
-  /* Hamburger - hidden on desktop */
-  .nav-toggle{
-    display:none; background:none; border:0; cursor:pointer; padding:8px;
-  }
-  .hamb{ display:block; width:26px; height:2px; background:var(--gris); position:relative }
-  .hamb::before, .hamb::after{ content:""; position:absolute; left:0; width:26px; height:2px; background:var(--gris); transition:transform .18s, top .18s }
-  .hamb::before{ top:-8px } .hamb::after{ top:8px }
-  
-  /* HERO */
-  .hero{
-    display:flex; 
-    align-items:center; 
-    justify-content:space-between;
-    padding:90px var(--container-padding); 
-    gap:40px;
-    background: linear-gradient(135deg, var(--azul-fondo), var(--cian));
-    color:var(--blanco);
-  }
-  .hero-text{ max-width:640px }
-  .hero-text h1{ font-size:48px; font-weight:800; line-height:1.02 }
-  .hero-text p{ margin-top:12px; font-size:18px; opacity:.95 }
-  .buttons{ margin-top:22px; display:flex; gap:14px }
-  .btn{ padding:12px 20px; border-radius:10px; font-weight:600; text-decoration:none }
-  .btn-yellow{ background:var(--amarillo); color:var(--gris) }
-  .btn-red{ background:var(--rojo); color:var(--blanco) }
-  
-  .hero-img img{
-    width: 380px;
-    height: auto;
-    object-fit: contain;
-    border-radius: 12px;
-  }
-  
-  /* SLIDER HERO - añadir al final del archivo */
+  --cian:#00A7C6;
+  --rojo:#E52333;
+  --verde:#7AC943;
+  --amarillo:#FFCF24;
+  --azul-fondo:#0093D5;
+  --gris:#333;
+  --blanco:#fff;
+
+  --container-padding: 40px;
+
+  /* Accessibility & sizing */
+  --focus-ring: 3px;
+  --btn-hit: 48px; /* mínimo área táctil */
+  --transition-fast: .18s;
+  --transition-medium: .35s;
+}
+
+/* Reset básico */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:"Poppins",sans-serif;color:var(--gris);background:#fff;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block;height:auto}
+
+/* NAVBAR */
+.navbar{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px var(--container-padding);
+  position:sticky;
+  top:0;
+  z-index:60;
+  background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  transition:box-shadow var(--transition-fast) ease, backdrop-filter var(--transition-fast) ease;
+  backdrop-filter: blur(2px);
+}
+.navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08) }
+
+.brand .logo{ height:56px; display:block }
+
+/* Menu desktop */
+.menu{ list-style:none; display:flex; gap:22px; align-items:center }
+.menu a{
+  text-decoration:none;
+  color:var(--gris);
+  font-weight:500;
+  transition:color var(--transition-fast);
+  padding:6px 4px;
+  border-radius:6px;
+}
+.menu a:hover,
+.menu a:focus{ color:var(--cian); outline:none; }
+
+/* Improve keyboard focus visibility */
+:focus{ outline: none; }
+:focus-visible{
+  outline: var(--focus-ring) solid rgba(0,0,0,0.12);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Hamburger - hidden on desktop */
+.nav-toggle{
+  display:none;
+  background:none;
+  border:0;
+  cursor:pointer;
+  padding:8px;
+  line-height:0;
+}
+.hamb{ display:block; width:26px; height:2px; background:var(--gris); position:relative; transition:background var(--transition-fast) }
+.hamb::before, .hamb::after{
+  content:""; position:absolute; left:0; width:26px; height:2px; background:var(--gris);
+  transition:transform var(--transition-fast), top var(--transition-fast), opacity var(--transition-fast);
+}
+.hamb::before{ top:-8px } .hamb::after{ top:8px }
+
+/* HERO */
+.hero{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:90px var(--container-padding);
+  gap:40px;
+  background: linear-gradient(135deg, var(--azul-fondo), var(--cian));
+  color:var(--blanco);
+  min-height:420px; /* ayuda a evitar CLS al cargar */
+}
+
+/* Make hero responsive-safe using aspect-ratio on slider (no JS needed for height) */
+.hero-text{ max-width:640px }
+.hero-text h1{ font-size:48px; font-weight:800; line-height:1.02; margin-bottom:6px; text-wrap:balance }
+.hero-text p{ margin-top:12px; font-size:18px; opacity:.95; max-width:60ch }
+.buttons{ margin-top:22px; display:flex; gap:14px; align-items:center }
+
+/* Buttons: ensure hit area and accessible contrast */
+.btn{
+  padding:12px 20px;
+  border-radius:10px;
+  font-weight:600;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:var(--btn-hit);
+  transition: transform var(--transition-medium), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.btn:focus-visible{ box-shadow: 0 0 0 4px rgba(0,0,0,0.08), 0 4px 18px rgba(0,0,0,0.12) }
+.btn:active{ transform: translateY(1px) }
+.btn-yellow{ background:var(--amarillo); color:var(--gris) }
+.btn-red{ background:var(--rojo); color:var(--blanco) }
+
+/* make sure contrast is sufficient — if needed adjust --amarillo or text color */
+
+/* HERO IMAGE (legacy, kept for compatibility) */
+.hero-img img{
+  width: 380px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* SLIDER HERO */
 .hero-slider {
   position: relative;
   width: 420px;           /* ancho del contenedor del hero (ajusta si quieres) */
-  height: 360px;          /* altura fija para que el hero no salte */
+  /* Use aspect-ratio to keep consistent height and avoid CLS */
+  aspect-ratio: 420 / 360;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  border-radius: 12px;
 }
 
-.hero-slider .slide {
-  position: absolute;
-  inset: 0;               /* top:0; right:0; bottom:0; left:0 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity .8s ease-in-out;
-  will-change: opacity;
+/* slides wrapper for easier transforms */
+.slides-wrapper{
+  position:relative;
+  width:100%;
+  height:100%;
 }
 
-.hero-slider .slide.active {
-  opacity: 1;
-  z-index: 2;
+/* slide base */
+.hero-slider .slide{
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  opacity:0;
+  transition: opacity .8s ease-in-out, transform .6s cubic-bezier(.2,.8,.2,1);
+  will-change: opacity, transform;
+  transform: translateY(6px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); /* subtle backdrop to increase text contrast if overlayed */
 }
 
-.hero-slider img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
+/* visible slide */
+.hero-slider .slide.active{
+  opacity:1;
+  transform:none;
+  z-index:2;
 }
 
-/* Ajustes móviles: que el slider quede más pequeño y el texto encima */
+/* image inside slide */
+.hero-slider img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  display:block;
+}
+
+/* Skeleton / placeholder to avoid content shift while image loads */
+.hero-slider .slide::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04));
+  opacity:0;
+  transition:opacity .35s;
+  z-index:1;
+}
+.hero-slider img[loading="lazy"] + /* no reliable selector for load state in CSS, JS should remove placeholder on load */
+  .slide::before { opacity:0 } /* TODO: control via JS */
+
+/* CONTROLS: prev / next */
+.slider-control{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:5;
+  background:rgba(0,0,0,0.06);
+  border:0;
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  backdrop-filter: blur(3px);
+}
+.slider-control:focus-visible{ outline: var(--focus-ring) solid rgba(0,0,0,0.12); outline-offset:3px }
+.slider-control:hover{ transform: translateY(-50%) scale(1.03) }
+
+.slider-control.prev{ left:10px }
+.slider-control.next{ right:10px }
+
+/* DOTS / INDICATORS */
+.slider-dots{
+  position:absolute;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:8px;
+  z-index:6;
+  align-items:center;
+}
+.slider-dots button{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  border:0;
+  background: rgba(255,255,255,0.35);
+  cursor:pointer;
+  transition: transform .18s, background .18s;
+}
+.slider-dots button[aria-selected="true"],
+.slider-dots button:active,
+.slider-dots button:focus-visible{
+  background: var(--blanco);
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* reveal animations */
+.reveal{ opacity:0; transform:translateY(8px); animation:reveal .6s forwards .15s }
+.reveal.delay-1{ animation-delay:.25s }
+.reveal.delay-2{ animation-delay:.45s }
+.reveal.delay-3{ animation-delay:.65s }
+@keyframes reveal{ to{opacity:1; transform:none} }
+
+/* RESPONSIVE */
 @media (max-width:1000px){
-  .hero-slider {
-    width: 320px;
-    height: 300px;
-    margin-top: 18px;
-  }
-  .hero { padding:70px 28px; flex-direction:column-reverse; text-align:center; gap:24px; }
-  .hero-text { max-width: 720px; }
+  .hero-slider{ width:320px; aspect-ratio:320/300; margin-top:18px; }
+  .hero{ padding:70px 28px; flex-direction:column-reverse; text-align:center; gap:24px; min-height:unset }
+  .hero-text{ max-width:720px }
 }
 
-/* Si quieres centrar el slider horizontalmente dentro del hero en pantallas grandes */
+/* If you want to center slider on large screens */
 @media (min-width:1001px){
-  /* opcional: ajustar la posición del slider respecto al texto */
-  .hero-slider { margin-left: 20px; }
+  .hero-slider{ margin-left:20px }
 }
 
-  /* reveal animations */
-  .reveal{ opacity:0; transform:translateY(8px); animation:reveal .6s forwards .15s }
-  .reveal.delay-1{ animation-delay:.25s }
-  .reveal.delay-2{ animation-delay:.45s }
-  .reveal.delay-3{ animation-delay:.65s }
-  @keyframes reveal{ to{opacity:1; transform:none} }
-  
-  /* RESPONSIVE */
-  @media (max-width:1000px){
-    .hero{ padding:70px 28px; flex-direction:column-reverse; text-align:center }
-    .hero-img img{ width:320px; max-width:80% }
-    .hero-text h1{ font-size:40px }
+/* Mobile: menu hamburger */
+@media (max-width:800px){
+  .menu{
+    position:fixed; top:72px; right:12px; background:var(--blanco);
+    flex-direction:column; padding:12px; gap:8px; border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12); display:none; min-width:200px;
   }
-  
-  /* Mobile: menu hamburger */
-  @media (max-width:800px){
-    .menu{ position:fixed; top:72px; right:12px; background:var(--blanco); flex-direction:column;
-           padding:12px; gap:8px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.12);
-           display:none; min-width:200px }
-    .menu.show{ display:flex }
-    .nav-toggle{ display:block }
-    .hamb{ background:transparent }
-    .hamb::before{ transform:none; top:0; }
-    .hamb::after{ transform:none; top:0; }
-    /* when open - draw X */
-    .nav-toggle.open .hamb{ background:transparent }
-    .nav-toggle.open .hamb::before{ transform:rotate(45deg); top:0 }
-    .nav-toggle.open .hamb::after{ transform:rotate(-45deg); top:0 }
+  .menu.show{ display:flex }
+  .nav-toggle{ display:block }
+  .hamb{ background:transparent }
+  .hamb::before{ transform:none; top:0 }
+  .hamb::after{ transform:none; top:0 }
+  .nav-toggle.open .hamb{ background:transparent }
+  .nav-toggle.open .hamb::before{ transform:rotate(45deg); top:0 }
+  .nav-toggle.open .hamb::after{ transform:rotate(-45deg); top:0 }
+}
+
+/* Small phones */
+@media (max-width:420px){
+  :root{ --container-padding:18px }
+  .hero-text h1{ font-size:32px }
+  .hero{ padding:48px var(--container-padding) }
+  .slider-control{ width:38px; height:38px; }
+}
+
+/* Accessibility: Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .reveal, .hero-slider .slide, .hero-slider .slide.active, .slider-control, .slider-dots button{
+    transition: none !important;
+    animation: none !important;
   }
-  
-  /* Small phones */
-  @media (max-width:420px){
-    :root{ --container-padding:18px }
-    .hero-text h1{ font-size:32px }
-    .hero{ padding:48px var(--container-padding) }
-  }
-  
+}
+
+/* Utility: visually-hidden (for offscreen labels if needed) */
+.visually-hidden{
+  position:absolute!important;
+  height:1px;width:1px;
+  overflow:hidden;clip:rect(1px,1px,1px,1px);
+  white-space:nowrap;border:0;padding:0;margin:-1px;
+}

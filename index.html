@@ -4,7 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SDS | Soluciones Digitales Seguras</title>
+
   <meta name="description" content="SDS - Protege, gestiona y optimiza tu mundo digital. Servicios: publicidad, hardware, software, diseño web, fotografía y más." />
+
+  <!-- Preload de la imagen principal del slider (mejora LCP) -->
+  <link rel="preload" as="image" href="images/item-1.png" />
+
   <link rel="stylesheet" href="home/style.css">
 </head>
 <body>
@@ -12,7 +17,7 @@
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <a href="../index.html" class="brand">
-      <img src="images/sds-logo.png" alt="SDS Logo" class="logo">
+      <img src="images/sds-logo.png" alt="Logotipo de Soluciones Digitales Seguras" class="logo">
     </a>
 
     <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
@@ -27,38 +32,78 @@
     </ul>
   </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-text">
-    <h1 class="reveal">Soluciones Digitales Seguras</h1>
-    <p class="reveal delay-1">Protege, gestiona y optimiza tu mundo digital.</p>
+  <!-- HERO -->
+  <section class="hero">
 
-    <div class="buttons reveal delay-2">
-      <a href="services/services.html" class="btn btn-yellow">Ver Servicios</a>
-      <a href="products/products.html" class="btn btn-red">Productos</a>
+    <div class="hero-text">
+      <h1 class="reveal">Soluciones Digitales Seguras</h1>
+
+      <p class="reveal delay-1">
+        Protege, gestiona y optimiza tu mundo digital.
+      </p>
+
+      <div class="buttons reveal delay-2">
+        <a href="services/services.html" class="btn btn-yellow" aria-label="Ver nuestros servicios">Ver Servicios</a>
+        <a href="products/products.html" class="btn btn-red" aria-label="Ver productos disponibles">Productos</a>
+      </div>
     </div>
-  </div>
 
-  <!-- AQUÍ VA EL SLIDER -->
-  <div class="hero-slider reveal delay-3">
-      <div class="slide active">
-          <img src="images/item-1.png" alt="">
-      </div>
-      <div class="slide">
-          <img src="images/item-2.png" alt="">
-      </div>
-      <div class="slide">
-          <img src="images/item-3.png" alt="">
-      </div>
-      <div class="slide">
-          <img src="images/item-4.png" alt="">
-      </div>
-      <div class="slide">
-          <img src="images/item-5.png" alt="">
-      </div>
-  </div>
+    <!-- SLIDER ACCESIBLE -->
+    <div class="hero-slider reveal delay-3"
+         role="region"
+         aria-roledescription="Carrusel"
+         aria-label="Galería de productos destacados">
 
-</section>
+      <!-- Controles accesibles -->
+      <button class="slider-control prev" aria-label="Imagen anterior">‹</button>
+      <button class="slider-control next" aria-label="Imagen siguiente">›</button>
+
+      <div class="slides-wrapper">
+
+        <div class="slide active" aria-hidden="false">
+            <img src="images/item-1.png"
+                 alt="Decoración temática de cumpleaños"
+                 loading="eager">
+        </div>
+
+        <div class="slide" aria-hidden="true">
+            <img src="images/item-2.png"
+                 alt="Producto promocional SDS"
+                 loading="lazy">
+        </div>
+
+        <div class="slide" aria-hidden="true">
+            <img src="images/item-3.png"
+                 alt="Accesorios personalizados"
+                 loading="lazy">
+        </div>
+
+        <div class="slide" aria-hidden="true">
+            <img src="images/item-4.png"
+                 alt="Artículo corporativo promocional"
+                 loading="lazy">
+        </div>
+
+        <div class="slide" aria-hidden="true">
+            <img src="images/item-5.png"
+                 alt="Regalo impreso personalizado"
+                 loading="lazy">
+        </div>
+
+      </div>
+
+      <!-- Indicadores -->
+      <div class="slider-dots" role="tablist" aria-label="Selector de imagen">
+        <button role="tab" aria-selected="true" aria-label="Imagen 1"></button>
+        <button role="tab" aria-selected="false" aria-label="Imagen 2"></button>
+        <button role="tab" aria-selected="false" aria-label="Imagen 3"></button>
+        <button role="tab" aria-selected="false" aria-label="Imagen 4"></button>
+        <button role="tab" aria-selected="false" aria-label="Imagen 5"></button>
+      </div>
+
+    </div>
+
+  </section>
 
   <script src="home/script.js"></script>
 </body>
