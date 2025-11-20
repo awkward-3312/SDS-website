@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <img loading="lazy" src="${p.image_url || 'assets/img/default.png'}" alt="${escapeHtml(p.title)}">
         <h3>${escapeHtml(p.title)}</h3>
         <p>${escapeHtml(p.description || '')}</p>
-        <div class="price">${p.price ? '$' + p.price : ''}</div>
+        <div class="price">${p.price ? 'L. ' + p.price : ''}</div>
         <div class="stock-badge ${inStock ? 'in' : 'out'} ${lowStock ? 'low' : ''}">
           ${inStock ? (lowStock ? 'Stock bajo' : 'En stock') : 'Agotado'}
         </div>
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mImg) mImg.src = p.image_url || 'assets/img/default.png';
     if (mTitle) mTitle.textContent = p.title;
     if (mDesc) mDesc.textContent = p.description || '';
-    if (mPrice) mPrice.textContent = p.price ? '$' + p.price : '';
+    if (mPrice) mPrice.textContent = p.price ? 'L.' + p.price : '';
     if (mVariants) mVariants.innerHTML = (p.variants || []).map(v => `
       <div class="variant-row">
         <div class="vname">${escapeHtml(v.name)}</div>
