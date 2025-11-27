@@ -1,4 +1,6 @@
-/* CSS – Catálogo + Modal (Premium UI) */
+/* CSS – Catálogo + Modal (Premium UI)
+   Actualizado para soportar: stepper, whatsapp btn, quote btn, sin íconos de favorito/regalo.
+*/
 
 /* Variables globales */
 :root{
@@ -15,10 +17,12 @@
   --container-pad: 40px;
   --max-width-controls: 1100px;
   --focus-ring: 3px solid rgba(0,137,166,0.18);
+  --btn-radius: 10px;
+  --muted: #6b7280;
 }
 
 /* Reset + tipografía */
-*{ margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif; }
+*{ margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
 html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
 /* ACCESIBILIDAD: focus-visible */
@@ -78,7 +82,7 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
 .product-count{
   text-align:left;
   font-size:14px;
-  color:#6b7280;
+  color:var(--muted);
   margin:12px var(--container-pad) 6px;
   max-width: var(--max-width-controls);
 }
@@ -135,10 +139,9 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
   cursor:pointer;
   outline: none;
 }
-/* Hover premium */
 .product-card:hover{
   transform: translateY(-8px) scale(1.015);
-  box-shadow: 0 20px 40px rgba(16,24,40,0.12);
+  box-shadow: var(--shadow-2);
 }
 
 /* Ensure interactive children still receive pointer events */
@@ -184,7 +187,7 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
   font-size:16px;
 }
 
-/* Badges de stock (con icono) */
+/* Badges de stock */
 .stock-badge{
   display:inline-flex;
   align-items:center;
@@ -215,21 +218,20 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
 .stock-badge.low::before{ content: "⚠"; font-size:12px; color: #b45309; }
 .stock-badge.out::before{ content: "✖"; font-size:12px; color: #b91c1c; }
 
-/* Lista de variantes (si la usaras) */
-.variant-list{ list-style:none; padding:0; margin:8px 0 0; color:#374151; font-size:13px; }
-
-/* Botón Ver detalles (alineado al final) */
+/* Botón Ver detalles (estilo primario de las tarjetas) */
 .details-btn, .btn {
   margin-top:auto;
   display:inline-block;
   background: linear-gradient(180deg,#06b6d4,#0891b2);
   color:#fff;
   padding:10px 16px;
-  border-radius:10px;
+  border-radius:var(--btn-radius);
   text-decoration:none;
   font-weight:700;
   transition: transform .12s ease, box-shadow .12s ease;
   pointer-events:auto;
+  border: none;
+  cursor: pointer;
 }
 .details-btn:hover, .btn:hover{
   transform:translateY(-4px);
@@ -239,7 +241,7 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
 /* ACCESIBILIDAD: focus states */
 .product-card:focus { box-shadow: 0 12px 30px rgba(3,105,161,0.10); transform: translateY(-6px); }
 
-/* MODAL: centrado, alto máximo y scroll interno (optimizado) */
+/* ----- MODAL: layout y estilo ----- */
 .modal {
   display: none;
   position: fixed;
@@ -251,35 +253,33 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
 }
 .modal.show { display: flex; }
 
-/* Backdrop */
+/* Backdrop con blur (glassmorphism ligero) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(3,6,23,0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px) saturate(1.05);
+  -webkit-backdrop-filter: blur(4px) saturate(1.05);
   z-index: 122;
 }
 
-/* Modal window */
+/* Ventana del modal */
 .modal-window {
   position: relative;
   z-index: 130;
   width: 92%;
-  max-width: 860px;
+  max-width: 980px;
   max-height: calc(100vh - 80px);
-  background: var(--blanco);
-  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,251,252,0.98));
+  border-radius: 16px;
   box-shadow: 0 30px 80px rgba(3,22,45,0.35);
   overflow: auto;
-  transform: translateY(0);
-  opacity: 1;
   transition: transform .18s ease, opacity .18s ease;
   display: flex;
   flex-direction: column;
 }
 
-/* Close button */
+/* Botón cerrar */
 .modal-close {
   position: absolute;
   right: 14px;
@@ -301,7 +301,7 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
 .modal-close:hover { transform: translateY(-2px); background: rgba(0,0,0,0.09); }
 .modal-close:focus-visible { outline: var(--focus-ring); }
 
-/* modal content */
+/* Contenido del modal: columna izquierda imagen - derecha info */
 .modal-content {
   display: flex;
   gap: 22px;
@@ -311,30 +311,128 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
   box-sizing: border-box;
 }
 .modal-left {
-  flex: 0 0 320px;
+  flex: 0 0 340px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 12px;
   background: linear-gradient(180deg,#fafbfc,#ffffff);
-  border-radius: 10px;
+  border-radius: 12px;
+  min-height: 260px;
 }
 .modal-content img {
-  width: 300px;
+  width: 320px;
   height: auto;
   object-fit: contain;
   border-radius: 8px;
   display: block;
+  transition: transform .18s ease;
 }
+.modal-left img:hover { transform: scale(1.03); }
+
 .modal-info { flex: 1; min-width: 0; }
-.modal-info h2, .modal-info h3 { font-size: 26px; margin: 0 0 6px; } /* soporta h2 o h3 por si cambias */
+.modal-info h2, .modal-info h3 { font-size: 26px; margin: 0 0 6px; color:#0f1724; }
 .modal-info p { font-size: 15px; color: #4d5b63; margin: 0 0 12px; line-height: 1.45; }
 #modalPrice, .modal-price { margin-bottom: 10px; }
 #modalPrice .amount, .modal-price .amount { font-size: 22px; font-weight: 900; color: var(--cian); }
 #modalStock, .modal-stock { display:inline-flex; align-items:center; gap:10px; padding:8px 12px; border-radius:999px; font-weight:700; }
 
-/* CTA inside modal */
-.modal-cta .btn{ padding:12px 18px; border-radius:10px; font-weight:800; box-shadow: 0 10px 30px rgba(3,105,161,0.08); }
+/* Row de acciones dentro del modal */
+.actions-row, .modal-cta {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+/* Botones principales del modal */
+.btn-primary {
+  background: linear-gradient(180deg,var(--cian), #0093b3);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: var(--btn-radius);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(3,105,161,0.08);
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(3,105,161,0.12); }
+.btn-primary:focus-visible { outline: var(--focus-ring); }
+
+/* Botón outline (WhatsApp / acciones secundarias) */
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid rgba(15,23,36,0.06);
+  padding: 10px 14px;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+}
+.btn-outline:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+.btn-outline:focus-visible { outline: var(--focus-ring); }
+
+/* Botón específico de WhatsApp (colores reconocibles) */
+#whatsappBtn.btn-outline {
+  border-color: rgba(37,211,102,0.14);
+  color: #0f5132;
+  background: linear-gradient(180deg, rgba(37,211,102,0.06), rgba(37,211,102,0.02));
+}
+
+/* Contenedor del stepper (cantidad) */
+.qty {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius: 999px;
+  background: #f8fafc;
+  padding:4px;
+  border: 1px solid rgba(15,23,36,0.04);
+}
+.qty input[type="number"]{
+  width:64px;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid rgba(15,23,36,0.06);
+  text-align:center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.qty input[type="number"]::-webkit-outer-spin-button,
+.qty input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.qty-btn {
+  width:34px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  border:0;
+  background: white;
+  box-shadow: 0 6px 18px rgba(3,22,45,0.04);
+  cursor: pointer;
+  font-size:18px;
+  font-weight:700;
+}
+.qty-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.qty-btn:focus-visible { outline: var(--focus-ring); }
+
+/* Microcopy (envío, notas) */
+.microcopy {
+  color: #6b7280;
+  font-size:13px;
+  margin-top:8px;
+}
+
+/* Estilos para cuando el producto esté agotado */
+.modal-stock.out { background: rgba(239,68,68,0.08); color: #b91c1c; border: 1px solid rgba(185,28,28,0.06); }
+.modal-stock.in { background: rgba(16,185,129,0.08); color:#059669; border:1px solid rgba(5,150,105,0.06); }
 
 /* Responsive modal */
 @media (max-width: 880px) {
@@ -344,6 +442,7 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
   .modal-content img { width: 60%; }
   .modal-info h2 { font-size: 22px; text-align: center; }
   .modal-info p { text-align: center; }
+  .actions-row { justify-content:center; }
 }
 
 /* small screen tweaks */
@@ -354,9 +453,14 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
   #products-list.products-grid { padding:12px; gap:12px; }
   .product-card { min-height:280px; padding:14px; }
   .product-card img { width:110px; height:110px; }
+  .modal-left img { width: 80%; }
+  .qty input[type="number"] { width: 56px; }
 }
 
-/* Reduced motion preferences */
+/* Preferencias de reducción de movimiento */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* Pequeños ajustes visuales - sombras y coherencia */
+.modal-window { border: 1px solid rgba(10,20,30,0.03); }

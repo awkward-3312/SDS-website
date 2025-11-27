@@ -4,13 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SDS | Productos</title>
-  <meta name="description" content="Catálogo de productos personalizados. Busca, filtra y añade al carrito." />
+  <meta name="description" content="Catálogo de productos personalizados. Busca, filtra y solicita cotización." />
 
   <!-- Estilos -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- Preload (si tienes una imagen hero estática) -->
-  <!-- <link rel="preload" as="image" href="../images/hero-products.jpg"> -->
 </head>
 <body>
 
@@ -93,7 +90,8 @@
       </ul>
     </section>
 
-    <!-- Plantilla de tarjeta de producto (para clonar desde JS) -->
+    <!-- Plantilla de tarjeta de producto (para clonar desde JS)
+         -> Eliminé el botón "Agregar" para seguir la directiva de no usar carrito. -->
     <template id="productCardTemplate">
       <li class="product-card" role="listitem">
         <article class="card" data-product-id="" data-category="" data-has-sizes="false" tabindex="0">
@@ -109,7 +107,7 @@
             </div>
             <div class="card-actions">
               <button class="btn btn-ghost view-details" type="button" aria-haspopup="dialog" aria-controls="productModal">Ver detalles</button>
-              <button class="btn btn-primary quick-add" type="button">Agregar</button>
+              <!-- botón "Agregar" eliminado intencionalmente -->
             </div>
           </div>
         </article>
@@ -119,12 +117,11 @@
   </main>
 
   <!-- MODAL DETALLES (mejorado y accesible) -->
-  <!-- Usamos un dialog-role con backdrop. aria-hidden="true" por defecto -->
   <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
     <div class="modal-backdrop" id="modalBackdrop" data-close="true"></div>
 
     <div class="modal-window" role="document">
-      <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">×</button>
+      <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar" aria-controls="productModal">×</button>
 
       <div class="modal-content" role="group" aria-label="Detalle del producto">
 
@@ -137,11 +134,9 @@
           <!-- THUMBS (opcional) -->
           <div id="modalThumbs" class="modal-thumbs" aria-hidden="true"></div>
 
-          <!-- acciones rápidas -->
-          <div class="media-actions">
-            <button class="icon-btn" id="favBtn" aria-label="Agregar a favoritos">♡</button>
-            <button class="icon-btn" id="giftBtn" aria-label="Marcar como regalo">🎁</button>
-          </div>
+          <!-- acciones rápidas (ELIMINADAS: favoritas / regalo)
+               Si en el futuro quieres reintroducir favoritos, manejar desde JS con autenticación. -->
+          <!-- <div class="media-actions"> ... eliminado ... </div> -->
         </aside>
 
         <!-- DERECHA: INFO -->
@@ -157,7 +152,6 @@
 
           <!-- VARIANTES: controladas desde JS -->
           <div id="modalVariants" class="product-options" aria-controls="modalInfo">
-            <!-- Ejemplo de control condicional: label con id label-talla -> hidden si no aplica -->
             <label id="label-talla" class="option-row" for="select-talla" hidden>
               Talla
               <select id="select-talla" name="size"></select>
@@ -169,18 +163,28 @@
             </label>
           </div>
 
-          <!-- CTA + cantidad + ayuda -->
+          <!-- CTA + cantidad + ayuda
+               -> 'Agregar al Carrito' eliminado; CTAs relevantes para cotización/consulta añadidas -->
           <div class="actions-row">
-            <button id="addToCart" class="btn btn-primary">Agregar al Carrito</button>
+            <!-- Botón primario para solicitar cotización o iniciar formulario -->
+            <button id="quoteBtn" class="btn btn-primary" type="button" aria-controls="quoteForm">
+              Solicitar cotización
+            </button>
 
-            <div class="qty-wishlist" aria-hidden="false">
+            <!-- Contenedor para cantidad + acciones de contacto -->
+            <div class="qty-contact" aria-hidden="false">
               <div class="qty" role="group" aria-label="Cantidad">
                 <button class="qty-btn" id="qty-dec" type="button" aria-label="Disminuir cantidad">−</button>
-                <input id="qty" type="number" value="1" min="1" inputmode="numeric" aria-label="Cantidad a comprar" />
+                <input id="qty" type="number" value="1" min="1" inputmode="numeric" aria-label="Cantidad para cotizar" />
                 <button class="qty-btn" id="qty-inc" type="button" aria-label="Aumentar cantidad">+</button>
               </div>
 
-              <button id="helpBtn" class="btn btn-outline" type="button">Solicitar ayuda</button>
+              <!-- Botón para enviar mensaje directo por WhatsApp (rellenar el texto desde JS) -->
+              <button id="whatsappBtn" class="btn btn-outline" type="button"
+                data-whatsapp-text="Hola, estoy interesado en este producto."
+                aria-label="Contactar por WhatsApp">
+                Enviar por WhatsApp
+              </button>
             </div>
           </div>
 

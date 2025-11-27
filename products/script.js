@@ -1,4 +1,6 @@
-/* products/script.js - versión corregida y robusta (focus restore, fallback image, selectores fijos) */
+/* products/script.js - versión corregida y robusta (focus restore, imagen fallback, selectores fijos)
+   Comentarios íntegramente en español.
+*/
 document.addEventListener('DOMContentLoaded', () => {
 
   /* CONFIG */
@@ -6,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE';
   const BUCKET_NAME = 'Products';
 
-  // Fallback local image (ruta del archivo que subiste)
+  // Imagen local de reserva (ruta local o relativa)
   const DEFAULT_IMG = '/mnt/data/b379a345-57b4-42f0-a748-df0c92d8a389.png';
 
   /* --- DETECCIÓN ROBUSTA DEL UMD DE SUPABASE --- */
@@ -45,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const supabase = _createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   /* --- FIN detección --- */
 
-  /* DOM refs (funciones para resolver en tiempo de uso) */
+  /* --- SELECTORES (getters para resolver en tiempo de uso) --- */
   const productsList = () => document.getElementById('products-list');
   const searchInput = () => document.getElementById('searchInput');
   const categoryFilter = () => document.getElementById('categoryFilter');
@@ -53,13 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSelect = () => document.getElementById('sortSelect');
 
   const modal = () => document.getElementById('productModal');
-  const modalCloseBtn = () => document.getElementById('modalCloseBtn'); // coincide con tu HTML
+  const modalCloseBtn = () => document.getElementById('modalCloseBtn');
   const modalImg = () => document.getElementById('modalImg');
   const modalTitle = () => document.getElementById('modalTitle');
   const modalDesc = () => document.getElementById('modalDesc');
   const modalPrice = () => document.getElementById('modalPrice');
   const modalVariants = () => document.getElementById('modalVariants');
-  const modalStock = () => document.getElementById('modalStock'); // <-- nuevo getter para stock
+  const modalStock = () => document.getElementById('modalStock');
+
+  const quoteBtn = () => document.getElementById('quoteBtn');
+  const whatsappBtn = () => document.getElementById('whatsappBtn');
+  const qtyDec = () => document.getElementById('qty-dec');
+  const qtyInc = () => document.getElementById('qty-inc');
+  const qtyInput = () => document.getElementById('qty');
 
   const productCountEl = () => document.getElementById('productCount');
   const categoryChipsEl = () => document.getElementById('categoryChips');
@@ -67,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let productsCache = [];
   let _previousFocus = null;
 
-  /* helpers */
+  /* --- HELPERS --- */
   function escapeHtml(str = '') {
     return String(str)
       .replaceAll('&', '&amp;')
@@ -77,23 +85,20 @@ document.addEventListener('DOMContentLoaded', () => {
       .replaceAll("'", '&#039;');
   }
 
-  /* productCardHTML now includes tabindex and data-id so card can be focusable and clickable */
+  /* Genera la tarjeta HTML del producto (simple y accesible). */
   function productCardHTML(p){
     const stock = Number(p.stock || 0);
     const inStock = stock > 0;
     const lowStock = inStock && stock < 5;
 
-    // build badge text
     const badgeClass = inStock ? (lowStock ? 'stock-badge low' : 'stock-badge in') : 'stock-badge out';
     const badgeText = inStock ? (lowStock ? 'Stock bajo' : 'En stock') : 'Agotado';
     const badgeUnits = inStock ? ` — ${stock} unidades` : '';
 
-    // Ensure id is string
     const id = p.id || p.product_id || '';
 
     const imgSrc = p.image_url && p.image_url.trim() ? p.image_url : DEFAULT_IMG;
 
-    // Use a button for details to avoid accidental navigation
     return `
       <div class="product-card" data-id="${escapeHtml(String(id))}" tabindex="0" role="button" aria-pressed="false">
         <img loading="lazy" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.title || '')}">
@@ -108,11 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   }
 
-  /* Render category chips (mobile-friendly) */
+  /* Renderiza chips de categoría (mobile-friendly). */
   function renderCategoryChips(categories){
     const wrapper = categoryChipsEl();
     if (!wrapper) return;
-    wrapper.innerHTML = ''; // reset
+    wrapper.innerHTML = '';
     const all = document.createElement('div');
     all.className = 'chip active';
     all.dataset.category = '';
@@ -138,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* Renders the product grid and updates controls (category select, chips, count) */
+  /* Renderiza la lista de productos y actualiza controles (select de categorías, chips y contador). */
   function renderList(data){
     const container = productsList();
     if (!container) {
@@ -146,11 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // compute categories
+    // categorías únicas
     const cats = Array.from(new Set(data.map(d => d.category).filter(Boolean)));
     const catEl = categoryFilter();
     if (catEl && catEl.options.length <= 1){
-      // ensure we don't duplicate options
       catEl.innerHTML = '';
       const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Todas las categorías';
       catEl.appendChild(empty);
@@ -160,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // render chips once if container exists
+    // render chips (una sola vez)
     if (categoryChipsEl() && categoryChipsEl().children.length === 0 && cats.length) {
       renderCategoryChips(cats);
     }
@@ -189,16 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if(s === 'price_desc') list.sort((a,b)=> (Number(b.price)||0)-(Number(a.price)||0));
     if(s === 'title_asc') list.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
 
-    // update product count
+    // actualizar contador
     const countEl = productCountEl();
     if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? 'producto' : 'productos'} encontrados`;
 
-    // render cards
+    // render tarjetas
     container.innerHTML = list.map(productCardHTML).join('');
 
-    // attach detail handlers for the visible buttons (not strictly necessary due to delegated click, but ok)
+    // adjuntar handlers de detalles para los botones visibles
     container.querySelectorAll('.details-btn').forEach(btn => {
-      // avoid duplicate handlers by clearing a possible marker
       if (!btn._hasHandler) {
         btn.addEventListener('click', onDetailsBtnClick);
         btn._hasHandler = true;
@@ -206,19 +209,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* details button click handler */
+  /* Handler del botón ver detalles (abre modal por id). */
   function onDetailsBtnClick(e){
     e.preventDefault();
     const id = e.currentTarget.dataset.id;
     if (id) openModalById(id);
   }
 
-  /* Accessibility / keyboard: handle Escape */
+  /* Cerrar modal con Escape (keyboard). */
   function handleEscapeClose(e){
     if (e.key === 'Escape') closeModal();
   }
 
-  /* Open modal (fills content, focuses close button, locks scroll) */
+  /* Abre modal: rellena contenido, actualiza cantidad/variants, foco y bloqueo de scroll. */
   function openModalById(productId){
     const p = productsCache.find(x => String(x.id) === String(productId));
     if(!p) {
@@ -233,12 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mTitle) mTitle.textContent = p.title || '';
     if (mDesc) mDesc.textContent = p.description || '';
 
-    // Price -> goes to modalPrice
+    // Precio
     if (mPrice) {
       mPrice.innerHTML = `<div class="modal-price"><div class="amount">${p.price ? 'L. ' + Number(p.price).toFixed(2) : ''}</div><div class="label">Precio</div></div>`;
     }
 
-    // Stock -> goes to modalStock (not modalVariants)
+    // Stock -> elemento modalStock
     if (mStockEl) {
       const stock = Number(p.stock || 0);
       if (stock > 0) {
@@ -250,12 +253,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Variants: only populate modalVariants if product has variants (sizes/colors)
+    // Variantes: tallas/colores si existen
     if (mVariants) {
-      // Clear previous variants
       mVariants.innerHTML = '';
-
-      // Example: if your product object contains sizes/colors arrays, populate selects
       const hasSizes = Array.isArray(p.sizes) && p.sizes.length > 0;
       const hasColors = Array.isArray(p.colors) && p.colors.length > 0;
 
@@ -292,27 +292,21 @@ document.addEventListener('DOMContentLoaded', () => {
         labelC.appendChild(selectC);
         mVariants.appendChild(labelC);
       }
-
-      // If no variants, optionally show a small hint (or leave empty)
-      if (!hasSizes && !hasColors) {
-        // keep empty to avoid layout jump; you could show a note if desired
-        // mVariants.innerHTML = `<p class="variant-note">Sin variantes</p>`;
-      }
     }
 
     if (!m) return;
 
-    // store previously focused element
+    // Guardar elemento previamente enfocado
     _previousFocus = document.activeElement;
 
-    // show modal
+    // Mostrar modal
     m.classList.add('show');
     m.setAttribute('aria-hidden','false');
 
-    // block body scroll
+    // bloquear scroll del body
     document.body.style.overflow = 'hidden';
 
-    // reset internal modal scroll & focus close
+    // reset scroll interno y focusear botón cerrar
     const mw = m.querySelector('.modal-window');
     if (mw) {
       mw.scrollTop = 0;
@@ -322,10 +316,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 40);
     }
 
-    // add escape listener
+    // actualizar acciones del modal (cantidad, whatsapp, cotización)
+    populateModalActionsWithProduct(p);
+
+    // listener para Escape
     document.addEventListener('keydown', handleEscapeClose);
   }
 
+  /* Cierra el modal y restaura foco y scroll. */
   function closeModal(){
     const m = modal();
     if (!m) return;
@@ -334,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
     m.classList.remove('show');
     m.setAttribute('aria-hidden','true');
 
-    // restore scroll after animation
+    // restaurar scroll y foco tras la animación
     setTimeout(()=> {
       document.body.style.overflow = '';
       if (_previousFocus && typeof _previousFocus.focus === 'function') {
@@ -343,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 180);
   }
 
-  /* LOAD: obtiene datos desde 'products' y convierte image_url -> publicUrl desde bucket */
+  /* Carga productos desde Supabase y normaliza image_url -> publicUrl si procede. */
   async function loadProducts(){
     console.log('[products] loadProducts start');
     try {
@@ -361,12 +359,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Normalize images: convert image_url to publicUrl if stored in bucket
+      // Normalizar imágenes: convertir rutas de bucket a publicUrl si aplica
       const normalized = await Promise.all(data.map(async (d) => {
         let imgPath = d.image_url || '';
         if (imgPath) {
           try {
-            // getPublicUrl is synchronous in the UMD wrapper returning { data: { publicUrl }, error }
+            // getPublicUrl devuelve { data: { publicUrl }, error } en la UMD
             const { data: pub, error: pubErr } = supabase.storage.from(BUCKET_NAME).getPublicUrl(imgPath);
             if (!pubErr && pub && pub.publicUrl) {
               imgPath = pub.publicUrl;
@@ -386,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Realtime: suscribirse a la tabla 'products'
+  /* Suscripción realtime a la tabla 'products' con fallback a polling si falla. */
   function subscribeRealtime(){
     try {
       const channel = supabase
@@ -417,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // polling simple (recarga loadProducts cada X ms)
+  /* Polling simple (recarga loadProducts cada X ms). */
   let _pollingInterval = null;
   function startPollingFallback(intervalMs = 15000) {
     if (_pollingInterval) return;
@@ -430,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (_pollingInterval) { clearInterval(_pollingInterval); _pollingInterval = null; }
   }
 
-  /* DEBUG helpers (temporal) */
+  /* Exponer helpers de debug en window (temporal). */
   window._productsDebug = {
     loadProducts: loadProducts,
     productsCache: () => productsCache
@@ -454,13 +452,11 @@ document.addEventListener('DOMContentLoaded', () => {
     subscribeRealtime();
   })();
 
-  /* UI events (delegated) */
-  // 1) delegated click handler to make whole card clickable but keep .details-btn behaviour
+  /* UI events (delegación para tarjetas) */
+  // 1) handler delegado para que toda la tarjeta abra modal (salvo cuando se presiona el botón de detalles)
   document.addEventListener('click', (e) => {
-    // if the click was on details button, let its handler run (we attach it in renderList)
     if (e.target.closest('.details-btn')) return;
 
-    // otherwise, if they clicked anywhere inside a product-card, open modal
     const card = e.target.closest('.product-card');
     if (card) {
       const id = card.dataset.id || card.getAttribute('data-id');
@@ -468,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 2) keyboard support: Enter opens focused card
+  // 2) soporte teclado: Enter abre tarjeta enfocada
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const active = document.activeElement;
@@ -479,12 +475,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // modal close bindings (if element exists)
+  // Bindings de cierre del modal (si existen los elementos)
   (function attachModalClose(){
     const mClose = modalCloseBtn();
     if (mClose) mClose.addEventListener('click', closeModal);
 
-    // close when clicking backdrop
+    // cerrar al hacer click en el backdrop
     const m = modal();
     if (m) {
       const backdrop = m.querySelector('.modal-backdrop');
@@ -492,12 +488,171 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  // input/filter bindings
+  // Bindings para inputs/controles de filtrado
   const si = () => { const el = searchInput(); if (el) el.addEventListener('input', () => renderList(productsCache)); };
   const cf = () => { const el = categoryFilter(); if (el) el.addEventListener('change', () => renderList(productsCache)); };
   const sf = () => { const el = stockFilter(); if (el) el.addEventListener('change', () => renderList(productsCache)); };
   const ss = () => { const el = sortSelect(); if (el) el.addEventListener('change', () => renderList(productsCache)); };
 
   si(); cf(); sf(); ss();
+
+  /* ---------------------------
+     ACCIONES DEL MODAL (STEPper, WhatsApp, Cotización)
+     --------------------------- */
+
+  // Adjunta una sola vez los manejadores del modal (no duplicar)
+  let _modalActionsAttached = false;
+  function attachModalActions(){
+    if (_modalActionsAttached) return;
+    _modalActionsAttached = true;
+
+    // stepper -
+    const dec = qtyDec();
+    const inc = qtyInc();
+    const input = qtyInput();
+
+    if (dec && inc && input) {
+      dec.addEventListener('click', () => {
+        const current = Number(input.value || 0);
+        if (isNaN(current)) return input.value = 1;
+        const next = Math.max(Number(input.min || 1), current - 1);
+        input.value = next;
+        // actualizar texto de whatsapp si ya existe
+        updateWhatsappTextFromModal();
+      });
+
+      inc.addEventListener('click', () => {
+        const current = Number(input.value || 0);
+        if (isNaN(current)) return input.value = 1;
+        const max = Number(input.max || Infinity);
+        const next = Math.min(max, current + 1);
+        input.value = next;
+        updateWhatsappTextFromModal();
+      });
+
+      // input manual
+      input.addEventListener('input', () => {
+        let v = Number(input.value || 1);
+        if (isNaN(v) || v < Number(input.min || 1)) v = Number(input.min || 1);
+        input.value = v;
+        updateWhatsappTextFromModal();
+      });
+    }
+
+    // WhatsApp: abre wa.me con texto prellenado
+    const waBtn = whatsappBtn();
+    if (waBtn) {
+      waBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const text = waBtn.dataset.whatsappText || waBtn.getAttribute('data-whatsapp-text') || 'Hola, estoy interesado en este producto.';
+        const encoded = encodeURIComponent(text);
+        // Abrir WhatsApp Web / app: usando wa.me con texto (sin número para que usuario elija)
+        const url = `https://wa.me/?text=${encoded}`;
+        window.open(url, '_blank', 'noopener');
+      });
+    }
+
+    // Cotización: abre mailto: con asunto y cuerpo prellenado
+    const qBtn = quoteBtn();
+    if (qBtn) {
+      qBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // obtener datos visibles
+        const title = modalTitle()?.textContent?.trim() || '';
+        const id = (function(){ // intentar extraer id del producto actualmente abierto buscando en productsCache por título (fallback)
+          const p = productsCache.find(x => String(x.title || '').trim() === String(title).trim());
+          return p ? (p.id || p.product_id || '') : '';
+        })();
+
+        const qty = qtyInput() ? qtyInput().value : '1';
+        const variants = [];
+        const selectT = document.getElementById('select-talla');
+        const selectC = document.getElementById('select-color');
+        if (selectT && selectT.value) variants.push(`Talla: ${selectT.value}`);
+        if (selectC && selectC.value) variants.push(`Color: ${selectC.value}`);
+
+        const bodyLines = [
+          `Hola,`,
+          ``,
+          `Solicito una cotización para el siguiente producto:`,
+          `- Producto: ${title}`,
+          `- ID/SKU: ${id}`,
+          `- Cantidad: ${qty}`,
+          variants.length ? `- Variantes: ${variants.join(', ')}` : '',
+          ``,
+          `Por favor indíquenos precio, tiempos de producción y opciones de envío.`,
+          ``,
+          `Gracias.`
+        ].filter(Boolean);
+
+        const subject = `Solicitud de cotización: ${title}`;
+        const body = encodeURIComponent(bodyLines.join('\n'));
+        const mailto = `mailto:ventas@tu-dominio.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+        // Abre el cliente de correo. Nota: reemplaza ventas@tu-dominio.com por la dirección real o integra con API.
+        window.location.href = mailto;
+      });
+    }
+  }
+
+  // Actualiza el atributo data-whatsapp-text en el botón a partir de los campos del modal
+  function updateWhatsappTextFromModal(){
+    const waBtn = whatsappBtn();
+    if (!waBtn) return;
+    const title = modalTitle()?.textContent?.trim() || '';
+    const qty = qtyInput() ? qtyInput().value : '1';
+    const selectT = document.getElementById('select-talla');
+    const selectC = document.getElementById('select-color');
+    const variants = [];
+    if (selectT && selectT.value) variants.push(`Talla: ${selectT.value}`);
+    if (selectC && selectC.value) variants.push(`Color: ${selectC.value}`);
+
+    const id = (function(){
+      const p = productsCache.find(x => String(x.title || '').trim() === String(title).trim());
+      return p ? (p.id || p.product_id || '') : '';
+    })();
+
+    let text = `Hola, estoy interesado en la "${title}"${id ? ' (ID: '+id+')' : ''}. Cantidad: ${qty}.`;
+    if (variants.length) text += ` Variantes: ${variants.join(', ')}.`;
+    waBtn.dataset.whatsappText = text;
+  }
+
+  // Rellena y ajusta acciones del modal según el producto (stock, max qty, whatsapp text)
+  function populateModalActionsWithProduct(p){
+    // asegurarse de que los handlers del modal estén adjuntados
+    attachModalActions();
+
+    // configurar stepper y límites
+    const input = qtyInput();
+    const dec = qtyDec();
+    const inc = qtyInc();
+    const waBtn = whatsappBtn();
+
+    const stock = Number(p.stock || 0);
+    if (input) {
+      input.value = 1;
+      input.min = 1;
+      if (stock > 0) {
+        input.max = stock;
+        input.disabled = false;
+      } else {
+        input.max = 1;
+        input.disabled = true;
+        input.value = 0;
+      }
+    }
+    if (dec) dec.disabled = (stock <= 0);
+    if (inc) inc.disabled = (stock <= 0);
+
+    // crear plantilla para whatsapp
+    if (waBtn) {
+      const id = p.id || p.product_id || '';
+      const baseText = `Hola, estoy interesado en "${p.title || ''}"${id ? ' (ID: '+id+')' : ''}. Cantidad: ${input ? input.value : '1'}.`;
+      waBtn.dataset.whatsappText = baseText;
+    }
+
+    // desactivar/activar botón de cotización según stock si quisieras (ahora siempre activo)
+    // quoteBtn() puede estar siempre disponible para pedir cotización aun si está agotado.
+    updateWhatsappTextFromModal();
+  }
 
 });
