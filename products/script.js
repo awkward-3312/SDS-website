@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Imagen local de reserva (ruta local o relativa)
   const DEFAULT_IMG = '/mnt/data/b379a345-57b4-42f0-a748-df0c92d8a389.png';
 
+  // URL base para generar enlace al producto (ajusta a tu dominio final)
+  const SITE_PRODUCT_URL = 'https://sds.com/products/?id=';
+
+  // Número de WhatsApp en formato internacional sin símbolos (Honduras +504 9713-5177 -> 50497135177)
+  const WHATSAPP_NUMBER = '50497135177';
+
   /* --- DETECCIÓN ROBUSTA DEL UMD DE SUPABASE --- */
   const GLOBALS = {
     supabaseJs: window.supabaseJs,
@@ -379,6 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
       productsCache = normalized;
       renderList(productsCache);
       console.log('[products] renderizado OK');
+
+      // Si la URL contiene ?id=UUID, abrir modal automáticamente (útil para compartir enlaces).
+      tryOpenModalFromQuery();
     } catch (err) {
       console.error('[products] Excepción loadProducts:', err);
     }
@@ -496,9 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   si(); cf(); sf(); ss();
 
-  /* ---------------------------
-     ACCIONES DEL MODAL (STEPper, WhatsApp, Cotización)
-     --------------------------- */
+  /* ACCIONES DEL MODAL (STEPper, WhatsApp, Cotización) */
 
   // Adjunta una sola vez los manejadores del modal (no duplicar)
   let _modalActionsAttached = false;
@@ -539,15 +546,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // WhatsApp: abre wa.me con texto prellenado
+    // WhatsApp: abre wa.me con texto prellenado y número fijo (abre chat directo con tu número)
     const waBtn = whatsappBtn();
     if (waBtn) {
       waBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const text = waBtn.dataset.whatsappText || waBtn.getAttribute('data-whatsapp-text') || 'Hola, estoy interesado en este producto.';
         const encoded = encodeURIComponent(text);
-        // Abrir WhatsApp Web / app: usando wa.me con texto (sin número para que usuario elija)
-        const url = `https://wa.me/50497135177?text=${encoded}`;
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
         window.open(url, '_blank', 'noopener');
       });
     }
@@ -611,8 +617,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return p ? (p.id || p.product_id || '') : '';
     })();
 
-    let text = `Hola, estoy interesado en la "${title}"${id ? ' (ID: '+id+')' : ''}. Cantidad: ${qty}.`;
-    if (variants.length) text += ` Variantes: ${variants.join(', ')}.`;
+    // construir mensaje con link público al producto en lugar de mostrar el ID crudo
+    const productUrl = id ? `${SITE_PRODUCT_URL}${encodeURIComponent(id)}` : SITE_PRODUCT_URL;
+    let text = `Hola, estoy interesado en este producto: ${productUrl}\nCantidad: ${qty}.`;
+    if (variants.length) text += `\nVariantes: ${variants.join(', ')}.`;
     waBtn.dataset.whatsappText = text;
   }
 
@@ -643,16 +651,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dec) dec.disabled = (stock <= 0);
     if (inc) inc.disabled = (stock <= 0);
 
-    // crear plantilla para whatsapp
+    // crear plantilla para whatsapp usando enlace al producto (más limpio que enviar el ID)
     if (waBtn) {
       const id = p.id || p.product_id || '';
-      const baseText = `Hola, estoy interesado en "${p.title || ''}"${id ? ' (ID: '+id+')' : ''}. Cantidad: ${input ? input.value : '1'}.`;
+      const productUrl = id ? `${SITE_PRODUCT_URL}${encodeURIComponent(id)}` : SITE_PRODUCT_URL;
+      const qtyVal = input ? input.value : '1';
+      const baseText = `Hola, estoy interesado en este producto: ${productUrl}\nCantidad: ${qtyVal}.`;
       waBtn.dataset.whatsappText = baseText;
     }
 
     // desactivar/activar botón de cotización según stock si quisieras (ahora siempre activo)
     // quoteBtn() puede estar siempre disponible para pedir cotización aun si está agotado.
     updateWhatsappTextFromModal();
+  }
+
+  /* Si la URL contiene ?id=..., intentar abrir modal automáticamente */
+  function tryOpenModalFromQuery(){
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id') || params.get('pid');
+      if (id && productsCache && productsCache.length) {
+        // buscar producto por id exacto
+        const found = productsCache.find(p => String(p.id) === String(id) || String(p.product_id) === String(id));
+        if (found) {
+          openModalById(found.id || found.product_id);
+          // opcional: limpiar el query param para no reabrir en refresh
+          // const url = new URL(window.location.href); url.searchParams.delete('id'); history.replaceState({}, '', url.toString());
+        }
+      }
+    } catch (e) {
+      // no crítico
+      console.warn('tryOpenModalFromQuery fallo', e);
+    }
   }
 
 });
