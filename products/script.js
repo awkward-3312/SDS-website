@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = waBtn.dataset.whatsappText || waBtn.getAttribute('data-whatsapp-text') || 'Hola, estoy interesado en este producto.';
         const encoded = encodeURIComponent(text);
         // Abrir WhatsApp Web / app: usando wa.me con texto (sin número para que usuario elija)
-        const url = `https://wa.me/?text=${encoded}`;
+        const url = `https://wa.me/50497135177?text=${encoded}`;
         window.open(url, '_blank', 'noopener');
       });
     }
