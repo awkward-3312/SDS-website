@@ -107,9 +107,17 @@
   outline: none;
 }
 
-/* Botón destacado (login etc) */
+/* Ocultar programáticamente cualquier "Iniciar sesión" que quede por error */
 .menu .btn-login,
-.menu .btn {
+.menu a[aria-label="Iniciar sesión"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Botón destacado (login etc) - reglas genéricas si lo quieres en otras páginas */
+.menu .btn,
+.btn {
   padding: 8px 12px;
   border-radius: 10px;
   background: linear-gradient(90deg,var(--cian), var(--azul-fondo));
@@ -348,6 +356,23 @@ html.nav-open, body.nav-open { overflow:hidden; height:100%; }
 .map-note { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
 :focus { outline: none; }
 a:focus, button:focus { outline-offset: 3px; }
+
+/* Scoped adjustments para la página de Contacto (solo si el body tiene .contact-page)
+   - restaura tamaño/posición del logo en desktop tal como tenías antes
+   - asegura que el menú en desktop se muestre inline
+*/
+body.contact-page .header-inner {
+  padding-left: 40px;
+  padding-right: 40px;
+  align-items: center;
+}
+@media (min-width: 881px) {
+  body.contact-page .logo { height: 60px; width: auto; }
+  /* Aseguramos que el menú principal aparezca en desktop */
+  body.contact-page .main-nav[hidden] { display: block; }
+  /* Si la estructura antigua navbar > .menu existe, que siga visible en desktop */
+  body.contact-page .navbar > .menu { display: flex; }
+}
 
 /* reduce-motion */
 @media (prefers-reduced-motion: reduce) {
