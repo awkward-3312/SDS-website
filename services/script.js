@@ -9,31 +9,59 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn._navInit) return;
     btn._navInit = true;
 
-    // Asegura estado inicial
+    // Estado inicial accesible
     if (!btn.hasAttribute('aria-expanded')) btn.setAttribute('aria-expanded', 'false');
+    if (!menu.hasAttribute('role')) menu.setAttribute('role', 'navigation');
 
-    // Guard helpers
-    const isOpen = () => menu.classList.contains('open') || menu.classList.contains('show');
+    // Helpers
+    const breakpoint = 880;
+    const isOpen = () => btn.getAttribute('aria-expanded') === 'true' && !menu.hasAttribute('hidden');
+
+    const enableBodyLock = () => {
+      document.documentElement.classList.add('nav-open');
+      document.body.classList.add('nav-open');
+    };
+    const disableBodyLock = () => {
+      document.documentElement.classList.remove('nav-open');
+      document.body.classList.remove('nav-open');
+    };
+
+    // Focus trap handlers storage
+    let _trapHandlers = null;
 
     const openMenu = () => {
       btn.setAttribute('aria-expanded', 'true');
+      btn.classList.add('is-open'); // para animación hamburguesa -> X
+      menu.removeAttribute('hidden');
       menu.classList.add('open');
-      menu.classList.remove('show'); // preferimos 'open' pero soportamos 'show' como fallback
+      menu.classList.remove('show');
+
       // focus al primer enlace
       const first = menu.querySelector('a, button');
       if (first) first.focus();
-      // bloquear scroll del documento detrás del panel
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
+
+      enableBodyLock();
+
+      // instalar focus trap mínimo para el menú
+      installMenuTrap();
     };
 
-    const closeMenu = () => {
+    const closeMenu = (returnFocus = true) => {
       btn.setAttribute('aria-expanded', 'false');
+      btn.classList.remove('is-open');
       menu.classList.remove('open');
       menu.classList.remove('show');
-      try { btn.focus(); } catch (e) {}
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
+      menu.setAttribute('hidden', '');
+
+      disableBodyLock();
+
+      // restaurar foco al botón que abrió
+      if (returnFocus) {
+        try { btn.focus(); } catch (e) {}
+      }
+
+      // quitar trap
+      removeMenuTrap();
     };
 
     // Toggle al click (botón)
@@ -43,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else openMenu();
     });
 
-    // Cerrar con ESC
+    // Cerrar con ESC (global)
     document.addEventListener('keydown', (ev) => {
       if ((ev.key === 'Escape' || ev.key === 'Esc') && isOpen()) {
         closeMenu();
@@ -53,9 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cerrar con click fuera cuando el menú esté abierto
     document.addEventListener('click', (ev) => {
       if (!isOpen()) return;
-      const target = ev.target;
-      if (menu.contains(target) || btn.contains(target)) return;
-      closeMenu();
+      const path = ev.composedPath ? ev.composedPath() : (ev.path || []);
+      // Si no hay composedPath disponible, fallback a contains
+      const clickedInside = path.length ? path.includes(menu) || path.includes(btn) : (menu.contains(ev.target) || btn.contains(ev.target));
+      if (!clickedInside) closeMenu();
     });
 
     // Cerrar al redimensionar a desktop
@@ -63,21 +92,68 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => {
       clearTimeout(_resizeTimer);
       _resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 880 && isOpen()) closeMenu();
+        if (window.innerWidth > breakpoint && isOpen()) closeMenu();
       }, 120);
     });
 
     // Cerrar cuando se hace click en un enlace del menú (navegación)
     menu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        if (isOpen()) closeMenu();
+        if (isOpen()) closeMenu(false); // no forzamos foco si el link navega fuera
       });
     });
+
+    // --- Focus trap mínimo para el menú (mientras esté abierto) ---
+    function installMenuTrap() {
+      // evita re-instalar
+      if (_trapHandlers) return;
+      const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const items = Array.from(menu.querySelectorAll(focusableSelector));
+      if (!items.length) return;
+
+      function handleKey(e) {
+        if (e.key !== 'Tab') return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+
+      function handleFocusin(e) {
+        if (!menu.contains(e.target)) {
+          // si el foco sale del menú, devolverlo al primer elemento
+          items[0].focus();
+        }
+      }
+
+      document.addEventListener('keydown', handleKey);
+      document.addEventListener('focusin', handleFocusin);
+      _trapHandlers = { handleKey, handleFocusin };
+    }
+
+    function removeMenuTrap() {
+      if (!_trapHandlers) return;
+      document.removeEventListener('keydown', _trapHandlers.handleKey);
+      document.removeEventListener('focusin', _trapHandlers.handleFocusin);
+      _trapHandlers = null;
+    }
+
   })();
 
 
   /* ----------------------
      SERVICE CARDS + MODALS
+     (dejé este bloque prácticamente igual a tu versión original,
+      solo hice pequeños ajustes de robustez)
      ---------------------- */
 
   const cards = Array.from(document.querySelectorAll('.service-card[role="button"], .service-card[tabindex]'));
@@ -90,34 +166,25 @@ document.addEventListener('DOMContentLoaded', () => {
   function openModal(modalId, triggerEl) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    // Save last focused
     modal._lastTrigger = triggerEl || document.activeElement;
     modal.setAttribute('aria-hidden', 'false');
     modal.style.display = ''; // ensure displayed if CSS used display:none
-    // Put focus on first focusable element inside modal
     const first = modal.querySelector(focusableSelector);
-    if (first) {
-      first.focus();
-    } else {
-      // fallback to modal itself
+    if (first) first.focus();
+    else {
       modal.setAttribute('tabindex', '-1');
       modal.focus();
     }
-    // enable trap
     trapFocus(modal);
   }
 
-  // Close modal and restore focus
   function closeModal(modal) {
     if (!modal) return;
     modal.setAttribute('aria-hidden', 'true');
     modal.style.display = 'none';
-    // remove tabindex fallback
     if (modal.hasAttribute('tabindex')) modal.removeAttribute('tabindex');
-    // restore focus
     const trigger = modal._lastTrigger;
     if (trigger && typeof trigger.focus === 'function') trigger.focus();
-    // remove trap listeners
     releaseTrap(modal);
   }
 
@@ -147,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleFocusin(e) {
       if (!modal.contains(e.target)) {
-        // If focus moves outside, send it back to first
         focusables[0].focus();
       }
     }
@@ -167,17 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Wire up each card
   cards.forEach(card => {
-    // ensure keyboard focusable
     if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
 
-    // click behavior
     card.addEventListener('click', (e) => {
-      // data-href takes precedence: navigate (progressive enhancement)
       const href = card.dataset.href;
       const modalId = card.dataset.modal;
       if (href) {
-        // allow regular navigation
         window.location.href = href;
         return;
       }
@@ -185,12 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(modalId, card);
         return;
       }
-      // default behavior: toggle aria-pressed as a visual state (non-modal)
       const pressed = card.getAttribute('aria-pressed') === 'true';
       card.setAttribute('aria-pressed', String(!pressed));
     });
 
-    // keyboard activation (Enter / Space)
     card.addEventListener('keydown', (e) => {
       if (isActivationKey(e)) {
         e.preventDefault();
@@ -199,13 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Modal global listeners: close on ESC or click outside / close buttons
-  // Find all modals in the document
+  // Modal global listeners
   const modals = Array.from(document.querySelectorAll('.modal'));
   modals.forEach(modal => {
-    // ensure hidden state attribute exists
     if (!modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true');
-    // close buttons
     modal.querySelectorAll('.modal-close').forEach(btn => {
       btn.addEventListener('click', (ev) => {
         ev.preventDefault();
@@ -213,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // click outside panel
     modal.addEventListener('click', (ev) => {
       if (ev.target === modal) closeModal(modal);
     });
@@ -230,10 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Optional: ensure links/buttons inside cards are usable (delegation)
-  // If you later put <a> inside card, keep normal behavior.
-
-  // Small UX: reduce hover animation on touch devices
+  // Touch device hint class
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   if (isTouch) {
     document.documentElement.classList.add('is-touch');
