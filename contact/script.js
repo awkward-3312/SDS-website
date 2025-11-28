@@ -4,29 +4,58 @@
 document.addEventListener("DOMContentLoaded", () => {
   const DEST_SHORT_URL = "https://maps.app.goo.gl/GGwMKSTcUmfTmZVU6";
 
-  // Eliminar formulario si quedó en el HTML viejo
+  // Eliminar formulario antiguo si quedó en el HTML
   const oldForm = document.getElementById("formContacto");
-  if (oldForm) oldForm.remove();
+  if (oldForm && oldForm.parentNode) oldForm.parentNode.removeChild(oldForm);
 
   // Eliminar botón "Cómo llegar" antiguo si existe
   const oldDirectionsBtn = document.getElementById("btn-directions");
-  if (oldDirectionsBtn) oldDirectionsBtn.remove();
+  if (oldDirectionsBtn && oldDirectionsBtn.parentNode) oldDirectionsBtn.parentNode.removeChild(oldDirectionsBtn);
 
-  // Botón único: abrir Google Maps
   const btnOpenMaps = document.getElementById("btn-open-maps");
-  if (btnOpenMaps) {
-    // Click normal
-    btnOpenMaps.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      window.open(DEST_SHORT_URL, "_blank", "noopener,noreferrer");
-    });
+  if (!btnOpenMaps) return;
 
-    // Activación por teclado (Enter / Space)
-    btnOpenMaps.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" || ev.key === " " || ev.key === "Spacebar") {
-        ev.preventDefault();
-        btnOpenMaps.click();
+  // Evita doble inicialización si el script se ejecuta más de una vez
+  if (btnOpenMaps._contactInit) return;
+  btnOpenMaps._contactInit = true;
+
+  // Función central para abrir el mapa (fallbacks incluidos)
+  function openMap() {
+    try {
+      // Preferimos abrir la URL en una nueva ventana/pestaña de forma segura
+      const newWin = window.open(DEST_SHORT_URL, "_blank", "noopener,noreferrer");
+      if (!newWin) {
+        // Si el popup fue bloqueado, navegamos en la misma pestaña como fallback
+        window.location.href = DEST_SHORT_URL;
       }
-    });
+    } catch (err) {
+      // Fallback muy robusto: asignar href al location
+      window.location.href = DEST_SHORT_URL;
+    }
   }
+
+  // Click normal
+  btnOpenMaps.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    openMap();
+  });
+
+  // Activación por teclado (Enter / Space)
+  btnOpenMaps.addEventListener("keydown", (ev) => {
+    const key = ev.key || ev.keyIdentifier || ev.code;
+    if (key === "Enter" || key === " " || key === "Spacebar" || key === "Space") {
+      ev.preventDefault();
+      openMap();
+    }
+  });
+
+  // Soporte adicional: activar con "pointerdown" en dispositivos táctiles (más rápido)
+  // Esto es opcional pero mejora la sensación en móviles
+  btnOpenMaps.addEventListener("pointerdown", (ev) => {
+    // solo si es un pointer de tipo touch o pen (evita duplicar en desktop)
+    if (ev.pointerType === "touch" || ev.pointerType === "pen") {
+      // no preventDefault aquí para no bloquear focus/gestos nativos
+      openMap();
+    }
+  }, { passive: true });
 });
