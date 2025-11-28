@@ -1,41 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SDS | Servicios</title>
 
-    <!-- FontAwesome -->
+    <!-- FontAwesome (si ya lo usas en otras páginas mantén la misma versión) -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <link rel="stylesheet" href="style.css">
+    <!-- Estilos globales (usar el mismo style.css en todas las páginas) -->
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
     <!-- Skip link para accesibilidad -->
     <a class="skip-link visually-hidden" href="#main">Ir al contenido</a>
 
-    <!-- NAVBAR (corregido para mobile hamburger + accesibilidad) -->
-    <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
-        <a href="../index.html" class="brand">
-            <img src="../images/sds-logo.png" alt="SDS Logo" class="logo">
+    <!-- NAVBAR genérico (hamburger para móvil) -->
+    <header class="site-header" role="banner">
+      <div class="container header-inner">
+
+        <!-- Logo / marca -->
+        <a class="brand" href="../index.html" aria-label="Inicio - SDS">
+          <img src="../images/sds-logo.png" alt="SDS" class="logo" />
         </a>
 
-        <!-- Botón hamburger (visible en mobile mediante CSS) -->
-        <button id="navToggle" class="nav-toggle" type="button"
-                aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
-          <span class="hamb" aria-hidden="true"></span>
+        <!-- Botón hamburger (controla el menú en pantallas pequeñas) -->
+        <button
+          id="navToggle"
+          class="nav-toggle"
+          type="button"
+          aria-controls="mainMenu"
+          aria-expanded="false"
+          aria-label="Abrir menú principal">
+          <!-- Icono visual (usa CSS para transformar en X cuando abierto) -->
+          <span class="hamburger" aria-hidden="true">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </span>
         </button>
 
-        <ul id="mainMenu" class="menu" role="menubar" aria-label="Menú principal">
+        <!-- Menú principal -->
+        <nav id="mainMenu" class="main-nav" role="navigation" aria-label="Menú principal" hidden>
+          <ul class="menu" role="menubar">
             <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
             <li role="none"><a role="menuitem" aria-current="page" href="#">Servicios</a></li>
             <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
             <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
-        </ul>
-    </nav>
+            <!-- Ejemplo de acción en header (login) -->
+            <li role="none"><a role="menuitem" href="../login.html" class="btn-login" aria-label="Iniciar sesión">Iniciar sesión</a></li>
+          </ul>
+        </nav>
+
+      </div>
+    </header>
 
     <!-- MAIN -->
     <main id="main" tabindex="-1">
@@ -48,17 +69,14 @@
 
       <!-- SERVICES GRID -->
       <section class="services-grid" aria-label="Servicios que ofrecemos">
-
-          <!-- PUBLICIDAD -->
+          <!-- (tus artículos de servicio tal cual los tienes) -->
           <article class="service-card publicidad" role="button" tabindex="0" aria-pressed="false" aria-label="Publicidad y contenido">
               <div class="card-media">
                   <i class="fa-solid fa-bullhorn card-icon" aria-hidden="true"></i>
               </div>
-
               <div class="card-body">
                   <h3 class="card-title">Publicidad &amp; Contenido</h3>
                   <p class="card-lead">Publicidad empresarial, videos y diseño gráfico.</p>
-
                   <ul class="card-features">
                       <li>Publicidad Empresarial</li>
                       <li>Publicidad para Eventos</li>
@@ -69,16 +87,13 @@
               </div>
           </article>
 
-          <!-- EVENTOS -->
           <article class="service-card eventos" role="button" tabindex="0" aria-pressed="false" aria-label="Eventos y decoración">
               <div class="card-media">
                   <i class="fa-solid fa-calendar-days card-icon" aria-hidden="true"></i>
               </div>
-
               <div class="card-body">
                   <h3 class="card-title">Eventos &amp; Decoración</h3>
                   <p class="card-lead">Decoraciones y temáticas personalizadas.</p>
-
                   <ul class="card-features">
                       <li>Decoración de Cumpleaños</li>
                       <li>Temáticas Personalizadas</li>
@@ -87,16 +102,13 @@
               </div>
           </article>
 
-          <!-- TECNOLOGÍA -->
           <article class="service-card tecnologia" role="button" tabindex="0" aria-pressed="false" aria-label="Tecnología y desarrollo">
               <div class="card-media">
                   <i class="fa-solid fa-code card-icon" aria-hidden="true"></i>
               </div>
-
               <div class="card-body">
                   <h3 class="card-title">Tecnología &amp; Desarrollo</h3>
                   <p class="card-lead">Software, sistemas y automatizaciones.</p>
-
                   <ul class="card-features">
                       <li>Desarrollo de Software</li>
                       <li>Programación de Sistemas</li>
@@ -106,16 +118,13 @@
               </div>
           </article>
 
-          <!-- HARDWARE -->
           <article class="service-card hardware" role="button" tabindex="0" aria-pressed="false" aria-label="Hardware y mantenimiento">
               <div class="card-media">
                   <i class="fa-solid fa-computer card-icon" aria-hidden="true"></i>
               </div>
-
               <div class="card-body">
                   <h3 class="card-title">Hardware &amp; Mantenimiento</h3>
                   <p class="card-lead">Reparación, mantenimiento y optimización.</p>
-
                   <ul class="card-features">
                       <li>Montaje de Equipos</li>
                       <li>Mantenimiento Preventivo</li>
@@ -125,16 +134,13 @@
               </div>
           </article>
 
-          <!-- SEGURIDAD -->
           <article class="service-card seguridad" role="button" tabindex="0" aria-pressed="false" aria-label="Seguridad y soporte">
               <div class="card-media">
                   <i class="fa-solid fa-shield-halved card-icon" aria-hidden="true"></i>
               </div>
-
               <div class="card-body">
                   <h3 class="card-title">Seguridad &amp; Soporte</h3>
                   <p class="card-lead">Protección digital y soporte técnico.</p>
-
                   <ul class="card-features">
                       <li>Seguridad Digital</li>
                       <li>Copias de Respaldo</li>
@@ -143,11 +149,11 @@
                   </ul>
               </div>
           </article>
-
       </section>
 
     </main>
 
-    <script src="script.js"></script>
+    <!-- Enlaza el mismo script.js genérico que controlarás para todas las páginas -->
+    <script src="script.js" defer></script>
 </body>
 </html>
