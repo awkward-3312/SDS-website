@@ -11,74 +11,48 @@
 
 <body>
 
-  <!-- APP SHELL: panel admin -->
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Barra lateral">
-      <div class="brand">
-        <h2>Warehouse Admin</h2>
-        <small>Inventario &amp; Catálogo</small>
+  <!-- Topbar simple (reemplaza la sidebar) -->
+  <header class="topbar main-topbar" role="banner" aria-label="Barra superior">
+    <div class="topbar-left">
+      <h1>Productos</h1>
+      <div class="meta">Panel Administrativo</div>
+    </div>
+
+    <!-- Area de sesión / toggles -->
+    <div class="topbar-right" id="auth-area" aria-live="polite">
+      <div class="view-toggles" role="toolbar" aria-label="Controles de vista" style="display:flex;gap:8px;align-items:center">
+        <button id="toggle-compact" class="btn-ghost" aria-pressed="false" title="Modo compacto" type="button">Compacto</button>
+        <button id="toggle-table" class="btn-ghost" aria-pressed="false" title="Vista tabla" type="button">Tabla</button>
+      </div>
+      <!-- admin.js rellenará info de sesión aquí -->
+    </div>
+  </header>
+
+  <main class="main main-full" id="main-content" role="main">
+    <section class="controls" aria-label="Controles de productos">
+      <div class="left-controls">
+        <button id="refresh" class="btn" type="button">Refrescar</button>
+        <button id="new-product" class="btn primary" type="button">+ Nuevo producto</button>
       </div>
 
-      <nav class="menu" role="navigation" aria-label="Menú principal">
-        <button id="nav-products" class="menu-item active" aria-pressed="true">Productos</button>
-        <button id="nav-imports" class="menu-item" aria-pressed="false">Importaciones</button>
-        <button id="nav-history" class="menu-item" aria-pressed="false">Historial</button>
-        <button id="nav-users" class="menu-item" aria-pressed="false">Usuarios</button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div id="admin-info" class="admin-info">
-          <div id="admin-name" aria-live="polite">—</div>
-          <button id="sign-out" class="btn-ghost" type="button">Salir</button>
-        </div>
+      <div class="right-controls">
+        <input id="search" type="search" placeholder="Buscar por título, sku..." aria-label="Buscar productos" />
+        <select id="filter-category" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+        </select>
       </div>
-    </aside>
+    </section>
 
-    <main class="main" id="main-content">
-      <header class="topbar">
-        <div class="topbar-left">
-          <h1>Productos</h1>
-          <div class="meta">Panel Administrativo</div>
-        </div>
+    <section id="product-list" class="product-list" aria-label="Listado de productos">
+      <div class="empty-state">No hay productos (pulsa "Refrescar")</div>
+    </section>
 
-        <!-- Topbar right: toggles + auth area -->
-        <div class="topbar-right" id="auth-area">
-          <!-- Vista / compact toggles -->
-          <div class="view-toggles" role="toolbar" aria-label="Controles de vista" style="display:flex;gap:8px;align-items:center">
-            <button id="toggle-compact" class="btn-ghost" aria-pressed="false" title="Modo compacto" type="button">Compacto</button>
-            <button id="toggle-table" class="btn-ghost" aria-pressed="false" title="Vista tabla" type="button">Tabla</button>
-          </div>
-          <!-- admin.js rellenará info de sesión aquí -->
-        </div>
-      </header>
+    <footer class="footer" role="contentinfo">
+      <small>Panel Admin — Warehouse</small>
+    </footer>
+  </main>
 
-      <section class="controls" aria-label="Controles de productos">
-        <div class="left-controls">
-          <button id="refresh" class="btn" type="button">Refrescar</button>
-          <button id="new-product" class="btn primary" type="button">+ Nuevo producto</button>
-        </div>
-
-        <div class="right-controls">
-          <input id="search" type="search" placeholder="Buscar por título, sku..." aria-label="Buscar productos" />
-          <select id="filter-category" aria-label="Filtrar por categoría">
-            <option value="">Todas las categorías</option>
-          </select>
-        </div>
-      </section>
-
-      <section id="product-list" class="product-list" aria-label="Listado de productos">
-        <div class="empty-state">No hay productos (pulsa "Refrescar")</div>
-      </section>
-
-      <footer class="footer">
-        <small>Panel Admin — Warehouse </small>
-      </footer>
-    </main>
-  </div>
-
-  <!-- Modal / Drawer para crear/editar producto
-       Oculto por defecto con hidden. Al abrir, quitar hidden y poner aria-modal="true".
-  -->
+  <!-- Modal / Drawer para crear/editar producto -->
   <div id="modal" class="modal" hidden role="dialog" aria-labelledby="modal-title" aria-modal="false">
     <div class="modal-panel" role="document">
       <header class="modal-header">
@@ -125,15 +99,12 @@
         <fieldset class="uploader" aria-label="Uploader de imagen principal">
           <legend>Imagen principal</legend>
 
-          <!-- Filename editable (mantiene id image-name) -->
           <div class="form-row">
             <label for="image-name">Nombre del archivo (editable)</label>
             <input id="image-name" name="image_name" type="text" placeholder="camisa-blanca.png" aria-label="Nombre del archivo (editable)" autocomplete="off">
           </div>
 
-          <!-- Dropzone / preview / controls -->
           <div id="uploader-dropzone" class="uploader-dropzone" role="button" tabindex="0" aria-label="Seleccionar o arrastrar imagen">
-            <!-- Column 1: icon -->
             <div class="uploader-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48" aria-hidden="true">
                 <path d="M7 10V9C7 6.23858 9.23858 4 12 4 14.7614 4 17 6.23858 17 9V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -142,7 +113,6 @@
               </svg>
             </div>
 
-            <!-- Column 2: info + preview -->
             <div class="uploader-info">
               <div class="muted" style="margin-bottom:8px;">JPG, PNG, WEBP — máximo 5MB. Arrastra o haz click.</div>
 
@@ -165,7 +135,6 @@
               </div>
             </div>
 
-            <!-- Column 3: hidden file input (keeps id image-file) -->
             <input id="image-file" name="image_file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
           </div>
         </fieldset>

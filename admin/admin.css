@@ -34,14 +34,13 @@ body{
   transition: background .25s ease;
 }
 
-/* ---------- App shell ---------- */
+/* ---------- App shell (sin sidebar) ---------- */
+/* Ahora .app-shell actúa como contenedor centrado para el topbar + main */
 .app-shell{
-  display:grid;
-  grid-template-columns: 260px 1fr;
-  gap:20px;
+  display:block;
   max-width:var(--max-width);
   margin:0 auto;
-  align-items:start;
+  padding:0 12px;
 }
 
 /* Ocultar app-shell completamente cuando aria-hidden=true (auth-gate) */
@@ -49,7 +48,7 @@ body{
   display: none !important;
 }
 
-/* Compact mode (more items per screen) */
+/* Compact mode tweaks (keeps compact behavior for cards) */
 .app-shell.compact {
   gap:12px;
 }
@@ -58,53 +57,32 @@ body{
 .app-shell.compact .card-title{font-size:14px}
 .app-shell.compact .product-list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
 
-/* ---------- Sidebar ---------- */
-.sidebar{
-  background: linear-gradient(180deg,#081226,#071226);
-  border-radius:var(--radius);
-  padding:18px;
-  box-shadow:var(--shadow-1);
-  min-height: calc(100vh - 40px);
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-
-.brand h2{margin:0;font-size:18px;letter-spacing:0.2px}
-.brand small{color:var(--muted);font-size:12px}
-
-.menu{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.menu-item{
-  background:transparent;
-  color:var(--text);
-  border:0;padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;font-size:14px;
-  display:flex;align-items:center;gap:10px;
-}
-.menu-item svg{opacity:0.9}
-.menu-item.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042029;font-weight:600;box-shadow:0 6px 18px rgba(0,167,198,0.08)}
-
-.sidebar-footer{margin-top:auto}
-.admin-info{display:flex;flex-direction:column;gap:8px}
-.admin-info #admin-name{font-size:13px;color:var(--muted)}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--text);cursor:pointer}
-
 /* ---------- Main content ---------- */
 .main{
   padding:18px;
   border-radius:var(--radius);
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  min-height: calc(100vh - 40px);
+  min-height: calc(100vh - 80px);
   box-shadow: var(--shadow-1);
   display:flex;
   flex-direction:column;
   gap:12px;
 }
 
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+/* Topbar (simple, centered header) */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px 6px;
+  border-radius:8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  border:1px solid rgba(255,255,255,0.02);
+}
 .topbar-left h1{margin:0;font-size:20px}
 .topbar-left .meta{color:var(--muted);font-size:13px}
 .topbar-right{display:flex;gap:8px;align-items:center}
-.topbar-right input[type="email"]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
 
 /* ---------- Controls ---------- */
 .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px}
@@ -123,14 +101,28 @@ input:focus, textarea:focus, select:focus{outline:2px solid var(--focus-ring); b
 .chip{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);cursor:pointer;font-size:13px;color:var(--muted)}
 
 /* ---------- Product list / cards ---------- */
-.product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:8px}
+.product-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+  gap:18px;
+  margin-top:8px;
+  align-items:start;
+}
+
 .card{
   background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-  border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(255,255,255,0.02);
+  border-radius:10px;
+  padding:12px;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  border:1px solid rgba(255,255,255,0.02);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
   min-height:110px;
 }
-.card-media{width:120px;height:96px;flex:0 0 120px;border-radius:8px;overflow:hidden;background:var(--glass-2);display:flex;align-items:center;justify-content:center}
+.card-media{
+  width:120px;height:96px;flex:0 0 120px;border-radius:8px;overflow:hidden;background:var(--glass-2);display:flex;align-items:center;justify-content:center;
+}
 .card-media img{width:100%;height:100%;object-fit:cover;display:block}
 .card-body{flex:1;display:flex;flex-direction:column;gap:8px}
 .card-title{margin:0;font-size:16px}
@@ -139,8 +131,8 @@ input:focus, textarea:focus, select:focus{outline:2px solid var(--focus-ring); b
 .meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .card-actions{display:flex;gap:8px;align-items:center}
 
-/* ---------- HIDE leftover numeric input if it somehow remains rendered ----------
-   This ensures the UI shows only the badge + edit flow.
+/* ---------- Ensure no leftover numeric inputs are visible ----------
+   inline stock editing was removed from cards; editing happens in modal.
 */
 .stock-input{display:none !important; visibility:hidden !important;}
 
@@ -236,8 +228,7 @@ textarea{resize:vertical}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 980px){
-  .app-shell{grid-template-columns:1fr; padding-bottom:40px}
-  .sidebar{min-height:auto;order:2}
+  .app-shell{padding-bottom:40px}
   .main{order:1}
   .product-list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .product-list.table-view .card-body{grid-template-columns: 1fr 90px 110px 110px}
@@ -266,8 +257,8 @@ input::placeholder, textarea::placeholder{color:rgba(255,255,255,0.18)}
 .swal2-success-ring, .swal2-success-circle, .swal2-icon.swal2-success { filter: drop-shadow(0 8px 20px rgba(57,161,106,0.18)); }
 
 /* ---------- Extra helpers for developers ---------- */
-/* Utility to dim the sidebar when heavy modal displayed */
-.app-shell.dimmed .sidebar { opacity: 0.85; filter: blur(0.2px) }
+/* Dim effect for heavy modal or focus states (if you want to toggle it) */
+.app-shell.dimmed .main { opacity: 0.95; filter: blur(0.2px) }
 
 /* ========== Uploader dropzone & topbar toggles ========== */
 

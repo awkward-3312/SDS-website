@@ -361,7 +361,6 @@ function renderProductCard(p) {
       <div class="card-actions" role="group" aria-label="Acciones producto ${safeTitle}">
         <button data-edit="${p.id}" class="btn-ghost" type="button">Editar</button>
         <button data-delete="${p.id}" class="btn-ghost danger" type="button">Eliminar</button>
-        <button data-history="${p.id}" class="btn-ghost" type="button">Historial</button>
       </div>
     </div>
   `
@@ -730,12 +729,11 @@ if (productForm) {
   })
 }
 
-/* ========== Delete / Edit / History handlers ========== */
+/* ========== Delete / Edit handlers ========== */
 if (productListEl) {
   productListEl.addEventListener('click', async (ev) => {
     const editId = ev.target.dataset?.edit
     const deleteId = ev.target.dataset?.delete
-    const histId = ev.target.dataset?.history
 
     if (editId) {
       const { data, error } = await supabase.from('products').select('*').eq('id', editId).single()
@@ -766,17 +764,6 @@ if (productListEl) {
       } catch (err) {
         console.error('delete error', err)
         toast('Error eliminando', 'danger')
-      }
-    } else if (histId) {
-      const { data, error } = await supabase.from('inventory_movements').select('*').eq('product_id', histId).order('created_at', { ascending: false }).limit(50)
-      if (error) { toast('Error cargando historial', 'danger'); return }
-      // show a minimal modal with history (could be improved)
-      if (Swal) {
-        const html = (data || []).map(r => `<div style="margin-bottom:8px"><strong>${r.change}</strong> — ${new Date(r.created_at).toLocaleString()} <div class="muted">${escapeHtml(r.note||'')}</div></div>`).join('') || '<div class="muted">No hay movimientos</div>'
-        Swal.fire({ title: 'Historial', html, width: 700, icon: 'info' })
-      } else {
-        console.table(data || [])
-        toast('Historial cargado en consola (implementar UI)', 'info')
       }
     }
   })
