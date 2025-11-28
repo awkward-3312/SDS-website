@@ -7,7 +7,6 @@
     --gris-texto: #333;
     --blanco: #fff;
 
-    /* Nuevas variables */
     --card-radius: 14px;
     --card-shadow: 0 8px 30px rgba(9, 30, 66, 0.06);
     --gap: 24px;
@@ -27,60 +26,204 @@
     -moz-osx-font-smoothing:grayscale;
 }
 
-/* NAVBAR */
-.navbar {
-    width: 100%;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--blanco);
-    position: sticky;
-    top: 0;
-    z-index: 60;
+/* Util — ocultar accesible (skip link) */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  border: 0; padding: 0; margin: -1px;
+}
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 999;
+  background: var(--blanco);
+  color: var(--gris-texto);
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform .18s ease, opacity .18s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  clip: auto;
+  height: auto; width: auto;
+  overflow: visible;
+  white-space: normal;
+  position: relative;
 }
 
+/* ========== HEADER / NAV (compatibilidad .navbar y .site-header) ========== */
+
+/* viejo: .navbar | nuevo: .site-header + .header-inner */
+.navbar,
+.site-header {
+  width: 100%;
+  background: var(--blanco);
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Si usas la estructura antigua .navbar, mantenemos padding similar */
+.navbar { padding: 20px 40px; }
+.header-inner { display:flex; align-items:center; justify-content:space-between; gap:var(--gap); padding:18px 0; }
+
+/* Brand / logo (compatibilidad) */
+.brand, .navbar > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
 .logo {
-    height: 60px;
+  display: block;
+  height: 56px;
+  width: auto;
 }
 
+/* Menú clásico (compatibilidad .menu) — desktop layout */
 .menu {
-    list-style: none;
-    display: flex;
-    gap: 25px;
+  list-style: none;
+  display: flex;
+  gap: 25px;
+  align-items: center;
 }
-
 .menu a {
-    text-decoration: none;
-    color: var(--gris-texto);
-    font-weight: 500;
-    transition: color var(--transition) ease;
+  text-decoration: none;
+  color: var(--gris-texto);
+  font-weight: 500;
+  padding: 8px 6px;
+  transition: color var(--transition) ease;
+  border-radius: 6px;
 }
-
 .menu a:hover,
 .menu a:focus {
-    color: var(--cian);
-    outline: none;
+  color: var(--cian);
+  outline: none;
 }
 
-/* HERO */
+/* Botón destacado (login etc) */
+.menu .btn-login,
+.menu .btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: linear-gradient(90deg,var(--cian), var(--azul-fondo));
+  color: var(--blanco);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ========== HAMBURGER (nuevo reusable) ========== */
+.nav-toggle {
+  display: none; /* visible en mobile por media query */
+  background: transparent;
+  border: 0;
+  padding: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  z-index: 140;
+}
+
+/* estructura de 3 barras */
+.hamburger {
+  display: inline-block;
+  width: 28px;
+  height: 18px;
+  position: relative;
+}
+.hamburger .bar {
+  display: block;
+  position: absolute;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--gris-texto);
+  border-radius: 2px;
+  transition: transform .28s cubic-bezier(.2,.9,.2,1), opacity .18s ease, top .18s ease;
+}
+.hamburger .bar:nth-child(1) { top: 0; }
+.hamburger .bar:nth-child(2) { top: calc(50% - 1px); }
+.hamburger .bar:nth-child(3) { top: calc(100% - 2px); }
+
+/* estado abierto: convertimos en X */
+.nav-toggle.is-open .hamburger .bar:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.nav-toggle.is-open .hamburger .bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(.8);
+}
+.nav-toggle.is-open .hamburger .bar:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* main-nav: layout y comportamiento (desktop first) */
+.main-nav { display: block; }
+.main-nav[hidden] { /* si usamos hidden por JS, desktop lo ignora más abajo */ display: none; }
+
+/* ========== MOBILE ========== */
+@media (max-width: 880px) {
+  /* mostrar boton hamburger */
+  .nav-toggle { display:inline-flex; }
+
+  /* Si usas .navbar (viejo) adaptamos layout: escondemos el menu inline */
+  .navbar > .menu { display: none; }
+
+  /* reusable main-nav pasa a ser panel flotante */
+  .main-nav {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    z-index: 130;
+  }
+  /* nav oculto con hidden */
+  .main-nav[hidden] { display: none !important; }
+
+  /* panel visual del menu */
+  .main-nav ul.menu {
+    flex-direction: column;
+    gap: 10px;
+    background: var(--blanco);
+    min-width: 220px;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.06);
+    animation: fadeMenu .22s ease;
+  }
+  .main-nav.open ul.menu { display:flex; }
+
+  .main-nav ul.menu a { display:block; padding:10px 12px; width:100%; }
+}
+
+/* Si por alguna razón el menu antiguo (.menu) necesita mostrarse en desktop */
+@media (min-width: 881px) {
+  .main-nav[hidden] { display:block; } /* asegúrate de que en desktop se muestre */
+  .navbar > .menu { display:flex; }    /* restaurar antiguo comportamiento */
+}
+
+/* bloqueo scroll cuando menu abierto (script añade .nav-open a html/body) */
+html.nav-open, body.nav-open { overflow:hidden; height:100%; }
+
+/* ========== CONTACT / HERO / GRID / TARJETAS ========== */
 .contact-hero {
     padding: 70px 40px;
     background: linear-gradient(135deg, var(--rojo), var(--cian));
     color: var(--blanco);
     text-align: center;
 }
-
 .contact-hero h1 {
     font-size: 46px;
     font-weight: 800;
     margin-bottom: 8px;
 }
-
-.contact-hero p {
-    font-size: 18px;
-    opacity: 0.95;
-}
+.contact-hero p { font-size: 18px; opacity: 0.95; }
 
 /* MAIN GRID */
 .contact-container {
@@ -99,11 +242,8 @@
     border-radius: var(--card-radius);
     box-shadow: var(--card-shadow);
 }
-
 .contact-form h2 { margin-bottom: 15px; }
-
-.contact-form input,
-.contact-form textarea {
+.contact-form input, .contact-form textarea {
     width: 100%;
     padding: 12px;
     margin-bottom: 12px;
@@ -112,7 +252,7 @@
     font-size: 15px;
 }
 
-/* Botón básico (base para todos) */
+/* Botones */
 .btn {
     background: var(--cian);
     color: var(--blanco);
@@ -128,89 +268,26 @@
     align-items: center;
     justify-content: center;
 }
-
 .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 .btn:active { transform: translateY(0); }
 .btn:focus { outline: 3px solid rgba(0,167,198,0.18); outline-offset: 2px; }
 
-/* INFO CARD y MAPA (nuevos estilos) */
-.contact-info-map {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: var(--gap);
-    align-items: start;
-}
-
-/* En pantallas pequeñas, apila */
-@media (max-width: 980px) {
-    .contact-info-map { grid-template-columns: 1fr; padding: 0 20px; }
-}
-
-/* Tarjeta de información */
-.contact-info-card {
-    background: var(--blanco);
-    padding: 22px;
-    border-radius: var(--card-radius);
-    box-shadow: var(--card-shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.contact-info-card h2 {
-    font-size: 22px;
-    margin-bottom: 6px;
-    color: var(--gris-texto);
-}
-
-.contact-info-card p {
-    color: var(--gris-texto);
-    font-size: 15px;
-    line-height: 1.5;
-}
-
-.contact-info-card a {
-    color: var(--cian);
-    text-decoration: none;
-}
-.contact-info-card a:hover,
-.contact-info-card a:focus { text-decoration: underline; }
-
-/* Iconos FontAwesome dentro de la tarjeta */
-.contact-info-card i {
-    margin-right: 10px;
-    color: var(--cian);
-    width: 20px;
-    text-align: center;
-    font-size: 18px;
-}
-
-/* Acciones dentro de la tarjeta (botones) */
-.contact-actions {
-    margin-top: 8px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* Botón primario (único CTA) */
 .btn-primary {
     background: var(--cian);
     color: var(--blanco);
-    padding: 12px 20spx;
+    padding: 12px 20px;
     border-radius: 10px;
     display: inline-flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     border: none;
     text-decoration: none;
     font-weight: 800;
     min-width: 220px;
     box-shadow: 0 8px 22px rgba(0,0,0,0.08);
-  }
-  .btn-primary .btn-text { color: var(--blanco); }  
+}
+.btn-primary .btn-text { color: var(--blanco); }
 
-/* Botón outline (si en algún otro lugar lo usas) */
 .btn-outline {
     background: transparent;
     border: 1px solid #e6e6e6;
@@ -220,25 +297,42 @@
     cursor: pointer;
     transition: background var(--transition), border-color var(--transition), transform var(--transition);
 }
-
 .btn-outline:hover { background: #fafafa; border-color: #ddd; transform: translateY(-2px); }
 .btn-outline:focus { outline: 3px solid rgba(0,0,0,0.06); outline-offset: 2px; }
 
-/* Alineación del icono dentro del botón */
 .icon-btn { gap: 10px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .icon-btn i { font-size: 18px; width: 20px; text-align: center; color: #fff; }
-
-/* Hacer que el CTA tenga ancho mínimo coherente */
 .contact-actions .btn { min-width: 220px; }
 
-/* Tarjeta del mapa */
-.contact-map-card {
+/* INFO CARD y MAPA */
+.contact-info-map {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: var(--gap);
+    align-items: start;
+}
+@media (max-width: 980px) {
+    .contact-info-map { grid-template-columns: 1fr; padding: 0 20px; }
+}
+.contact-info-card {
+    background: var(--blanco);
+    padding: 22px;
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
+.contact-info-card h2 { font-size: 22px; margin-bottom: 6px; color: var(--gris-texto); }
+.contact-info-card p { color: var(--gris-texto); font-size: 15px; line-height: 1.5; }
+.contact-info-card a { color: var(--cian); text-decoration: none; }
+.contact-info-card a:hover, .contact-info-card a:focus { text-decoration: underline; }
 
-/* MAPA: tarjeta, proporción y estilo */
+.contact-info-card i { margin-right: 10px; color: var(--cian); width: 20px; text-align: center; font-size: 18px; }
+.contact-actions { margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* MAP */
+.contact-map-card { display:flex; flex-direction:column; gap:10px; }
 .map-wrapper {
     border-radius: 12px;
     overflow: hidden;
@@ -246,58 +340,27 @@
     box-shadow: 0 14px 40px rgba(16, 30, 50, 0.06);
     border: 1px solid rgba(0,0,0,0.04);
     position: relative;
-    /* Responsive ratio: 62% => aprox 16:10 */
 }
-.map-wrapper::before {
-    content: "";
-    display: block;
-    padding-top: 62%;
-}
+.map-wrapper::before { content: ""; display:block; padding-top:62%; }
+.map-wrapper iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:0; display:block; }
 
-/* Ajuste del iframe para cubrir toda la tarjeta */
-.map-wrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Nota debajo del mapa */
-.map-note {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 6px;
-}
-
-/* Pequeños ajustes visuales extra */
-.contact-info-card .horarios {
-    margin-top: 8px;
-    color: var(--gris-texto);
-    font-size: 14px;
-}
-.contact-info-card .horarios p { margin: 4px 0; }
-
-/* Accesibilidad - foco y motion */
+/* Nota y accesibilidad */
+.map-note { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
 :focus { outline: none; }
 a:focus, button:focus { outline-offset: 3px; }
 
-/* Preferencias reduce-motion */
+/* reduce-motion */
 @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
 }
 
-/* Ajustes adicionales para pantallas muy pequeñas */
+/* very small screens */
 @media (max-width: 520px) {
     .contact-hero h1 { font-size: 32px; }
     .menu { gap: 12px; }
     .logo { height: 52px; }
     .map-wrapper { min-height: 220px; }
-    .map-wrapper::before { padding-top: 78%; } /* mapa más alto en móvil */
+    .map-wrapper::before { padding-top: 78%; }
     .contact-info-card { padding: 18px; }
     .contact-info-map { gap: 16px; padding-bottom: 20px; }
     .contact-actions { display:flex; flex-direction:column; gap:12px; }
