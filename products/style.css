@@ -124,7 +124,7 @@ html,body{ height:100%; background:#fff; color:var(--gris-texto); -webkit-font-s
 
 /* TARJETA - product-card */
 .product-card{
-  background:var(--blanco);
+  background:#E8F8FC;
   padding:18px;
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow-1);
