@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Gestión de Productos</title>
+
+  <link rel="stylesheet" href="admin.css">
+  <script type="module" defer src="admin.js"></script>
+</head>
+
+<body>
+
+  <!-- APP SHELL: solo el panel admin, sin login embebido -->
+  <div class="app-shell" aria-hidden="true">
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>Warehouse Admin</h2>
+        <small>Inventario &amp; Catálogo</small>
+      </div>
+
+      <nav class="menu" role="navigation" aria-label="Menú principal">
+        <button id="nav-products" class="menu-item active" aria-pressed="true">Productos</button>
+        <button id="nav-imports" class="menu-item" aria-pressed="false">Importaciones</button>
+        <button id="nav-history" class="menu-item" aria-pressed="false">Historial</button>
+        <button id="nav-users" class="menu-item" aria-pressed="false">Usuarios</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div id="admin-info" class="admin-info">
+          <div id="admin-name" aria-live="polite">—</div>
+          <button id="sign-out" class="btn-ghost">Salir</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1>Productos</h1>
+          <div class="meta">Admin panel — editar inventario y subir imágenes</div>
+        </div>
+
+        <!-- Topbar right: toggles + auth area -->
+        <div class="topbar-right" id="auth-area">
+          <!-- Vista / compact toggles -->
+          <div class="view-toggles" role="toolbar" aria-label="Controles de vista" style="display:flex;gap:8px;align-items:center">
+            <button id="toggle-compact" class="btn-ghost" aria-pressed="false" title="Modo compacto">Compacto</button>
+            <button id="toggle-table" class="btn-ghost" aria-pressed="false" title="Vista tabla">Tabla</button>
+          </div>
+          <!-- admin.js rellenará info de sesión aquí -->
+        </div>
+      </header>
+
+      <section class="controls">
+        <div class="left-controls">
+          <button id="refresh" class="btn">Refrescar</button>
+          <button id="new-product" class="btn primary">+ Nuevo producto</button>
+        </div>
+
+        <div class="right-controls">
+          <input id="search" type="search" placeholder="Buscar por título, sku..." aria-label="Buscar productos" />
+          <select id="filter-category" aria-label="Filtrar por categoría">
+            <option value="">Todas las categorías</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="product-list" class="product-list" aria-live="polite">
+        <div class="empty-state">No hay productos (pulsa "Refrescar")</div>
+      </section>
+
+      <footer class="footer">
+        <small>Panel Admin — Warehouse </small>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Modal / Drawer para crear/editar producto -->
+  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-panel" role="document">
+      <header class="modal-header">
+        <h2 id="modal-title">Nuevo producto</h2>
+        <button id="modal-close" class="btn-ghost" aria-label="Cerrar">✕</button>
+      </header>
+
+      <form id="product-form" class="modal-form" autocomplete="off">
+        <input type="hidden" name="id" id="product-id">
+
+        <div class="form-row">
+          <label for="title">Título *</label>
+          <input id="title" name="title" type="text" required placeholder="Camisa blanca">
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="sku">SKU</label>
+            <input id="sku" name="sku" type="text" placeholder="CAMISA-001">
+          </div>
+          <div>
+            <label for="category">Categoría</label>
+            <input id="category" name="category" type="text" placeholder="Ropa / Hombres">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="description">Descripción</label>
+          <textarea id="description" name="description" rows="3" placeholder="Descripción breve"></textarea>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="price">Precio *</label>
+            <input id="price" name="price" type="number" min="0" step="0.01" required placeholder="0.00">
+          </div>
+          <div>
+            <label for="stock">Stock *</label>
+            <input id="stock" name="stock" type="number" min="0" required placeholder="0">
+          </div>
+        </div>
+
+        <!-- ---------- Uploader mejorado (visual + accesible) ---------- -->
+        <fieldset class="uploader" aria-label="Uploader de imagen principal">
+          <legend>Imagen principal</legend>
+
+          <!-- Filename editable (mantiene id image-name) -->
+          <div class="form-row">
+            <label for="image-name">Nombre del archivo (editable)</label>
+            <input id="image-name" name="image_name" type="text" placeholder="camisa-blanca.png" aria-label="Nombre del archivo (editable)">
+          </div>
+
+          <!-- Dropzone / preview / controls -->
+          <div id="uploader-dropzone" class="uploader-dropzone" role="button" tabindex="0" aria-label="Seleccionar o arrastrar imagen">
+            <!-- Column 1: icon -->
+            <div class="uploader-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+                <path d="M7 10V9C7 6.23858 9.23858 4 12 4 14.7614 4 17 6.23858 17 9V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 12V21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 15L12 12L15 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <!-- Column 2: info + preview -->
+            <div class="uploader-info">
+              <div class="muted" style="margin-bottom:8px;">JPG, PNG, WEBP — máximo 5MB. Arrastra o haz click.</div>
+
+              <div class="preview-row" style="align-items:center;gap:12px">
+                <div class="preview" style="width:160px;height:110px;">
+                  <img id="img-preview" alt="Preview" src="" hidden>
+                  <div id="preview-placeholder" class="muted">No hay imagen seleccionada</div>
+                </div>
+
+                <div class="uploader-controls" style="flex:1;display:flex;flex-direction:column;gap:8px">
+                  <div id="upload-status" class="muted">Estado: idle</div>
+                  <div id="upload-error" class="error" hidden></div>
+                  <div id="upload-success" class="success" hidden></div>
+
+                  <div class="uploader-actions">
+                    <button id="auto-name" type="button" class="btn-ghost">Sugerir nombre</button>
+                    <button id="start-upload" type="button" class="btn primary">Subir imagen</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 3: hidden file input (keeps id image-file) -->
+            <input id="image-file" name="image_file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
+        </fieldset>
+
+        <div class="form-row">
+          <label for="image-filename">image_filename</label>
+          <input id="image-filename" name="image_filename" type="text" readonly placeholder="camisa-blanca.png">
+        </div>
+
+        <div class="form-row">
+          <label for="image-path">image_path</label>
+          <input id="image-path" name="image_path" type="text" readonly placeholder="products/CAMISA-001/camisa-blanca.png">
+        </div>
+
+        <div class="form-actions">
+          <button id="save-product" type="submit" class="btn primary">Guardar</button>
+          <button id="cancel" type="button" class="btn-ghost">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" hidden></div>
+  <div id="toast-root" aria-live="polite" class="toast-root"></div>
+
+</body>
+</html>

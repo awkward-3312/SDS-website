@@ -1,0 +1,117 @@
+// login.js
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+// === CONFIG: usa tus claves ===
+const SUPABASE_URL = 'https://rxerfllxwdalduuzndiv.supabase.co'
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// === DOM ===
+const form = document.getElementById('login-form')
+const username = document.getElementById('username')
+const password = document.getElementById('password')
+const btnSignin = document.getElementById('btn-signin')
+const statusEl = document.getElementById('status')
+
+// === Helpers ===
+function setStatus(msg, type = 'info') {
+  statusEl.textContent = msg
+  if (type === 'error') statusEl.style.color = '#ff6b6b'
+  else if (type === 'success') statusEl.style.color = '#7ee0b8'
+  else statusEl.style.color = '#e5e7eb'
+}
+
+// Si ya hay sesión → verificar admin y redirigir
+supabase.auth.getSession().then(async ({ data: { session } }) => {
+  if (!session) return
+
+  const user = session.user
+  if (!user) return
+
+  const { data, error } = await supabase
+    .from('admins')
+    .select('id,is_active')
+    .eq('id', user.id)
+    .single()
+
+  if (error || !data || data.is_active === false) {
+    await supabase.auth.signOut()
+    return
+  }
+
+  // Es admin → dentro del panel
+  window.location.href = 'admin.html'
+})
+
+// === Login submit ===
+form.addEventListener('submit', async (ev) => {
+  ev.preventDefault()
+  btnSignin.disabled = true
+  setStatus('Iniciando sesión...')
+
+  const email = username.value.trim()
+  const pwd = password.value.trim()
+
+  if (!email || !pwd) {
+    setStatus('Completa usuario y contraseña', 'error')
+    btnSignin.disabled = false
+    return
+  }
+
+  try {
+    // Login con email + password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pwd
+    })
+
+    if (error) {
+      setStatus('Credenciales incorrectas', 'error')
+      btnSignin.disabled = false
+      return
+    }
+
+    const user = data?.user
+    if (!user) {
+      setStatus('Error: usuario no encontrado', 'error')
+      btnSignin.disabled = false
+      return
+    }
+
+    // Validar que esté en tabla "admins" con is_active = true
+    const { data: adminRow, error: adminErr } = await supabase
+      .from('admins')
+      .select('id,is_active')
+      .eq('id', user.id)
+      .single()
+
+    if (adminErr || !adminRow) {
+      await supabase.auth.signOut()
+      setStatus('Acceso denegado (no es administrador)', 'error')
+      btnSignin.disabled = false
+      return
+    }
+
+    if (adminRow.is_active === false) {
+      await supabase.auth.signOut()
+      setStatus('Tu cuenta admin está desactivada', 'error')
+      btnSignin.disabled = false
+      return
+    }
+
+    // Login y permisos correctos
+    setStatus('Acceso correcto. Redirigiendo...', 'success')
+
+    setTimeout(() => {
+      window.location.href = 'admin.html'
+    }, 500)
+
+  } catch (err) {
+    console.error(err)
+    setStatus('Error inesperado: ' + err.message, 'error')
+  } finally {
+    btnSignin.disabled = false
+  }
+})

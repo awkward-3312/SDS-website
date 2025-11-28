@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Login</title>
+
+  <link rel="stylesheet" href="login.css">
+  <script type="module" defer src="login.js"></script>
+</head>
+
+<body>
+
+<div class="form-container">
+	<p class="title">Login</p>
+
+	<form id="login-form" class="form" autocomplete="on">
+
+		<div class="input-group">
+			<label for="username">Username</label>
+			<input type="text" name="username" id="username" placeholder="usuario o correo" required>
+		</div>
+
+		<div class="input-group">
+			<label for="password">Password</label>
+			<input type="password" name="password" id="password" placeholder="" required autocomplete="current-password">
+		</div>
+
+		<button id="btn-signin" class="sign" type="submit">Sign in</button>
+	</form>
+
+	<p id="status" class="status"></p>
+</div>
+
+</body>
+</html>
