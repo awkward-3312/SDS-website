@@ -14,96 +14,103 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar" id="navbar">
+  <!-- Skip link (accesibilidad): visible al enfocar con teclado -->
+  <a class="skip-link" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+    Ir al contenido
+  </a>
+
+  <!-- NAVBAR: landmark accesible -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
     <a href="index.html" class="brand">
       <img src="images/sds-logo.png" alt="Logotipo de Soluciones Digitales Seguras" class="logo">
     </a>
 
-    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
-      <span class="hamb"></span>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu" type="button">
+      <span class="hamb" aria-hidden="true"></span>
     </button>
 
-    <ul class="menu" id="mainMenu">
-      <li><a class="home-link" href="index.html">Inicio</a></li>
-      <li><a href="services/services.html">Servicios</a></li>
-      <li><a href="products/products.html">Productos</a></li>
-      <li><a href="contact/contact.html">Contacto</a></li>
+    <ul class="menu" id="mainMenu" role="menubar" aria-label="Menú principal">
+      <li role="none"><a class="home-link" role="menuitem" href="index.html">Inicio</a></li>
+      <li role="none"><a role="menuitem" href="services/services.html">Servicios</a></li>
+      <li role="none"><a role="menuitem" href="products/products.html">Productos</a></li>
+      <li role="none"><a role="menuitem" href="contact/contact.html">Contacto</a></li>
     </ul>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero">
+  <!-- MAIN / HERO -->
+  <main id="main" tabindex="-1">
+    <section class="hero">
 
-    <div class="hero-text">
-      <h1 class="reveal">Soluciones Digitales Seguras</h1>
+      <div class="hero-text">
+        <h1 class="reveal">Soluciones Digitales Seguras</h1>
 
-      <p class="reveal delay-1">
-        Protege, gestiona y optimiza tu mundo digital.
-      </p>
+        <p class="reveal delay-1">
+          Protege, gestiona y optimiza tu mundo digital.
+        </p>
 
-      <div class="buttons reveal delay-2">
-        <a href="services/services.html" class="btn btn-yellow" aria-label="Ver nuestros servicios">Ver Servicios</a>
-        <a href="products/products.html" class="btn btn-red" aria-label="Ver productos disponibles">Productos</a>
-      </div>
-    </div>
-
-    <!-- SLIDER ACCESIBLE -->
-    <div class="hero-slider reveal delay-3"
-         role="region"
-         aria-roledescription="Carrusel"
-         aria-label="Galería de productos destacados">
-
-      <!-- Controles accesibles -->
-      <button class="slider-control prev" aria-label="Imagen anterior">‹</button>
-      <button class="slider-control next" aria-label="Imagen siguiente">›</button>
-
-      <div class="slides-wrapper">
-
-        <div class="slide active" aria-hidden="false">
-            <img src="images/item-1.png"
-                 alt="Decoración temática de cumpleaños"
-                 loading="eager">
+        <div class="buttons reveal delay-2">
+          <a href="services/services.html" class="btn btn-yellow" aria-label="Ver nuestros servicios">Ver Servicios</a>
+          <a href="products/products.html" class="btn btn-red" aria-label="Ver productos disponibles">Productos</a>
         </div>
-
-        <div class="slide" aria-hidden="true">
-            <img src="images/item-2.png"
-                 alt="Producto promocional SDS"
-                 loading="lazy">
-        </div>
-
-        <div class="slide" aria-hidden="true">
-            <img src="images/item-3.png"
-                 alt="Accesorios personalizados"
-                 loading="lazy">
-        </div>
-
-        <div class="slide" aria-hidden="true">
-            <img src="images/item-4.png"
-                 alt="Artículo corporativo promocional"
-                 loading="lazy">
-        </div>
-
-        <div class="slide" aria-hidden="true">
-            <img src="images/item-5.png"
-                 alt="Regalo impreso personalizado"
-                 loading="lazy">
-        </div>
-
       </div>
 
-      <!-- Indicadores -->
-      <div class="slider-dots" role="tablist" aria-label="Selector de imagen">
-        <button role="tab" aria-selected="true" aria-label="Imagen 1"></button>
-        <button role="tab" aria-selected="false" aria-label="Imagen 2"></button>
-        <button role="tab" aria-selected="false" aria-label="Imagen 3"></button>
-        <button role="tab" aria-selected="false" aria-label="Imagen 4"></button>
-        <button role="tab" aria-selected="false" aria-label="Imagen 5"></button>
+      <!-- SLIDER ACCESIBLE -->
+      <div class="hero-slider reveal delay-3"
+           role="region"
+           aria-roledescription="Carrusel"
+           aria-label="Galería de productos destacados">
+
+        <!-- Controles accesibles -->
+        <button class="slider-control prev" aria-label="Imagen anterior" type="button">‹</button>
+        <button class="slider-control next" aria-label="Imagen siguiente" type="button">›</button>
+
+        <div class="slides-wrapper" aria-live="polite" aria-atomic="false">
+
+          <div class="slide active" aria-hidden="false">
+              <img src="images/item-1.png"
+                   alt="Decoración temática de cumpleaños"
+                   loading="eager">
+          </div>
+
+          <div class="slide" aria-hidden="true">
+              <img src="images/item-2.png"
+                   alt="Producto promocional SDS"
+                   loading="lazy">
+          </div>
+
+          <div class="slide" aria-hidden="true">
+              <img src="images/item-3.png"
+                   alt="Accesorios personalizados"
+                   loading="lazy">
+          </div>
+
+          <div class="slide" aria-hidden="true">
+              <img src="images/item-4.png"
+                   alt="Artículo corporativo promocional"
+                   loading="lazy">
+          </div>
+
+          <div class="slide" aria-hidden="true">
+              <img src="images/item-5.png"
+                   alt="Regalo impreso personalizado"
+                   loading="lazy">
+          </div>
+
+        </div>
+
+        <!-- Indicadores -->
+        <div class="slider-dots" role="tablist" aria-label="Selector de imagen">
+          <button role="tab" aria-selected="true" aria-label="Imagen 1" type="button"></button>
+          <button role="tab" aria-selected="false" aria-label="Imagen 2" type="button"></button>
+          <button role="tab" aria-selected="false" aria-label="Imagen 3" type="button"></button>
+          <button role="tab" aria-selected="false" aria-label="Imagen 4" type="button"></button>
+          <button role="tab" aria-selected="false" aria-label="Imagen 5" type="button"></button>
+        </div>
+
       </div>
 
-    </div>
-
-  </section>
+    </section>
+  </main>
 
   <script src="home/script.js"></script>
 </body>

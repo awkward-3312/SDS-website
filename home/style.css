@@ -10,7 +10,8 @@
   --container-padding: 40px;
 
   /* Accessibility & sizing */
-  --focus-ring: 3px;
+  --focus-ring-width: 3px;
+  --focus-ring-color: rgba(0,0,0,0.12);
   --btn-hit: 48px; /* mínimo área táctil */
   --transition-fast: .18s;
   --transition-medium: .35s;
@@ -30,7 +31,7 @@ img{max-width:100%;display:block;height:auto}
   padding:18px var(--container-padding);
   position:sticky;
   top:0;
-  z-index:60;
+  z-index:70; /* subido para que quede encima */
   background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
   transition:box-shadow var(--transition-fast) ease, backdrop-filter var(--transition-fast) ease;
   backdrop-filter: blur(2px);
@@ -52,10 +53,13 @@ img{max-width:100%;display:block;height:auto}
 .menu a:hover,
 .menu a:focus{ color:var(--cian); outline:none; }
 
+/* Make .menu.open act like .menu.show (compatibilidad entre variantes JS) */
+.menu.open{ display:flex }
+
 /* Improve keyboard focus visibility */
 :focus{ outline: none; }
 :focus-visible{
-  outline: var(--focus-ring) solid rgba(0,0,0,0.12);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: 3px;
   border-radius: 6px;
 }
@@ -68,6 +72,11 @@ img{max-width:100%;display:block;height:auto}
   cursor:pointer;
   padding:8px;
   line-height:0;
+  min-width: var(--btn-hit);
+  min-height: var(--btn-hit);
+  align-items:center;
+  justify-content:center;
+  z-index:80; /* encima del menu/hero */
 }
 .hamb{ display:block; width:26px; height:2px; background:var(--gris); position:relative; transition:background var(--transition-fast) }
 .hamb::before, .hamb::after{
@@ -112,8 +121,6 @@ img{max-width:100%;display:block;height:auto}
 .btn-yellow{ background:var(--amarillo); color:var(--gris) }
 .btn-red{ background:var(--rojo); color:var(--blanco) }
 
-/* make sure contrast is sufficient — if needed adjust --amarillo or text color */
-
 /* HERO IMAGE (legacy, kept for compatibility) */
 .hero-img img{
   width: 380px;
@@ -153,7 +160,7 @@ img{max-width:100%;display:block;height:auto}
   transition: opacity .8s ease-in-out, transform .6s cubic-bezier(.2,.8,.2,1);
   will-change: opacity, transform;
   transform: translateY(6px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); /* subtle backdrop to increase text contrast if overlayed */
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
 }
 
 /* visible slide */
@@ -173,7 +180,8 @@ img{max-width:100%;display:block;height:auto}
   display:block;
 }
 
-/* Skeleton / placeholder to avoid content shift while image loads */
+/* Skeleton / placeholder to avoid content shift while image loads
+   Note: JS removes the skeleton class when image has loaded; CSS kept minimal here. */
 .hero-slider .slide::before{
   content:"";
   position:absolute;
@@ -183,8 +191,6 @@ img{max-width:100%;display:block;height:auto}
   transition:opacity .35s;
   z-index:1;
 }
-.hero-slider img[loading="lazy"] + /* no reliable selector for load state in CSS, JS should remove placeholder on load */
-  .slide::before { opacity:0 } /* TODO: control via JS */
 
 /* CONTROLS: prev / next */
 .slider-control{
@@ -206,7 +212,7 @@ img{max-width:100%;display:block;height:auto}
   transition: background var(--transition-fast), transform var(--transition-fast);
   backdrop-filter: blur(3px);
 }
-.slider-control:focus-visible{ outline: var(--focus-ring) solid rgba(0,0,0,0.12); outline-offset:3px }
+.slider-control:focus-visible{ outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset:3px }
 .slider-control:hover{ transform: translateY(-50%) scale(1.03) }
 
 .slider-control.prev{ left:10px }
@@ -265,9 +271,12 @@ img{max-width:100%;display:block;height:auto}
     position:fixed; top:72px; right:12px; background:var(--blanco);
     flex-direction:column; padding:12px; gap:8px; border-radius:10px;
     box-shadow:0 10px 30px rgba(0,0,0,.12); display:none; min-width:200px;
+    z-index:75; /* asegurar encima del hero */
+    max-height: calc(100vh - 96px);
+    overflow:auto;
   }
   .menu.show{ display:flex }
-  .nav-toggle{ display:block }
+  .nav-toggle{ display:flex }
   .hamb{ background:transparent }
   .hamb::before{ transform:none; top:0 }
   .hamb::after{ transform:none; top:0 }
