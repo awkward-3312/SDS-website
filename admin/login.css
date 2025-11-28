@@ -1,5 +1,3 @@
-/* LOGIN — versión limpia sin recuperación ni redes */
-
 html, body {
     height: 100%;
     margin: 0;
@@ -13,9 +11,9 @@ html, body {
   /* Card */
   .form-container {
     width: 320px;
-    border-radius: 0.75rem;
+    border-radius: 0.80rem;
     background-color: rgba(17, 24, 39, 1);
-    padding: 2rem;
+    padding: 4rem;
     color: rgba(243, 244, 246, 1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   }
