@@ -24,12 +24,16 @@
     justify-content: space-between;
     align-items: center;
     background: var(--blanco);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .logo {
     height: 60px;
 }
 
+/* DESKTOP MENU */
 .menu {
     list-style: none;
     display: flex;
@@ -45,6 +49,93 @@
 
 .menu a:hover {
     color: var(--cian);
+}
+
+/* ────────────────────────────── */
+/* HAMBURGER BUTTON (mobile only) */
+/* ────────────────────────────── */
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 110;
+}
+
+.hamb {
+    width: 28px;
+    height: 3px;
+    background: var(--gris-texto);
+    position: relative;
+    transition: 0.3s ease;
+}
+
+.hamb::before,
+.hamb::after {
+    content: "";
+    width: 28px;
+    height: 3px;
+    background: var(--gris-texto);
+    position: absolute;
+    left: 0;
+    transition: 0.3s ease;
+}
+
+.hamb::before { top: -8px; }
+.hamb::after  { top: 8px; }
+
+/* Estado abierto */
+.nav-toggle.open .hamb {
+    background: transparent;
+}
+
+.nav-toggle.open .hamb::before {
+    transform: rotate(45deg);
+    top: 0;
+}
+
+.nav-toggle.open .hamb::after {
+    transform: rotate(-45deg);
+    top: 0;
+}
+
+/* MOBILE MENU */
+@media (max-width: 880px) {
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .menu {
+        position: fixed;
+        top: 80px;
+        right: 16px;
+        background: var(--blanco);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        display: none;
+        min-width: 210px;
+        animation: fadeMenu 0.25s ease;
+    }
+
+    .menu.open {
+        display: flex;
+    }
+
+    @keyframes fadeMenu {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .menu a {
+        padding: 8px 4px;
+        width: 100%;
+    }
 }
 
 /* HERO */
@@ -70,33 +161,11 @@
     padding: 60px 40px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
-
-/* ==== NEW SERVICE CARD SYSTEM ==== */
-
-/* --- Reset utilitario para screen readers --- */
-.sr-only {
-    position: absolute !important;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* --- GRID mejorado --- */
-.services-grid {
-    padding: 60px 40px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 32px;
 }
 
-/* --- TARJETAS --- */
+/* TARJETAS */
 .service-card {
-    --card-bg: #ffffff;
     --card-radius: 14px;
 
     display: flex;
@@ -122,7 +191,7 @@
     outline-offset: 3px;
 }
 
-/* --- ICONO DE LA IZQUIERDA --- */
+/* ICONO */
 .card-media {
     width: 60px;
     height: 60px;
@@ -142,7 +211,7 @@
     color: #222;
 }
 
-/* --- CONTENIDO DE LA TARJETA --- */
+/* CONTENIDO */
 .card-body {
     flex: 1;
     display: flex;
@@ -167,7 +236,7 @@
     margin-bottom: 6px;
 }
 
-/* --- COLORES SEGÚN CATEGORÍA EN ICONO (usando tu paleta) --- */
+/* COLORES DE CATEGORÍAS */
 .publicidad .card-media {
     background: linear-gradient(135deg, #f4ce44, #ffba0a);
 }
