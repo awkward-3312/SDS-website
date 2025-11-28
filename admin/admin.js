@@ -88,22 +88,6 @@ function debounce(fn, wait = 300) {
   }
 }
 
-/* ---------- APP SHELL reveal bug fix ---------- */
-const appShell = document.querySelector('.app-shell')
-if (appShell) {
-  // Only set aria-hidden if the attribute exists (don't blindly set it)
-  if (appShell.hasAttribute('aria-hidden')) {
-    appShell.setAttribute('aria-hidden', 'true')
-  } else {
-    // if it didn't exist, set it for initial hide (so revealApp can remove safely)
-    appShell.setAttribute('aria-hidden', 'true')
-  }
-}
-function revealApp() {
-  if (!appShell) return
-  if (appShell.hasAttribute('aria-hidden')) appShell.removeAttribute('aria-hidden')
-}
-
 /* ========== UI Elements (guarded) ========== */
 const authArea = $('auth-area')
 const signOutBtn = $('sign-out')
@@ -267,7 +251,9 @@ async function initAuth() {
     })
   }  
 
+  // reveal app (your HTML no longer hides app-shell by default)
   revealApp()
+
   // restore UI prefs (compact / table) before loading categories/products
   restoreUiPreferences()
   await loadCategories()
@@ -289,6 +275,16 @@ async function initAuth() {
     await loadCategories()
     await refreshProducts()
   })
+}
+
+/* ---------- APP SHELL reveal helper ----------
+   NOTE: removed the old behavior that forced aria-hidden at load.
+   We just expose a helper to remove aria-hidden when needed.
+*/
+const appShell = document.querySelector('.app-shell')
+function revealApp() {
+  if (!appShell) return
+  if (appShell.hasAttribute('aria-hidden')) appShell.removeAttribute('aria-hidden')
 }
 
 /* ========== Products CRUD & rendering ========== */
@@ -317,6 +313,9 @@ function stockBadgeClass(stock) {
   return 'badge-ok'
 }
 
+/* ---------- IMPORTANT: renderProductCard NO LONGER outputs the numeric input ----------
+   Only the visual stock badge is rendered. Editing stock is done inside the Edit modal.
+*/
 function renderProductCard(p) {
   const wrapper = document.createElement('div')
   wrapper.className = 'card'
@@ -330,10 +329,8 @@ function renderProductCard(p) {
   if (p.image_path && String(p.image_path).trim()) {
     filePath = p.image_path
   } else if (p.sku && p.image_filename) {
-    // si guardas filename separado y sku en tabla
     filePath = `products/${p.sku}/${p.image_filename}`
   } else if (p.sku && p.title) {
-    // intento heurístico: slug del título + png/jpeg fallback
     const slug = String(p.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     filePath = `products/${p.sku}/${slug}.png`
   }
@@ -357,15 +354,14 @@ function renderProductCard(p) {
       <p class="card-desc">${safeDesc}</p>
       <div class="meta">
         <div><strong>${formatCurrency ? formatCurrency(p.price) : ('$' + Number(p.price||0).toFixed(2))}</strong></div>
-        <div class="stock-wrap"><span class="stock-badge ${stockClass}">${p.stock}</span>
-          <label class="visually-hidden">Stock de ${safeTitle}</label>
-          <input data-id="${p.id}" aria-label="Editar stock ${safeTitle}" class="stock-input" type="number" value="${p.stock || 0}" style="width:80px;margin-left:8px">
+        <div class="stock-wrap" aria-hidden="false">
+          <span class="stock-badge ${stockClass}" aria-label="Stock ${p.stock}">${p.stock}</span>
         </div>
       </div>
       <div class="card-actions" role="group" aria-label="Acciones producto ${safeTitle}">
-        <button data-edit="${p.id}" class="btn-ghost">Editar</button>
-        <button data-delete="${p.id}" class="btn-ghost danger">Eliminar</button>
-        <button data-history="${p.id}" class="btn-ghost">Historial</button>
+        <button data-edit="${p.id}" class="btn-ghost" type="button">Editar</button>
+        <button data-delete="${p.id}" class="btn-ghost danger" type="button">Eliminar</button>
+        <button data-history="${p.id}" class="btn-ghost" type="button">Historial</button>
       </div>
     </div>
   `
@@ -413,7 +409,9 @@ function openModal(data = null) {
   modal.hidden = false
   modalOverlay.hidden = false
   modal.setAttribute('aria-hidden', 'false')
-  modal.focus?.()
+  // hide main app for AT / focus trap
+  if (appShell) appShell.setAttribute('aria-hidden', 'true')
+
   if (!data) {
     modalTitle && (modalTitle.textContent = 'Nuevo producto')
     productIdEl && (productIdEl.value = '')
@@ -462,6 +460,7 @@ function closeModal() {
   modal.hidden = true
   modalOverlay.hidden = true
   modal.setAttribute('aria-hidden', 'true')
+  if (appShell) appShell.removeAttribute('aria-hidden')
 }
 
 /* keyboard navigation for modal: Esc closes, ArrowLeft/Right navigate prev/next product when editing */
@@ -731,7 +730,7 @@ if (productForm) {
   })
 }
 
-/* ========== Delete / Edit / Stock inline handlers ========== */
+/* ========== Delete / Edit / History handlers ========== */
 if (productListEl) {
   productListEl.addEventListener('click', async (ev) => {
     const editId = ev.target.dataset?.edit
@@ -780,52 +779,6 @@ if (productListEl) {
         toast('Historial cargado en consola (implementar UI)', 'info')
       }
     }
-  })
-
-  /* stock inline change (debounced update by 400ms per input) */
-  const pendingStockUpdates = new Map()
-  productListEl.addEventListener('input', (ev) => {
-    if (!ev.target.classList.contains('stock-input')) return
-    const id = ev.target.dataset.id
-    const el = ev.target
-    // debounce per id
-    if (pendingStockUpdates.has(id)) clearTimeout(pendingStockUpdates.get(id).timer)
-    const previous = productsCache.find(p => p.id === id)?.stock || 0
-    const newValue = parseInt(el.value, 10) || 0
-    // temporary visual feedback
-    el.disabled = true
-    el.setAttribute('aria-busy', 'true')
-
-    const timer = setTimeout(async () => {
-      try {
-        // try atomic RPC
-        const { data, error } = await supabase.rpc('adjust_stock_atomic', {
-          p_product_id: id,
-          p_change: newValue - previous,
-          p_type: 'manual_adjust',
-          p_reason: 'Ajuste inline',
-          p_performed_by: (await supabase.auth.getUser()).data?.user?.id || null
-        })
-        if (error) throw error
-        toast('Stock actualizado (atomic)', 'success')
-      } catch (rpcErr) {
-        console.warn('RPC adjust_stock_atomic failed, fallback to update', rpcErr)
-        try {
-          const { error } = await supabase.from('products').update({ stock: newValue, updated_by: (await supabase.auth.getUser()).data?.user?.id || null }).eq('id', id)
-          if (error) throw error
-          toast('Stock actualizado', 'success')
-        } catch (err) {
-          toast('Error actualizando stock: ' + (err.message || JSON.stringify(err)), 'danger')
-        }
-      } finally {
-        el.disabled = false
-        el.removeAttribute('aria-busy')
-        pendingStockUpdates.delete(id)
-        await refreshProducts()
-      }
-    }, 450)
-
-    pendingStockUpdates.set(id, { timer })
   })
 }
 

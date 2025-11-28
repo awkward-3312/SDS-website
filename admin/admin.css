@@ -139,12 +139,16 @@ input:focus, textarea:focus, select:focus{outline:2px solid var(--focus-ring); b
 .meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .card-actions{display:flex;gap:8px;align-items:center}
 
-/* small input in card */
-.stock-input{padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);width:86px}
+/* ---------- HIDE leftover numeric input if it somehow remains rendered ----------
+   This ensures the UI shows only the badge + edit flow.
+*/
+.stock-input{display:none !important; visibility:hidden !important;}
 
-/* stock badge wrapper */
-.stock-wrap{display:flex;align-items:center;gap:8px}
-.stock-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 8px;border-radius:999px;font-weight:600;font-size:13px;color:#051617;min-width:44px;text-align:center}
+/* stock badge wrapper: tightened spacing to avoid gaps where input used to be */
+.stock-wrap{display:flex;align-items:center;gap:10px}
+
+/* stock badge visual */
+.stock-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;font-weight:600;font-size:13px;color:#051617;min-width:56px;text-align:center}
 .badge-ok{background:var(--badge-ok-bg);color:#eafff7}
 .badge-low{background:var(--badge-low-bg);color:#2b1200;animation: pulse-slow 2.6s infinite ease-in-out}
 .badge-out{background:var(--badge-out-bg);color:#fff;box-shadow:0 6px 14px rgba(228,87,87,0.12)}
@@ -248,9 +252,6 @@ textarea{resize:vertical}
 button:active{transform:translateY(1px)}
 input::placeholder, textarea::placeholder{color:rgba(255,255,255,0.18)}
 .btn-ghost.danger{border-color:rgba(228,87,87,0.18);color:var(--danger)}
-
-/* ---------- Card hover ---------- */
-.card:hover{transform:translateY(-4px);box-shadow:0 18px 46px rgba(2,6,23,0.6)}
 
 /* ---------- Accessibility tweaks ---------- */
 [role="dialog"]{outline: none}

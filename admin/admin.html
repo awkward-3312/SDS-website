@@ -11,9 +11,9 @@
 
 <body>
 
-  <!-- APP SHELL: solo el panel admin, sin login embebido -->
-  <div class="app-shell" aria-hidden="true">
-    <aside class="sidebar">
+  <!-- APP SHELL: panel admin -->
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Barra lateral">
       <div class="brand">
         <h2>Warehouse Admin</h2>
         <small>Inventario &amp; Catálogo</small>
@@ -29,33 +29,33 @@
       <div class="sidebar-footer">
         <div id="admin-info" class="admin-info">
           <div id="admin-name" aria-live="polite">—</div>
-          <button id="sign-out" class="btn-ghost">Salir</button>
+          <button id="sign-out" class="btn-ghost" type="button">Salir</button>
         </div>
       </div>
     </aside>
 
-    <main class="main">
+    <main class="main" id="main-content">
       <header class="topbar">
         <div class="topbar-left">
           <h1>Productos</h1>
-          <div class="meta">Admin panel — editar inventario y subir imágenes</div>
+          <div class="meta">Panel Administrativo</div>
         </div>
 
         <!-- Topbar right: toggles + auth area -->
         <div class="topbar-right" id="auth-area">
           <!-- Vista / compact toggles -->
           <div class="view-toggles" role="toolbar" aria-label="Controles de vista" style="display:flex;gap:8px;align-items:center">
-            <button id="toggle-compact" class="btn-ghost" aria-pressed="false" title="Modo compacto">Compacto</button>
-            <button id="toggle-table" class="btn-ghost" aria-pressed="false" title="Vista tabla">Tabla</button>
+            <button id="toggle-compact" class="btn-ghost" aria-pressed="false" title="Modo compacto" type="button">Compacto</button>
+            <button id="toggle-table" class="btn-ghost" aria-pressed="false" title="Vista tabla" type="button">Tabla</button>
           </div>
           <!-- admin.js rellenará info de sesión aquí -->
         </div>
       </header>
 
-      <section class="controls">
+      <section class="controls" aria-label="Controles de productos">
         <div class="left-controls">
-          <button id="refresh" class="btn">Refrescar</button>
-          <button id="new-product" class="btn primary">+ Nuevo producto</button>
+          <button id="refresh" class="btn" type="button">Refrescar</button>
+          <button id="new-product" class="btn primary" type="button">+ Nuevo producto</button>
         </div>
 
         <div class="right-controls">
@@ -66,7 +66,7 @@
         </div>
       </section>
 
-      <section id="product-list" class="product-list" aria-live="polite">
+      <section id="product-list" class="product-list" aria-label="Listado de productos">
         <div class="empty-state">No hay productos (pulsa "Refrescar")</div>
       </section>
 
@@ -76,30 +76,32 @@
     </main>
   </div>
 
-  <!-- Modal / Drawer para crear/editar producto -->
-  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+  <!-- Modal / Drawer para crear/editar producto
+       Oculto por defecto con hidden. Al abrir, quitar hidden y poner aria-modal="true".
+  -->
+  <div id="modal" class="modal" hidden role="dialog" aria-labelledby="modal-title" aria-modal="false">
     <div class="modal-panel" role="document">
       <header class="modal-header">
         <h2 id="modal-title">Nuevo producto</h2>
-        <button id="modal-close" class="btn-ghost" aria-label="Cerrar">✕</button>
+        <button id="modal-close" class="btn-ghost" type="button" aria-label="Cerrar">✕</button>
       </header>
 
-      <form id="product-form" class="modal-form" autocomplete="off">
+      <form id="product-form" class="modal-form" novalidate>
         <input type="hidden" name="id" id="product-id">
 
         <div class="form-row">
           <label for="title">Título *</label>
-          <input id="title" name="title" type="text" required placeholder="Camisa blanca">
+          <input id="title" name="title" type="text" required placeholder="Camisa blanca" autocomplete="off">
         </div>
 
         <div class="form-row two-col">
           <div>
             <label for="sku">SKU</label>
-            <input id="sku" name="sku" type="text" placeholder="CAMISA-001">
+            <input id="sku" name="sku" type="text" placeholder="CAMISA-001" autocomplete="off">
           </div>
           <div>
             <label for="category">Categoría</label>
-            <input id="category" name="category" type="text" placeholder="Ropa / Hombres">
+            <input id="category" name="category" type="text" placeholder="Ropa / Hombres" autocomplete="on">
           </div>
         </div>
 
@@ -111,11 +113,11 @@
         <div class="form-row two-col">
           <div>
             <label for="price">Precio *</label>
-            <input id="price" name="price" type="number" min="0" step="0.01" required placeholder="0.00">
+            <input id="price" name="price" type="number" min="0" step="0.01" required placeholder="0.00" autocomplete="off">
           </div>
           <div>
             <label for="stock">Stock *</label>
-            <input id="stock" name="stock" type="number" min="0" required placeholder="0">
+            <input id="stock" name="stock" type="number" min="0" required placeholder="0" autocomplete="off">
           </div>
         </div>
 
@@ -126,14 +128,14 @@
           <!-- Filename editable (mantiene id image-name) -->
           <div class="form-row">
             <label for="image-name">Nombre del archivo (editable)</label>
-            <input id="image-name" name="image_name" type="text" placeholder="camisa-blanca.png" aria-label="Nombre del archivo (editable)">
+            <input id="image-name" name="image_name" type="text" placeholder="camisa-blanca.png" aria-label="Nombre del archivo (editable)" autocomplete="off">
           </div>
 
           <!-- Dropzone / preview / controls -->
           <div id="uploader-dropzone" class="uploader-dropzone" role="button" tabindex="0" aria-label="Seleccionar o arrastrar imagen">
             <!-- Column 1: icon -->
             <div class="uploader-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48" aria-hidden="true">
                 <path d="M7 10V9C7 6.23858 9.23858 4 12 4 14.7614 4 17 6.23858 17 9V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M12 12V21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M9 15L12 12L15 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -169,12 +171,12 @@
         </fieldset>
 
         <div class="form-row">
-          <label for="image-filename">image_filename</label>
+          <label for="image-filename">Nombre archivo (lectura)</label>
           <input id="image-filename" name="image_filename" type="text" readonly placeholder="camisa-blanca.png">
         </div>
 
         <div class="form-row">
-          <label for="image-path">image_path</label>
+          <label for="image-path">Ruta de almacenamiento (lectura)</label>
           <input id="image-path" name="image_path" type="text" readonly placeholder="products/CAMISA-001/camisa-blanca.png">
         </div>
 
@@ -187,7 +189,7 @@
   </div>
 
   <div id="modal-overlay" class="modal-overlay" hidden></div>
-  <div id="toast-root" aria-live="polite" class="toast-root"></div>
+  <div id="toast-root" aria-live="polite" class="toast-root" role="status"></div>
 
 </body>
 </html>
