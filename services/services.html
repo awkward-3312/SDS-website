@@ -10,50 +10,35 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Estilos globales (usar el mismo style.css en todas las páginas) -->
+    <!-- Estilos globales -->
     <link rel="stylesheet" href="style.css" />
 </head>
 <body class="services-page">
 
-    <!-- Skip link para accesibilidad -->
+    <!-- Skip link -->
     <a class="skip-link visually-hidden" href="#main">Ir al contenido</a>
 
-    <!-- NAVBAR genérico (hamburger para móvil) -->
+    <!-- HEADER con nuevo NAVBAR -->
     <header class="site-header" role="banner">
-      <div class="container header-inner">
 
-        <!-- Logo / marca -->
-        <a class="brand" href="../index.html" aria-label="Inicio - SDS">
-          <img src="../images/sds-logo.png" alt="SDS" class="logo" />
+      <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+        <a class="brand" href="../index.html">
+          <img src="../images/sds-logo.png" alt="Soluciones Digitales Seguras (SDS)" class="logo">
         </a>
 
-        <!-- Botón hamburger (controla el menú en pantallas pequeñas) -->
-        <button
-          id="navToggle"
-          class="nav-toggle"
-          type="button"
-          aria-controls="mainMenu"
-          aria-expanded="false"
-          aria-label="Abrir menú principal">
-          <!-- Icono visual (usa CSS para transformar en X cuando abierto) -->
-          <span class="hamburger" aria-hidden="true">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
-          </span>
+        <!-- Botón hamburger -->
+        <button id="navToggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
+          <span class="hamb" aria-hidden="true"></span>
         </button>
 
-        <!-- Menú principal -->
-        <nav id="mainMenu" class="main-nav" role="navigation" aria-label="Menú principal" hidden>
-          <ul class="menu" role="menubar">
-            <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
-            <li role="none"><a role="menuitem" aria-current="page" href="#">Servicios</a></li>
-            <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
-            <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
-          </ul>
-        </nav>
+        <ul id="mainMenu" class="menu" role="menubar" aria-hidden="true">
+          <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
+          <li role="none"><a role="menuitem" aria-current="page" href="#">Servicios</a></li>
+          <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
+          <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
+        </ul>
+      </nav>
 
-      </div>
     </header>
 
     <!-- MAIN -->
@@ -67,7 +52,7 @@
 
       <!-- SERVICES GRID -->
       <section class="services-grid" aria-label="Servicios que ofrecemos">
-          <!-- (tus artículos de servicio tal cual los tienes) -->
+
           <article class="service-card publicidad" role="button" tabindex="0" aria-pressed="false" aria-label="Publicidad y contenido">
               <div class="card-media">
                   <i class="fa-solid fa-bullhorn card-icon" aria-hidden="true"></i>
@@ -151,7 +136,6 @@
 
     </main>
 
-    <!-- Enlaza el mismo script.js genérico que controlarás para todas las páginas -->
     <script src="script.js" defer></script>
 </body>
 </html>
