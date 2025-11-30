@@ -20,25 +20,25 @@
 
   <!-- NAVBAR unificado (misma estructura que products.html) -->
   <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
-    <!-- Brand / logo -->
+    <!-- Brand / logo (lado izquierdo) -->
     <a class="brand" href="../index.html">
       <img src="../images/sds-logo.png" alt="Soluciones Digitales Seguras (SDS)" class="logo">
     </a>
 
-    <!-- Botón hamburger (móvil) -->
-    <button id="navToggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
-      <span class="hamb" aria-hidden="true"></span>
-    </button>
+        <!-- Botón hamburger para mobile (controlado por tu JS) -->
+        <button id="navToggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
+          <span class="hamb" aria-hidden="true"></span>
+        </button>
+    
+        <ul id="mainMenu" class="menu" role="menubar">
+          <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
+          <li role="none"><a role="menuitem" href="../services/services.html">Servicios</a></li>
+          <li role="none"><a role="menuitem" href="#" aria-current="page">Productos</a></li>
+          <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
+        </ul>
+      </nav>
 
-    <!-- Menú principal -->
-    <ul id="mainMenu" class="menu" role="menubar" aria-hidden="true" aria-label="Menú principal">
-      <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
-      <li role="none"><a role="menuitem" aria-current="page" href="#">Servicios</a></li>
-      <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
-      <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
-    </ul>
-
-    <!-- Header actions (opcional, placeholder) -->
+    <!-- Header actions (lado derecho; placeholder) -->
     <div class="header-actions" aria-hidden="true"></div>
   </nav>
 
@@ -138,6 +138,6 @@
 
   </main>
 
-  <script src="script.js" defer></script>
+  <script src="../services/script.js" defer></script>
 </body>
 </html>
