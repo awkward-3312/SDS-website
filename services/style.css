@@ -150,7 +150,11 @@
     pointer-events:none !important;
   }
   
-/* ===== HAMBURGER + NAV MOBILE ===== */
+/* ========== Copia EXACTA del menú móvil / hamburguesa (tomado de producto.css)
+   Incluye soporte para markup con <span class="hamb"> o <span class="bar">.
+   Pegar en servicios.css reemplazando las reglas móviles/hamburguesa actuales.
+   ========== */
+
 /* Botón hamburguesa (oculto en desktop) */
 .nav-toggle{
   display: none;
@@ -169,7 +173,7 @@
 }
 .nav-toggle:focus-visible{ outline: var(--focus-ring); }
 
-/* líneas del icono */
+/* líneas del icono usando .hamb (preferido) */
 .nav-toggle .hamb,
 .nav-toggle .hamb::before,
 .nav-toggle .hamb::after {
@@ -191,7 +195,22 @@
 .nav-toggle .hamb::before{ top: -7px; }
 .nav-toggle .hamb::after{ top: 7px; }
 
-/* Estado abierto -> animación a "X" */
+/* Soporte adicional si tu HTML usa 3 barras con clase .bar */
+.nav-toggle .bar {
+  display:block;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  width: 22px;
+  background: currentColor;
+  border-radius: 2px;
+}
+.nav-toggle .bar:nth-child(1){ top: 14px; }
+.nav-toggle .bar:nth-child(2){ top: 23px; transform: translate(-50%, -50%); } /* centro */
+.nav-toggle .bar:nth-child(3){ top: 32px; }
+
+/* Estado abierto -> animación a "X" (controlado por aria-expanded o body.menu-open) */
 .nav-toggle[aria-expanded="true"] .hamb { background: transparent; }
 .nav-toggle[aria-expanded="true"] .hamb::before {
   transform: translateY(7px) rotate(45deg);
@@ -199,6 +218,11 @@
 .nav-toggle[aria-expanded="true"] .hamb::after {
   transform: translateY(-7px) rotate(-45deg);
 }
+
+/* Si usas .bar (3 spans), transformarlos a X cuando abierto */
+.nav-toggle[aria-expanded="true"] .bar:nth-child(1){ transform: translateY(9px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .bar:nth-child(2){ opacity: 0; transform: scaleX(.8); }
+.nav-toggle[aria-expanded="true"] .bar:nth-child(3){ transform: translateY(-9px) rotate(-45deg); }
 
 /* menú principal (desktop por defecto) */
 .menu{ list-style:none; display:flex; gap:25px; align-items:center; margin-left:16px; }
@@ -250,61 +274,7 @@
   }
   .menu a:focus, .menu a:hover{ background: rgba(0,0,0,0.03); color: var(--cian); }
 }
-  
-  /* Botón toggle: solo deja espacio (48x48) en móvil. No aplica líneas ni animaciones. */
-  .nav-toggle{
-    display:none;              /* oculto por defecto en desktop */
-    width:48px;
-    height:48px;
-    background:transparent;
-    border:0;
-    padding:0;
-    margin:0;
-    align-items:center;
-    justify-content:center;
-  }
-  
-  /* Mostrar el espacio en pantallas móviles (el botón real puede tener icono vía HTML) */
-  @media (max-width:880px){
-    .nav-toggle{ display:inline-flex; }
-    /* Asegura que el menú inline (desktop) se oculte en móvil */
-    .navbar > .menu,
-    .main-nav{ display:none; }
-  }
-  
-  /* ===========================
-     Desktop layout fixes (logo left, menu right)
-     =========================== */
-  @media (min-width:881px){
-    .navbar{
-      display:flex;
-      align-items:center;
-      gap:var(--gap);
-      padding-left:20px;
-      padding-right:2px;
-      justify-content:flex-start !important;
-    }
-  
-    .navbar > .brand{ order:1; }
-    .navbar > .nav-toggle{ order:2; } /* espacio reservado (aunque oculto en desktop) */
-    .navbar > .menu{
-      order:3;
-      margin-left:auto;
-      display:flex !important;
-      gap:28px;
-      align-items:center;
-    }
-    .navbar > .header-actions{ order:4; margin-left:16px; }
-  
-    .site-header .header-inner{ justify-content:flex-start; }
-    .site-header .brand{ order:1; }
-    .site-header .main-nav{ order:3; margin-left:auto; display:flex; }
-    .site-header .header-actions{ order:4; }
-  
-    /* aseguramos que la hamburguesa no se muestre en desktop */
-    .nav-toggle{ display:none !important; }
-  }
-  
+
   /* ================= HERO / GRID / TARJETAS ================= */
   .services-hero{
     padding:70px 20px;
