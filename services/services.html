@@ -1,141 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SDS | Servicios</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDS | Servicios</title>
 
-    <!-- FontAwesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- FontAwesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Estilos globales -->
-    <link rel="stylesheet" href="style.css" />
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body class="services-page">
 
-    <!-- Skip link -->
-    <a class="skip-link visually-hidden" href="#main">Ir al contenido</a>
+  <!-- Skip link (visible en foco) -->
+  <a class="skip-link visually-hidden" href="#main">Ir al contenido</a>
 
-    <!-- HEADER con nuevo NAVBAR -->
-    <header class="site-header" role="banner">
+  <!-- NAVBAR unificado (misma estructura que products.html) -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+    <!-- Brand / logo -->
+    <a class="brand" href="../index.html">
+      <img src="../images/sds-logo.png" alt="Soluciones Digitales Seguras (SDS)" class="logo">
+    </a>
 
-      <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
-        <a class="brand" href="../index.html">
-          <img src="../images/sds-logo.png" alt="Soluciones Digitales Seguras (SDS)" class="logo">
-        </a>
+    <!-- Botón hamburger (móvil) -->
+    <button id="navToggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
+      <span class="hamb" aria-hidden="true"></span>
+    </button>
 
-        <!-- Botón hamburger -->
-        <button id="navToggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainMenu">
-          <span class="hamb" aria-hidden="true"></span>
-        </button>
+    <!-- Menú principal -->
+    <ul id="mainMenu" class="menu" role="menubar" aria-hidden="true" aria-label="Menú principal">
+      <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
+      <li role="none"><a role="menuitem" aria-current="page" href="#">Servicios</a></li>
+      <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
+      <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
+    </ul>
 
-        <ul id="mainMenu" class="menu" role="menubar" aria-hidden="true">
-          <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
-          <li role="none"><a role="menuitem" aria-current="page" href="#">Servicios</a></li>
-          <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
-          <li role="none"><a role="menuitem" href="../contact/contact.html">Contacto</a></li>
-        </ul>
-      </nav>
+    <!-- Header actions (opcional, placeholder) -->
+    <div class="header-actions" aria-hidden="true"></div>
+  </nav>
 
+  <!-- MAIN -->
+  <main id="main" tabindex="-1">
+
+    <!-- HERO -->
+    <header class="services-hero" role="banner" aria-label="Encabezado de servicios">
+      <h1>Nuestros Servicios</h1>
+      <p>Soluciones creativas, técnicas y digitales para empresas y personas.</p>
     </header>
 
-    <!-- MAIN -->
-    <main id="main" tabindex="-1">
+    <!-- SERVICES GRID -->
+    <section class="services-grid" aria-label="Servicios que ofrecemos">
 
-      <!-- HERO -->
-      <header class="services-hero" role="banner">
-          <h1>Nuestros Servicios</h1>
-          <p>Soluciones creativas, técnicas y digitales para empresas y personas.</p>
-      </header>
+      <article class="service-card publicidad" role="button" tabindex="0" aria-pressed="false" aria-label="Publicidad y contenido">
+        <div class="card-media">
+          <i class="fa-solid fa-bullhorn card-icon" aria-hidden="true"></i>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Publicidad &amp; Contenido</h3>
+          <p class="card-lead">Publicidad empresarial, videos y diseño gráfico.</p>
+          <ul class="card-features">
+            <li>Publicidad Empresarial</li>
+            <li>Publicidad para Eventos</li>
+            <li>Videos Publicitarios</li>
+            <li>Diseño Gráfico</li>
+            <li>Fotografía Profesional</li>
+          </ul>
+        </div>
+      </article>
 
-      <!-- SERVICES GRID -->
-      <section class="services-grid" aria-label="Servicios que ofrecemos">
+      <article class="service-card eventos" role="button" tabindex="0" aria-pressed="false" aria-label="Eventos y decoración">
+        <div class="card-media">
+          <i class="fa-solid fa-calendar-days card-icon" aria-hidden="true"></i>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Eventos &amp; Decoración</h3>
+          <p class="card-lead">Decoraciones y temáticas personalizadas.</p>
+          <ul class="card-features">
+            <li>Decoración de Cumpleaños</li>
+            <li>Temáticas Personalizadas</li>
+            <li>Cobertura Foto/Video</li>
+          </ul>
+        </div>
+      </article>
 
-          <article class="service-card publicidad" role="button" tabindex="0" aria-pressed="false" aria-label="Publicidad y contenido">
-              <div class="card-media">
-                  <i class="fa-solid fa-bullhorn card-icon" aria-hidden="true"></i>
-              </div>
-              <div class="card-body">
-                  <h3 class="card-title">Publicidad &amp; Contenido</h3>
-                  <p class="card-lead">Publicidad empresarial, videos y diseño gráfico.</p>
-                  <ul class="card-features">
-                      <li>Publicidad Empresarial</li>
-                      <li>Publicidad para Eventos</li>
-                      <li>Videos Publicitarios</li>
-                      <li>Diseño Gráfico</li>
-                      <li>Fotografía Profesional</li>
-                  </ul>
-              </div>
-          </article>
+      <article class="service-card tecnologia" role="button" tabindex="0" aria-pressed="false" aria-label="Tecnología y desarrollo">
+        <div class="card-media">
+          <i class="fa-solid fa-code card-icon" aria-hidden="true"></i>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Tecnología &amp; Desarrollo</h3>
+          <p class="card-lead">Software, sistemas y automatizaciones.</p>
+          <ul class="card-features">
+            <li>Desarrollo de Software</li>
+            <li>Programación de Sistemas</li>
+            <li>Diseño Web</li>
+            <li>Automatizaciones</li>
+          </ul>
+        </div>
+      </article>
 
-          <article class="service-card eventos" role="button" tabindex="0" aria-pressed="false" aria-label="Eventos y decoración">
-              <div class="card-media">
-                  <i class="fa-solid fa-calendar-days card-icon" aria-hidden="true"></i>
-              </div>
-              <div class="card-body">
-                  <h3 class="card-title">Eventos &amp; Decoración</h3>
-                  <p class="card-lead">Decoraciones y temáticas personalizadas.</p>
-                  <ul class="card-features">
-                      <li>Decoración de Cumpleaños</li>
-                      <li>Temáticas Personalizadas</li>
-                      <li>Cobertura Foto/Video</li>
-                  </ul>
-              </div>
-          </article>
+      <article class="service-card hardware" role="button" tabindex="0" aria-pressed="false" aria-label="Hardware y mantenimiento">
+        <div class="card-media">
+          <i class="fa-solid fa-computer card-icon" aria-hidden="true"></i>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Hardware &amp; Mantenimiento</h3>
+          <p class="card-lead">Reparación, mantenimiento y optimización.</p>
+          <ul class="card-features">
+            <li>Montaje de Equipos</li>
+            <li>Mantenimiento Preventivo</li>
+            <li>Mantenimiento Correctivo</li>
+            <li>Optimización de Rendimiento</li>
+          </ul>
+        </div>
+      </article>
 
-          <article class="service-card tecnologia" role="button" tabindex="0" aria-pressed="false" aria-label="Tecnología y desarrollo">
-              <div class="card-media">
-                  <i class="fa-solid fa-code card-icon" aria-hidden="true"></i>
-              </div>
-              <div class="card-body">
-                  <h3 class="card-title">Tecnología &amp; Desarrollo</h3>
-                  <p class="card-lead">Software, sistemas y automatizaciones.</p>
-                  <ul class="card-features">
-                      <li>Desarrollo de Software</li>
-                      <li>Programación de Sistemas</li>
-                      <li>Diseño Web</li>
-                      <li>Automatizaciones</li>
-                  </ul>
-              </div>
-          </article>
+      <article class="service-card seguridad" role="button" tabindex="0" aria-pressed="false" aria-label="Seguridad y soporte">
+        <div class="card-media">
+          <i class="fa-solid fa-shield-halved card-icon" aria-hidden="true"></i>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Seguridad &amp; Soporte</h3>
+          <p class="card-lead">Protección digital y soporte técnico.</p>
+          <ul class="card-features">
+            <li>Seguridad Digital</li>
+            <li>Copias de Respaldo</li>
+            <li>Recuperación de Datos</li>
+            <li>Soporte Técnico</li>
+          </ul>
+        </div>
+      </article>
 
-          <article class="service-card hardware" role="button" tabindex="0" aria-pressed="false" aria-label="Hardware y mantenimiento">
-              <div class="card-media">
-                  <i class="fa-solid fa-computer card-icon" aria-hidden="true"></i>
-              </div>
-              <div class="card-body">
-                  <h3 class="card-title">Hardware &amp; Mantenimiento</h3>
-                  <p class="card-lead">Reparación, mantenimiento y optimización.</p>
-                  <ul class="card-features">
-                      <li>Montaje de Equipos</li>
-                      <li>Mantenimiento Preventivo</li>
-                      <li>Mantenimiento Correctivo</li>
-                      <li>Optimización de Rendimiento</li>
-                  </ul>
-              </div>
-          </article>
+    </section>
 
-          <article class="service-card seguridad" role="button" tabindex="0" aria-pressed="false" aria-label="Seguridad y soporte">
-              <div class="card-media">
-                  <i class="fa-solid fa-shield-halved card-icon" aria-hidden="true"></i>
-              </div>
-              <div class="card-body">
-                  <h3 class="card-title">Seguridad &amp; Soporte</h3>
-                  <p class="card-lead">Protección digital y soporte técnico.</p>
-                  <ul class="card-features">
-                      <li>Seguridad Digital</li>
-                      <li>Copias de Respaldo</li>
-                      <li>Recuperación de Datos</li>
-                      <li>Soporte Técnico</li>
-                  </ul>
-              </div>
-          </article>
-      </section>
+  </main>
 
-    </main>
-
-    <script src="script.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
