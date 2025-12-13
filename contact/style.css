@@ -8,7 +8,7 @@
     --blanco: #fff;
 
     --card-radius: 14px;
-    --card-shadow: 0 8px 30px rgba(9, 30, 66, 0.06);
+    --card-shadow: 0 12px 36px rgba(9, 30, 66, 0.08);
     --gap: 24px;
     --container-max: 1180px;
     --transition: 240ms;
@@ -25,6 +25,7 @@
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
 }
+html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%,#ffffff 100%); }
 
 /* Util — ocultar accesible (skip link) */
 .visually-hidden {
@@ -66,7 +67,8 @@
   position: sticky;
   top: 0;
   z-index: 120;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  backdrop-filter: blur(8px);
 }
 
 /* Si usas la estructura antigua .navbar, mantenemos padding similar */
@@ -221,10 +223,21 @@ html.nav-open, body.nav-open { overflow:hidden; height:100%; }
 
 /* ========== CONTACT / HERO / GRID / TARJETAS ========== */
 .contact-hero {
-    padding: 70px 40px;
-    background: linear-gradient(135deg, var(--rojo), var(--cian));
+    padding: 80px 40px;
+    background: linear-gradient(135deg, #0aa1d5, #0ec5b5);
     color: var(--blanco);
     text-align: center;
+    position:relative;
+    overflow:hidden;
+}
+.contact-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 15% 20%, rgba(255,255,255,0.16), transparent 42%),
+                radial-gradient(circle at 75% 10%, rgba(255,255,255,0.14), transparent 38%),
+                radial-gradient(circle at 35% 80%, rgba(0,0,0,0.08), transparent 46%);
+    pointer-events: none;
 }
 .contact-hero h1 {
     font-size: 46px;
