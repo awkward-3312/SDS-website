@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const body = document.body;
   const html = document.documentElement;
 
+  // Navbar (estilo unificado)
+  (() => {
+    const nav = document.getElementById('navbar') || document.querySelector('.navbar');
+    if (!nav) return;
+    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll);
+  })();
+
   const btn = document.getElementById('navToggle') || document.querySelector('.nav-toggle');
   const originalMenu = document.getElementById('mainMenu') || document.querySelector('.menu');
   const headerEl = document.querySelector('.navbar') || document.querySelector('.site-header') || document.querySelector('header');

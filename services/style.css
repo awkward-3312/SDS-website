@@ -83,32 +83,25 @@
   /* ===========================
      Header / Navbar unificado
      =========================== */
-  .navbar,
-  .site-header{
+  .navbar{
     width:100%;
-    background:var(--blanco);
-    position:sticky;
-    top:0;
-    z-index:120;
-    box-shadow:none;
-  }
-  
-  /* Interior del header */
-  .navbar,
-  .site-header .header-inner{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:var(--gap);
-    padding:18px 0;
-    padding-left:var(--container-pad);
-    padding-right:var(--container-pad);
+    padding:18px var(--container-pad);
+    position:sticky;
+    top:0;
+    z-index:120;
+    background:rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom:1px solid rgba(0,0,0,0.04);
+    transition:box-shadow .18s ease, backdrop-filter .18s ease, transform .18s ease;
   }
-  
+  .navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+
   /* Brand / logo */
   .brand,
   .navbar .brand,
-  .site-header .brand,
   .navbar > a{
     display:inline-flex;
     align-items:center;
@@ -116,32 +109,44 @@
     text-decoration:none;
     justify-content:flex-start;
   }
-  .logo{ display:block; height:60px; width:auto; }
-  
-  /* Main nav wrapper */
-  .main-nav,
-  .navbar nav,
-  .site-header .main-nav{ display:block; align-self:center; }
-  
+  .logo{ display:block; height:56px; width:auto; }
+
   /* Menu (desktop inline) */
   .menu,
-  .main-nav ul.menu,
   .navbar > .menu{
     list-style:none;
     display:flex;
-    gap:25px;
+    gap:22px;
     align-items:center;
     margin:0;
     margin-left:16px;
   }
-  .menu a,
-  .main-nav ul.menu a{
+  .menu a{
     text-decoration:none;
     color:var(--gris-texto);
     font-weight:500;
-    transition:color .18s ease;
+    transition:color .18s ease, transform .18s ease;
+    padding:6px 4px;
+    border-radius:6px;
+    position:relative;
   }
-  .menu a:hover, .menu a:focus{ color:var(--cian); }
+  .menu a:hover, .menu a:focus{ color:var(--cian); outline:none; }
+  .menu a::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:-4px;
+    height:3px;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--cian),var(--azul-fondo));
+    transform:scaleX(0);
+    transform-origin:center;
+    transition:transform .18s ease;
+    opacity:0.8;
+  }
+  .menu a:hover::after, .menu a:focus::after{ transform:scaleX(1); }
+
+  /* Make .menu.open act like .menu.show */
+  .menu.open{ display:flex; }
   
   /* Ocultar login legacy si existe */
   .menu .btn-login,
@@ -225,20 +230,15 @@
 .nav-toggle[aria-expanded="true"] .bar:nth-child(2){ opacity: 0; transform: scaleX(.8); }
 .nav-toggle[aria-expanded="true"] .bar:nth-child(3){ transform: translateY(-9px) rotate(-45deg); }
 
-/* menú principal (desktop por defecto) */
-.menu{ list-style:none; display:flex; gap:25px; align-items:center; margin-left:16px; }
-.menu a{ text-decoration:none; color:var(--gris-texto); font-weight:500; transition:color .18s ease; }
-.menu a:hover, .menu a:focus{ color:var(--cian); }
-
 /* Mobile: ocultar menú en línea y usar panel desplegable */
 @media (max-width: 880px){
   .nav-toggle{ display: inline-flex; }
 
   .menu{
     position: fixed;
-    top: 72px; /* ajustar si tu navbar cambia de alto */
-    right: 20px;
-    width: calc(100% - 40px);
+    top: 72px;
+    right: 12px;
+    width: calc(100% - 24px);
     max-width: 360px;
     background: #ffffff;
     border-radius: 12px;
@@ -250,18 +250,20 @@
     transform: translateY(-8px) scale(.99);
     pointer-events: none;
     transition: opacity .22s ease, transform .22s ease;
-    z-index: 68;
+    z-index: 75;
     border: 1px solid rgba(10,20,30,0.03);
     -webkit-overflow-scrolling: touch;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 96px);
     overflow: auto;
   }
 
   /* Clase para mostrar el menú (añadir/remover desde JS) */
-  .menu.open{
+  .menu.open,
+  .menu.show{
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: auto;
+    display:flex;
   }
 
   /* Estilos de enlaces en móvil */

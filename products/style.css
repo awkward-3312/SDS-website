@@ -25,13 +25,20 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 :focus { outline: none; }
 :focus-visible { outline: var(--focus-ring); outline-offset: 4px; border-radius: 8px; }
 
-/* NAVBAR */
+/* NAVBAR (unificada) */
 .navbar{
   width:100%;
-  padding:20px var(--container-pad);
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
+  padding:18px var(--container-pad);
+  position:sticky;
+  top:0;
+  z-index:70;
+  background:rgba(255,255,255,0.96);
+  transition:box-shadow .18s ease, backdrop-filter .18s ease, transform .18s ease;
+  backdrop-filter: blur(12px);
+
   background:rgba(255,255,255,0.94);
   z-index:50;
   position:sticky;
@@ -39,7 +46,9 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
   backdrop-filter: blur(10px);
   border-bottom:1px solid rgba(0,0,0,0.04);
 }
-.logo{ height:60px; display:block; }
+.navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08) }
+
+.brand .logo{ height:56px; display:block }
 
 /* ===== HAMBURGER + NAV MOBILE ===== */
 /* Botón hamburguesa (oculto en desktop) */
@@ -92,9 +101,33 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 }
 
 /* menú principal (desktop por defecto) */
-.menu{ list-style:none; display:flex; gap:25px; align-items:center; margin-left:16px; }
-.menu a{ text-decoration:none; color:var(--gris-texto); font-weight:500; transition:color .18s ease; }
-.menu a:hover, .menu a:focus{ color:var(--cian); }
+.menu{ list-style:none; display:flex; gap:22px; align-items:center; margin-left:16px; }
+.menu a{
+  text-decoration:none;
+  color:var(--gris-texto);
+  font-weight:500;
+  transition:color .18s ease, transform .18s ease;
+  padding:6px 4px;
+  border-radius:6px;
+  position:relative;
+}
+.menu a:hover, .menu a:focus{ color:var(--cian); outline:none; }
+.menu a::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-4px;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--cian),var(--azul-fondo));
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform .18s ease;
+  opacity:0.8;
+}
+.menu a:hover::after,.menu a:focus::after{ transform:scaleX(1); }
+
+/* Make .menu.open act like .menu.show (compatibilidad entre variantes JS) */
+.menu.open{ display:flex }
 
 /* Mobile: ocultar menú en línea y usar panel desplegable */
 @media (max-width: 880px){
@@ -102,9 +135,9 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 
   .menu{
     position: fixed;
-    top: 72px; /* ajustar si tu navbar cambia de alto */
-    right: 20px;
-    width: calc(100% - 40px);
+    top: 72px;
+    right: 12px;
+    width: calc(100% - 24px);
     max-width: 360px;
     background: #ffffff;
     border-radius: 12px;
@@ -116,18 +149,20 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
     transform: translateY(-8px) scale(.99);
     pointer-events: none;
     transition: opacity .22s ease, transform .22s ease;
-    z-index: 68;
+    z-index: 75;
     border: 1px solid rgba(10,20,30,0.03);
     -webkit-overflow-scrolling: touch;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 96px);
     overflow: auto;
   }
 
   /* Clase para mostrar el menú (añadir/remover desde JS) */
-  .menu.open{
+  .menu.open,
+  .menu.show{
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: auto;
+    display:flex;
   }
 
   /* Estilos de enlaces en móvil */

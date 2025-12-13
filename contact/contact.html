@@ -17,42 +17,32 @@
     <!-- Skip link -->
     <a class="skip-link visually-hidden" href="#main">Ir al contenido</a>
 
-    <!-- NAVBAR genérico (usa el mismo script.js / style.css global) -->
-    <header class="site-header" role="banner">
-      <div class="container header-inner">
+    <!-- NAVBAR unificada -->
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+      <!-- Logo -->
+      <a class="brand" href="../index.html" aria-label="Inicio - SDS">
+        <img src="../images/sds-logo.png" alt="SDS" class="logo" />
+      </a>
 
-        <!-- Logo -->
-        <a class="brand" href="../index.html" aria-label="Inicio - SDS">
-          <img src="../images/sds-logo.png" alt="SDS" class="logo" />
-        </a>
+      <!-- Botón hamburger -->
+      <button
+        id="navToggle"
+        class="nav-toggle"
+        type="button"
+        aria-controls="mainMenu"
+        aria-expanded="false"
+        aria-label="Abrir menú principal">
+        <span class="hamb" aria-hidden="true"></span>
+      </button>
 
-        <!-- Botón hamburger -->
-        <button
-          id="navToggle"
-          class="nav-toggle"
-          type="button"
-          aria-controls="mainMenu"
-          aria-expanded="false"
-          aria-label="Abrir menú principal">
-          <span class="hamburger" aria-hidden="true">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
-          </span>
-        </button>
-
-        <!-- Menú principal reutilizable (sin "Iniciar sesión") -->
-        <nav id="mainMenu" class="main-nav" role="navigation" aria-label="Menú principal" hidden>
-          <ul class="menu" role="menubar">
-            <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
-            <li role="none"><a role="menuitem" href="../services/services.html">Servicios</a></li>
-            <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
-            <li role="none"><a role="menuitem" aria-current="page" href="#">Contacto</a></li>
-          </ul>
-        </nav>
-
-      </div>
-    </header>
+      <!-- Menú principal -->
+      <ul id="mainMenu" class="menu" role="menubar">
+        <li role="none"><a role="menuitem" href="../index.html">Inicio</a></li>
+        <li role="none"><a role="menuitem" href="../services/services.html">Servicios</a></li>
+        <li role="none"><a role="menuitem" href="../products/products.html">Productos</a></li>
+        <li role="none"><a role="menuitem" aria-current="page" href="#">Contacto</a></li>
+      </ul>
+    </nav>
 
     <!-- HERO -->
     <main id="main" tabindex="-1">

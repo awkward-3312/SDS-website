@@ -11,6 +11,7 @@
     --card-shadow: 0 12px 36px rgba(9, 30, 66, 0.08);
     --gap: 24px;
     --container-max: 1180px;
+    --container-pad: 40px;
     --transition: 240ms;
     --btn-border-radius: 10px;
     --text-muted: #666;
@@ -57,25 +58,25 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
   position: relative;
 }
 
-/* ========== HEADER / NAV (compatibilidad .navbar y .site-header) ========== */
-
-/* viejo: .navbar | nuevo: .site-header + .header-inner */
-.navbar,
-.site-header {
+/* ========== HEADER / NAV unificado ========== */
+.navbar{
   width: 100%;
-  background: var(--blanco);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px var(--container-pad);
   position: sticky;
   top: 0;
   z-index: 120;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  transition: box-shadow 0.18s ease, backdrop-filter 0.18s ease, transform 0.18s ease;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   backdrop-filter: blur(8px);
 }
+.navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08); }
 
-/* Si usas la estructura antigua .navbar, mantenemos padding similar */
-.navbar { padding: 20px 40px; }
-.header-inner { display:flex; align-items:center; justify-content:space-between; gap:var(--gap); padding:18px 0; }
-
-/* Brand / logo (compatibilidad) */
 .brand, .navbar > a {
   display: inline-flex;
   align-items: center;
@@ -88,47 +89,46 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
   width: auto;
 }
 
-/* Menú clásico (compatibilidad .menu) — desktop layout */
 .menu {
   list-style: none;
   display: flex;
-  gap: 25px;
+  gap: 22px;
   align-items: center;
+  margin:0;
 }
 .menu a {
   text-decoration: none;
   color: var(--gris-texto);
   font-weight: 500;
-  padding: 8px 6px;
-  transition: color var(--transition) ease;
+  padding: 6px 4px;
+  transition: color var(--transition) ease, transform var(--transition) ease;
   border-radius: 6px;
+  position:relative;
 }
 .menu a:hover,
 .menu a:focus {
   color: var(--cian);
   outline: none;
 }
-
-/* Ocultar programáticamente cualquier "Iniciar sesión" que quede por error */
-.menu .btn-login,
-.menu a[aria-label="Iniciar sesión"] {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+.menu a::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-4px;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--cian),var(--azul-fondo));
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform var(--transition) ease;
+  opacity:0.8;
 }
+.menu a:hover::after,
+.menu a:focus::after{ transform:scaleX(1); }
 
-/* Botón destacado (login etc) - reglas genéricas si lo quieres en otras páginas */
-.menu .btn,
-.btn {
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: linear-gradient(90deg,var(--cian), var(--azul-fondo));
-  color: var(--blanco);
-  text-decoration: none;
-  font-weight: 600;
-}
+/* Make .menu.open act like .menu.show */
+.menu.open{ display:flex; }
 
-/* ========== HAMBURGER (nuevo reusable) ========== */
+/* ========== HAMBURGER (unificado) ========== */
 .nav-toggle {
   display: none; /* visible en mobile por media query */
   background: transparent;
@@ -137,89 +137,62 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
   cursor: pointer;
   align-items: center;
   justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
   z-index: 140;
 }
 
-/* estructura de 3 barras */
-.hamburger {
-  display: inline-block;
-  width: 28px;
-  height: 18px;
-  position: relative;
+.hamb{ display:block; width:26px; height:2px; background:var(--gris-texto); position:relative; transition:background var(--transition) }
+.hamb::before, .hamb::after{
+  content:""; position:absolute; left:0; width:26px; height:2px; background:var(--gris-texto);
+  transition:transform var(--transition), top var(--transition), opacity var(--transition);
 }
-.hamburger .bar {
-  display: block;
-  position: absolute;
-  left: 0;
-  height: 2px;
-  width: 100%;
-  background: var(--gris-texto);
-  border-radius: 2px;
-  transition: transform .28s cubic-bezier(.2,.9,.2,1), opacity .18s ease, top .18s ease;
-}
-.hamburger .bar:nth-child(1) { top: 0; }
-.hamburger .bar:nth-child(2) { top: calc(50% - 1px); }
-.hamburger .bar:nth-child(3) { top: calc(100% - 2px); }
+.hamb::before{ top:-8px } .hamb::after{ top:8px }
 
 /* estado abierto: convertimos en X */
-.nav-toggle.is-open .hamburger .bar:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-.nav-toggle.is-open .hamburger .bar:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(.8);
-}
-.nav-toggle.is-open .hamburger .bar:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
-}
-
-/* main-nav: layout y comportamiento (desktop first) */
-.main-nav { display: block; }
-.main-nav[hidden] { /* si usamos hidden por JS, desktop lo ignora más abajo */ display: none; }
+.nav-toggle.open .hamb{ background:transparent }
+.nav-toggle.open .hamb::before{ transform:rotate(45deg); top:0 }
+.nav-toggle.open .hamb::after{ transform:rotate(-45deg); top:0 }
 
 /* ========== MOBILE ========== */
 @media (max-width: 880px) {
-  /* mostrar boton hamburger */
   .nav-toggle { display:inline-flex; }
 
-  /* Si usas .navbar (viejo) adaptamos layout: escondemos el menu inline */
-  .navbar > .menu { display: none; }
-
-  /* reusable main-nav pasa a ser panel flotante */
-  .main-nav {
+  .menu {
     position: fixed;
     top: 72px;
-    right: 16px;
-    z-index: 130;
-  }
-  /* nav oculto con hidden */
-  .main-nav[hidden] { display: none !important; }
-
-  /* panel visual del menu */
-  .main-nav ul.menu {
+    right: 12px;
+    width: calc(100% - 24px);
+    max-width: 360px;
+    background: var(--blanco);
+    border-radius: 12px;
+    box-shadow: 0 18px 50px rgba(3,22,45,0.12);
+    padding: 12px 14px;
     flex-direction: column;
     gap: 10px;
-    background: var(--blanco);
-    min-width: 220px;
-    padding: 14px;
-    border-radius: 12px;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    opacity: 0;
+    transform: translateY(-8px) scale(.99);
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease;
+    z-index: 130;
     border: 1px solid rgba(0,0,0,0.06);
-    animation: fadeMenu .22s ease;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 96px);
+    overflow: auto;
   }
-  .main-nav.open ul.menu { display:flex; }
 
-  .main-nav ul.menu a { display:block; padding:10px 12px; width:100%; }
+  .menu.show,
+  .menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    display:flex;
+  }
+
+  .menu li{ width:100%; }
+  .menu a { display:block; padding:10px 12px; width:100%; border-radius:8px; }
+  .menu a:focus, .menu a:hover{ background: rgba(0,0,0,0.03); color: var(--cian); }
 }
-
-/* Si por alguna razón el menu antiguo (.menu) necesita mostrarse en desktop */
-@media (min-width: 881px) {
-  .main-nav[hidden] { display:block; } /* asegúrate de que en desktop se muestre */
-  .navbar > .menu { display:flex; }    /* restaurar antiguo comportamiento */
-}
-
-/* bloqueo scroll cuando menu abierto (script añade .nav-open a html/body) */
-html.nav-open, body.nav-open { overflow:hidden; height:100%; }
 
 /* ========== CONTACT / HERO / GRID / TARJETAS ========== */
 .contact-hero {

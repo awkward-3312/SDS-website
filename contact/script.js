@@ -2,6 +2,37 @@
 // No interfiere con script.js (navbar + hamburger).
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Navbar toggle (misma experiencia que el home)
+  (() => {
+    const nav = document.getElementById('navbar');
+    const toggle = document.getElementById('navToggle');
+    const menu = document.getElementById('mainMenu');
+
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener('click', () => {
+      const isOpen = menu.classList.toggle('show');
+      toggle.classList.toggle('open', !!isOpen);
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    menu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (menu.classList.contains('show')) {
+          menu.classList.remove('show');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    if (nav) {
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    }
+  })();
+
   const DEST_SHORT_URL = "https://maps.app.goo.gl/GGwMKSTcUmfTmZVU6";
 
   // Eliminar formulario antiguo si quedó en el HTML
