@@ -36,7 +36,8 @@
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
   }
-  html,body{ height:100%; color:var(--gris-texto); background:var(--blanco); }
+  html,body{ height:100%; color:var(--gris-texto); background:linear-gradient(180deg,#f7fbff 0%,#f3f7ff 40%,#ffffff 100%); }
+  body.services-page{ background:linear-gradient(180deg,#f6fbff 0%,#eef4ff 45%,#ffffff 100%); }
   
   /* Util — ocultar accesible (skip link) */
   .visually-hidden{
@@ -277,10 +278,21 @@
 
   /* ================= HERO / GRID / TARJETAS ================= */
   .services-hero{
-    padding:70px 20px;
-    background:linear-gradient(135deg, var(--azul-fondo), var(--cian));
+    padding:80px 20px;
+    background:linear-gradient(135deg, #0aa1d5, #0ec5b5);
     color:var(--blanco);
     text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .services-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 40%),
+               radial-gradient(circle at 80% 10%, rgba(255,255,255,0.12), transparent 36%),
+               radial-gradient(circle at 30% 80%, rgba(0,0,0,0.08), transparent 45%);
+    pointer-events:none;
   }
   .services-hero h1{
     font-size:clamp(28px, 4.2vw, 46px);
@@ -296,33 +308,47 @@
   
   /* GRID */
   .services-grid{
-    padding:40px 20px;
+    padding:48px 20px 64px;
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
     gap:28px;
+    max-width:1180px;
+    margin:0 auto;
   }
   
   /* TARJETAS */
   .service-card{
-    --card-radius:14px;
+    --card-radius:16px;
     display:flex;
     gap:16px;
-    padding:20px;
+    padding:22px;
     border-radius:var(--card-radius);
-    background:linear-gradient(180deg, #ffffff 0%, #f9f9f9 100%);
-    box-shadow:0 8px 24px rgba(0,0,0,0.08);
-    border:1px solid rgba(0,0,0,0.05);
+    background:linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+    box-shadow:0 12px 30px rgba(0,0,0,0.08);
+    border:1px solid rgba(0,0,0,0.04);
     cursor:pointer;
-    transition:transform 0.25s ease, box-shadow 0.25s ease;
+    transition:transform 0.25s ease, box-shadow 0.25s ease, border-color .2s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .service-card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
+    opacity:0;
+    transition:opacity .3s ease;
   }
   .service-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 18px 36px rgba(0,0,0,0.12);
+    transform:translateY(-8px);
+    box-shadow:0 22px 46px rgba(0,0,0,0.12);
+    border-color:rgba(0,167,198,0.18);
   }
+  .service-card:hover::after{ opacity:1; }
   .service-card:focus,
   .service-card:focus-visible{
     outline:3px solid rgba(0, 167, 198, 0.24);
-    outline-offset:4px;
+    outline-offset:6px;
   }
   
   /* ICONO */
@@ -346,9 +372,17 @@
     flex-direction:column;
     gap:8px;
   }
-  .card-title{ font-size:20px; font-weight:700; color:var(--gris-texto); }
-  .card-lead{ font-size:14px; color:#555; }
-  .card-features li{ font-size:14px; color:#444; margin-bottom:6px; }
+  .card-title{ font-size:20px; font-weight:800; color:var(--gris-texto); letter-spacing:-0.01em; }
+  .card-lead{ font-size:14px; color:#4b5563; line-height:1.45; }
+  .card-features{ margin-top:4px; display:grid; gap:6px; color:#1f2937; }
+  .card-features li{ font-size:14px; color:#2f3645; margin:0; padding-left:16px; position:relative; }
+  .card-features li::before{
+    content:"•";
+    position:absolute;
+    left:0;
+    color:var(--cian);
+    font-weight:800;
+  }
   
   /* COLORES DE CATEGORÍAS */
   .publicidad .card-media{ background:linear-gradient(135deg, #f4ce44, #ffba0a); }
