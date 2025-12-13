@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Navbar (estilo unificado)
+  (() => {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll);
+  })();
+
   /* CONFIG */
   const SUPABASE_URL = 'https://rxerfllxwdalduuzndiv.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE';

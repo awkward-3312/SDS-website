@@ -8,6 +8,7 @@
   --blanco:#fff;
 
   --container-padding: 40px;
+  --container-max: 1220px;
 
   /* Accessibility & sizing */
   --focus-ring-width: 3px;
@@ -19,8 +20,10 @@
 
 /* Reset básico */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:"Poppins",sans-serif;color:var(--gris);background:#fff;-webkit-font-smoothing:antialiased}
+html,body{height:100%;font-family:"Poppins",sans-serif;color:var(--gris);background:linear-gradient(180deg,#f7fbff 0%,#f2f6ff 50%,#ffffff 100%);-webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block;height:auto}
+
+main{padding:6px 0 24px;}
 
 /* NAVBAR */
 .navbar{
@@ -32,9 +35,10 @@ img{max-width:100%;display:block;height:auto}
   position:sticky;
   top:0;
   z-index:70; /* subido para que quede encima */
-  background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
-  transition:box-shadow var(--transition-fast) ease, backdrop-filter var(--transition-fast) ease;
-  backdrop-filter: blur(2px);
+  background:rgba(255,255,255,0.96);
+  transition:box-shadow var(--transition-fast) ease, backdrop-filter var(--transition-fast) ease, transform var(--transition-fast);
+  backdrop-filter: blur(12px);
+  border-bottom:1px solid rgba(0,0,0,0.04);
 }
 .navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08) }
 
@@ -46,12 +50,26 @@ img{max-width:100%;display:block;height:auto}
   text-decoration:none;
   color:var(--gris);
   font-weight:500;
-  transition:color var(--transition-fast);
+  transition:color var(--transition-fast), transform var(--transition-fast);
   padding:6px 4px;
   border-radius:6px;
+  position:relative;
 }
 .menu a:hover,
 .menu a:focus{ color:var(--cian); outline:none; }
+.menu a::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-4px;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--cian),var(--azul-fondo));
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform var(--transition-fast);
+  opacity:0.8;
+}
+.menu a:hover::after,.menu a:focus::after{ transform:scaleX(1); }
 
 /* Make .menu.open act like .menu.show (compatibilidad entre variantes JS) */
 .menu.open{ display:flex }
@@ -92,10 +110,27 @@ img{max-width:100%;display:block;height:auto}
   justify-content:space-between;
   padding:90px var(--container-padding);
   gap:40px;
-  background: linear-gradient(135deg, var(--azul-fondo), var(--cian));
+  background: linear-gradient(135deg, #0f9ad5, #0ec5cb);
   color:var(--blanco);
   min-height:420px; /* ayuda a evitar CLS al cargar */
+  max-width:var(--container-max);
+  margin:28px auto 0;
+  border-radius:24px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.18);
 }
+.hero::before,
+.hero::after{
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  filter:blur(32px);
+  opacity:0.25;
+  pointer-events:none;
+}
+.hero::before{ width:320px; height:320px; background:rgba(255,255,255,0.35); top:-80px; right:-120px; }
+.hero::after{ width:240px; height:240px; background:rgba(0,0,0,0.18); bottom:-120px; left:-60px; }
 
 /* Make hero responsive-safe using aspect-ratio on slider (no JS needed for height) */
 .hero-text{ max-width:640px }
@@ -113,13 +148,15 @@ img{max-width:100%;display:block;height:auto}
   align-items:center;
   justify-content:center;
   min-height:var(--btn-hit);
-  transition: transform var(--transition-medium), box-shadow var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform var(--transition-medium), box-shadow var(--transition-fast), filter var(--transition-fast);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.16);
+  letter-spacing:0.01em;
 }
 .btn:focus-visible{ box-shadow: 0 0 0 4px rgba(0,0,0,0.08), 0 4px 18px rgba(0,0,0,0.12) }
 .btn:active{ transform: translateY(1px) }
-.btn-yellow{ background:var(--amarillo); color:var(--gris) }
-.btn-red{ background:var(--rojo); color:var(--blanco) }
+.btn-yellow{ background:linear-gradient(120deg,#ffd54f,#f9a825); color:var(--gris) }
+.btn-red{ background:linear-gradient(120deg,#ff4b5c,#e52333); color:var(--blanco) }
+.btn:hover{ filter:brightness(1.05); transform: translateY(-1px); }
 
 /* HERO IMAGE (legacy, kept for compatibility) */
 .hero-img img{
@@ -139,7 +176,11 @@ img{max-width:100%;display:block;height:auto}
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.28);
+  border:1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(4px);
 }
 
 /* slides wrapper for easier transforms */
@@ -160,7 +201,7 @@ img{max-width:100%;display:block;height:auto}
   transition: opacity .8s ease-in-out, transform .6s cubic-bezier(.2,.8,.2,1);
   will-change: opacity, transform;
   transform: translateY(6px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.06));
 }
 
 /* visible slide */
@@ -209,11 +250,12 @@ img{max-width:100%;display:block;height:auto}
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  transition: background var(--transition-fast), transform var(--transition-fast);
-  backdrop-filter: blur(3px);
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  backdrop-filter: blur(8px);
+  box-shadow:0 10px 30px rgba(0,0,0,0.16);
 }
 .slider-control:focus-visible{ outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset:3px }
-.slider-control:hover{ transform: translateY(-50%) scale(1.03) }
+.slider-control:hover{ transform: translateY(-50%) scale(1.05); background:rgba(255,255,255,0.12); }
 
 .slider-control.prev{ left:10px }
 .slider-control.next{ right:10px }
@@ -234,7 +276,7 @@ img{max-width:100%;display:block;height:auto}
   height:12px;
   border-radius:50%;
   border:0;
-  background: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.42);
   cursor:pointer;
   transition: transform .18s, background .18s;
 }
@@ -242,8 +284,8 @@ img{max-width:100%;display:block;height:auto}
 .slider-dots button:active,
 .slider-dots button:focus-visible{
   background: var(--blanco);
-  transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transform: scale(1.2);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
 }
 
 /* reveal animations */
