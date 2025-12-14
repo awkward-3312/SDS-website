@@ -29,6 +29,11 @@
   </header>
 
   <main class="main main-full" id="main-content" role="main">
+    <section class="page-lede" aria-label="Resumen de la página">
+      <div class="lede-title">Control rápido de inventario</div>
+      <p class="lede-text">Busca, filtra y cambia de vista sin perder de vista el contexto. Mantén tus productos al día con acciones claras.</p>
+    </section>
+
     <section class="controls" aria-label="Controles de productos">
       <div class="left-controls">
         <button id="refresh" class="btn" type="button">Refrescar</button>
@@ -43,8 +48,22 @@
       </div>
     </section>
 
+    <section class="helper-banner" aria-label="Sugerencia de uso">
+      <div class="helper-badge" aria-hidden="true">Tip</div>
+      <div class="helper-copy">
+        <p class="helper-title">Usa las vistas para trabajar mejor</p>
+        <p class="helper-text">Activa el modo compacto o de tabla desde la barra superior cuando necesites revisar muchos productos a la vez.</p>
+      </div>
+    </section>
+
     <section id="product-list" class="product-list" aria-label="Listado de productos">
-      <div class="empty-state">No hay productos (pulsa "Refrescar")</div>
+      <div class="empty-state" role="status">
+        <div class="empty-icon" aria-hidden="true">📦</div>
+        <div>
+          <div class="empty-title">No hay productos</div>
+          <p class="empty-text">Pulsa "Refrescar" para sincronizar o crea un artículo nuevo desde el botón superior.</p>
+        </div>
+      </div>
     </section>
 
     <footer class="footer" role="contentinfo">
