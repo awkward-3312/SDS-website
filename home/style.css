@@ -52,94 +52,6 @@ main{
   isolation:isolate;
 }
 
-/* NAVBAR */
-.navbar{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:18px var(--container-padding);
-  position:sticky;
-  top:0;
-  z-index:70; /* subido para que quede encima */
-  background:rgba(255,255,255,0.96);
-  transition:box-shadow var(--transition-fast) ease, backdrop-filter var(--transition-fast) ease, transform var(--transition-fast);
-  backdrop-filter: blur(12px);
-  border-bottom:1px solid rgba(0,0,0,0.04);
-}
-.navbar::after{
-  content:"";
-  position:absolute;
-  left:20px;
-  right:20px;
-  bottom:0;
-  height:1px;
-  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(0,167,198,0.35),rgba(255,255,255,0));
-  opacity:.6;
-}
-.navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08) }
-
-.brand .logo{ height:56px; display:block }
-
-/* Menu desktop */
-.menu{ list-style:none; display:flex; gap:22px; align-items:center }
-.menu a{
-  text-decoration:none;
-  color:var(--gris);
-  font-weight:500;
-  transition:color var(--transition-fast), transform var(--transition-fast);
-  padding:6px 4px;
-  border-radius:6px;
-  position:relative;
-}
-.menu a:hover,
-.menu a:focus{ color:var(--cian); outline:none; }
-.menu a::after{
-  content:"";
-  position:absolute;
-  left:0;right:0;bottom:-4px;
-  height:3px;
-  border-radius:999px;
-  background:linear-gradient(90deg,var(--cian),var(--azul-fondo));
-  transform:scaleX(0);
-  transform-origin:center;
-  transition:transform var(--transition-fast);
-  opacity:0.8;
-}
-.menu a:hover::after,.menu a:focus::after{ transform:scaleX(1); }
-
-/* Make .menu.open act like .menu.show (compatibilidad entre variantes JS) */
-.menu.open{ display:flex }
-
-/* Improve keyboard focus visibility */
-:focus{ outline: none; }
-:focus-visible{
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-/* Hamburger - hidden on desktop */
-.nav-toggle{
-  display:none;
-  background:none;
-  border:0;
-  cursor:pointer;
-  padding:8px;
-  line-height:0;
-  min-width: var(--btn-hit);
-  min-height: var(--btn-hit);
-  align-items:center;
-  justify-content:center;
-  z-index:80; /* encima del menu/hero */
-}
-.hamb{ display:block; width:26px; height:2px; background:var(--gris); position:relative; transition:background var(--transition-fast) }
-.hamb::before, .hamb::after{
-  content:""; position:absolute; left:0; width:26px; height:2px; background:var(--gris);
-  transition:transform var(--transition-fast), top var(--transition-fast), opacity var(--transition-fast);
-}
-.hamb::before{ top:-8px } .hamb::after{ top:8px }
-
 /* HERO */
 .hero{
   display:grid;
@@ -385,26 +297,6 @@ main{
 /* If you want to center slider on large screens */
 @media (min-width:1001px){
   .hero-slider{ margin-left:20px }
-}
-
-/* Mobile: menu hamburger */
-@media (max-width:800px){
-  .menu{
-    position:fixed; top:72px; right:12px; background:var(--blanco);
-    flex-direction:column; padding:12px; gap:8px; border-radius:10px;
-    box-shadow:0 10px 30px rgba(0,0,0,.12); display:none; min-width:200px;
-    z-index:75; /* asegurar encima del hero */
-    max-height: calc(100vh - 96px);
-    overflow:auto;
-  }
-  .menu.show{ display:flex }
-  .nav-toggle{ display:flex }
-  .hamb{ background:transparent }
-  .hamb::before{ transform:none; top:0 }
-  .hamb::after{ transform:none; top:0 }
-  .nav-toggle.open .hamb{ background:transparent }
-  .nav-toggle.open .hamb::before{ transform:rotate(45deg); top:0 }
-  .nav-toggle.open .hamb::after{ transform:rotate(-45deg); top:0 }
 }
 
 /* Small phones */

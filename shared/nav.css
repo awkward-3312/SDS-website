@@ -1,0 +1,164 @@
+/* Navbar y menú hamburguesa compartido */
+.navbar{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px var(--nav-padding, var(--container-pad, var(--container-padding, 40px)));
+  position:sticky;
+  top:0;
+  z-index:70;
+  background:rgba(255,255,255,0.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(0,0,0,0.04);
+  transition:
+    box-shadow var(--transition-fast, .18s) ease,
+    backdrop-filter var(--transition-fast, .18s) ease,
+    transform var(--transition-fast, .18s) ease;
+}
+.navbar::after{
+  content:"";
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(0,167,198,0.35),rgba(255,255,255,0));
+  opacity:.6;
+}
+.navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+
+.brand{ display:inline-flex; align-items:center; gap:10px; text-decoration:none; }
+.brand .logo{ height:56px; width:auto; display:block; }
+
+.menu{
+  list-style:none;
+  display:flex;
+  gap:22px;
+  align-items:center;
+  margin:0;
+}
+.menu a{
+  text-decoration:none;
+  color:var(--nav-text-color, var(--gris-texto, var(--gris, #333)));
+  font-weight:500;
+  transition:color var(--transition-fast, .18s), transform var(--transition-fast, .18s);
+  padding:6px 4px;
+  border-radius:6px;
+  position:relative;
+}
+.menu a:hover,
+.menu a:focus{
+  color:var(--cian, #00A7C6);
+  outline:none;
+}
+.menu a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-4px;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--cian, #00A7C6),var(--azul-fondo,#0093D5));
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform var(--transition-fast, .18s);
+  opacity:0.8;
+}
+.menu a:hover::after,
+.menu a:focus::after{ transform:scaleX(1); }
+
+.menu.open{ display:flex; }
+
+.navbar a:focus,
+.navbar button:focus{ outline:none; }
+.navbar a:focus-visible,
+.navbar button:focus-visible{
+  outline:var(--focus-ring-width, 3px) solid var(--focus-ring-color, rgba(0,0,0,0.12));
+  outline-offset:3px;
+  border-radius:6px;
+}
+
+.nav-toggle{
+  display:none;
+  background:none;
+  border:0;
+  cursor:pointer;
+  padding:8px;
+  line-height:0;
+  min-width:var(--btn-hit, 48px);
+  min-height:var(--btn-hit, 48px);
+  align-items:center;
+  justify-content:center;
+  z-index:80;
+  color:var(--nav-text-color, var(--gris-texto, var(--gris, #333)));
+}
+.hamb{
+  display:block;
+  width:26px;
+  height:2px;
+  background:currentColor;
+  position:relative;
+  transition:background var(--transition-fast, .18s);
+}
+.hamb::before,
+.hamb::after{
+  content:"";
+  position:absolute;
+  left:0;
+  width:26px;
+  height:2px;
+  background:currentColor;
+  transition:transform var(--transition-fast, .18s), top var(--transition-fast, .18s), opacity var(--transition-fast, .18s);
+}
+.hamb::before{ top:-8px; }
+.hamb::after{ top:8px; }
+
+.nav-toggle.open .hamb{ background:transparent; }
+.nav-toggle.open .hamb::before{ transform:rotate(45deg); top:0; }
+.nav-toggle.open .hamb::after{ transform:rotate(-45deg); top:0; }
+
+@media (max-width:880px){
+  .nav-toggle{ display:flex; }
+  .menu{
+    position:fixed;
+    top:72px;
+    right:12px;
+    width:calc(100% - 24px);
+    max-width:360px;
+    background:#ffffff;
+    border-radius:12px;
+    box-shadow:0 18px 50px rgba(3,22,45,0.12);
+    padding:12px 14px;
+    flex-direction:column;
+    gap:10px;
+    opacity:0;
+    transform:translateY(-8px) scale(.99);
+    pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease;
+    z-index:75;
+    border:1px solid rgba(0,0,0,0.06);
+    -webkit-overflow-scrolling:touch;
+    max-height:calc(100vh - 96px);
+    overflow:auto;
+    visibility:hidden;
+  }
+  .menu.show,
+  .menu.open{
+    display:flex;
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+    visibility:visible;
+  }
+  .menu li{ width:100%; }
+  .menu a{
+    display:block;
+    padding:10px 12px;
+    border-radius:8px;
+    color:var(--nav-text-color, var(--gris-texto, var(--gris, #333)));
+  }
+  .menu a:hover,
+  .menu a:focus{ background:rgba(0,0,0,0.03); }
+}
