@@ -23,6 +23,10 @@ function setStatus(msg, type = 'info') {
   else statusEl.style.color = '#e5e7eb'
 }
 
+function normalizeEmail(raw) {
+  return raw.trim().toLowerCase()
+}
+
 // Si ya hay sesión → verificar admin y redirigir
 supabase.auth.getSession().then(async ({ data: { session } }) => {
   if (!session) return
@@ -51,11 +55,17 @@ form.addEventListener('submit', async (ev) => {
   btnSignin.disabled = true
   setStatus('Iniciando sesión...')
 
-  const email = username.value.trim()
+  const email = normalizeEmail(username.value)
   const pwd = password.value.trim()
 
   if (!email || !pwd) {
     setStatus('Completa usuario y contraseña', 'error')
+    btnSignin.disabled = false
+    return
+  }
+
+  if (!email.includes('@')) {
+    setStatus('Ingresa el correo corporativo, no solo el usuario', 'error')
     btnSignin.disabled = false
     return
   }
@@ -68,7 +78,10 @@ form.addEventListener('submit', async (ev) => {
     })
 
     if (error) {
-      setStatus('Credenciales incorrectas', 'error')
+      const friendly = error.message?.toLowerCase().includes('invalid')
+        ? 'Credenciales incorrectas'
+        : `No se pudo iniciar sesión: ${error.message}`
+      setStatus(friendly, 'error')
       btnSignin.disabled = false
       return
     }
@@ -110,7 +123,7 @@ form.addEventListener('submit', async (ev) => {
 
   } catch (err) {
     console.error(err)
-    setStatus('Error inesperado: ' + err.message, 'error')
+    setStatus('No se pudo conectar con el servicio de login. Intenta de nuevo.', 'error')
   } finally {
     btnSignin.disabled = false
   }
