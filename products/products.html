@@ -12,7 +12,7 @@
 <body>
 
   <!-- Skip link para usuarios de teclado/lectores -->
-  <a class="skip-link" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+  <a class="skip-link" href="#main">
     Ir al contenido
   </a>
 
@@ -40,9 +40,78 @@
 
     <!-- HERO -->
     <header class="products-hero" role="region" aria-label="Encabezado de productos">
-      <h1>Productos Disponibles</h1>
-      <p>Productos personalizados a tu gusto para tu hogar o negocio.</p>
+      <div class="hero-inner">
+        <div class="hero-text">
+          <p class="eyebrow">Catálogo 2024</p>
+          <h1>Personalizamos cada detalle para potenciar tu marca.</h1>
+          <p class="hero-intro">Diseña productos únicos desde señalética hasta displays premium con acabados de alta calidad, listas para impresionar en ferias, tiendas y oficinas.</p>
+          <div class="hero-actions" role="group" aria-label="Acciones rápidas">
+            <a class="btn btn-primary" href="#catalogo">Explorar catálogo</a>
+            <a class="btn btn-ghost" href="../contact/contact.html">Agendar asesoría</a>
+          </div>
+          <ul class="hero-metrics" aria-label="Indicadores de confianza">
+            <li>
+              <span class="metric-value">350+</span>
+              <span class="metric-label">Proyectos entregados</span>
+            </li>
+            <li>
+              <span class="metric-value">48h</span>
+              <span class="metric-label">Respuesta de cotización</span>
+            </li>
+            <li>
+              <span class="metric-value">4.9/5</span>
+              <span class="metric-label">Satisfacción de clientes</span>
+            </li>
+          </ul>
+        </div>
+        <div class="hero-media" aria-hidden="true">
+          <div class="hero-card primary">
+            <p class="hero-card-label">Entrega Express</p>
+            <p class="hero-card-value">72h</p>
+            <p class="hero-card-note">En proyectos urgentes</p>
+          </div>
+          <div class="hero-card secondary">
+            <p class="hero-card-label">Materiales</p>
+            <p class="hero-card-value">Premium</p>
+            <p class="hero-card-note">Acrílico, MDF, metal y más</p>
+          </div>
+          <div class="hero-card tertiary">
+            <p class="hero-card-label">Soporte dedicado</p>
+            <p class="hero-card-note">Diseñador asignado a tu proyecto</p>
+          </div>
+        </div>
+      </div>
     </header>
+
+    <section class="value-props" aria-label="Beneficios de trabajar con SDS">
+      <div class="section-heading">
+        <p class="eyebrow">¿Por qué SDS?</p>
+        <h2>Experiencia integral para proyectos sin complicaciones</h2>
+        <p class="section-description">Coordinamos diseño, producción y logística para que recibas piezas impecables, listas para instalar. Cada etapa está optimizada para ahorrarte tiempo.</p>
+      </div>
+      <div class="value-grid">
+        <article class="value-card">
+          <div class="value-icon" aria-hidden="true">🎨</div>
+          <h3>Diseño colaborativo</h3>
+          <p>Revisiones ilimitadas hasta lograr el resultado perfecto, con guías de color y materiales.</p>
+        </article>
+        <article class="value-card">
+          <div class="value-icon" aria-hidden="true">🛠️</div>
+          <h3>Producción precisa</h3>
+          <p>Plotters y routers CNC para acabados nítidos, listas de verificación en cada lote.</p>
+        </article>
+        <article class="value-card">
+          <div class="value-icon" aria-hidden="true">🚚</div>
+          <h3>Logística nacional</h3>
+          <p>Coordinamos envíos y montaje en todo Honduras, con seguimiento en tiempo real.</p>
+        </article>
+        <article class="value-card">
+          <div class="value-icon" aria-hidden="true">🤝</div>
+          <h3>Acompañamiento experto</h3>
+          <p>Un asesor asignado te guía desde la cotización hasta la entrega final.</p>
+        </article>
+      </div>
+    </section>
 
     <!-- CONTROLES: búsqueda, categoría, stock y orden -->
     <section class="products-controls" aria-label="Controles de búsqueda y filtro">
@@ -75,7 +144,7 @@
     </section>
 
     <!-- CONTADOR Y CHIPS DE CATEGORÍA -->
-    <section aria-label="Resumen de resultados" class="results-summary" style="max-width:var(--max-width-controls); margin: 0 auto;">
+    <section aria-label="Resumen de resultados" class="results-summary">
       <p id="productCount" class="product-count" aria-live="polite"></p>
       <div id="categoryChips" class="category-chips" role="toolbar" aria-label="Filtrar por categoría">
         <!-- chips dinámicos aquí -->
@@ -84,10 +153,27 @@
 
     <!-- AREA PRODUCTOS: lista semántica -->
     <section id="catalogo" aria-label="Catálogo de productos">
+      <div class="section-heading">
+        <p class="eyebrow">Catálogo en tiempo real</p>
+        <h2>Filtra, encuentra y solicita una cotización en minutos</h2>
+        <p class="section-description">Actualizamos el inventario automáticamente desde Supabase para que siempre veas precios y stock actualizados.</p>
+      </div>
       <!-- products-list actúa como listado para screen readers -->
       <ul id="products-list" class="products-grid" role="list">
         <!-- Los elementos de producto se generarán dinámicamente como <li role="listitem"> -->
       </ul>
+    </section>
+
+    <section class="cta-band" aria-label="¿Listo para iniciar tu proyecto?">
+      <div class="cta-content">
+        <p class="eyebrow">Siguiente paso</p>
+        <h2>Hablemos de tu idea y te compartimos un primer boceto en 48 horas.</h2>
+        <p>Combinamos impresión de gran formato, corte láser y acabados artesanales para crear piezas únicas. Te asesoramos en materiales, instalación y mantenimiento.</p>
+        <div class="cta-actions" role="group" aria-label="Acciones de contacto">
+          <a class="btn btn-primary" href="../contact/contact.html">Hablar con un asesor</a>
+          <a class="btn btn-outline cta-whatsapp" href="https://wa.me/50497135177" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+        </div>
+      </div>
     </section>
 
     <!-- Plantilla de tarjeta de producto (para clonar desde JS)
