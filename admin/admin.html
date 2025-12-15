@@ -59,6 +59,98 @@
               <option value="">Todas las categorías</option>
             </select>
           </div>
+          <div class="field">
+            <label for="filter-status">Estado</label>
+            <select id="filter-status" aria-label="Filtrar por estado logístico">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filter-warehouse">Bodega/Zona</label>
+            <select id="filter-warehouse" aria-label="Filtrar por bodega">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filter-alerts">Alertas</label>
+            <select id="filter-alerts" aria-label="Filtrar por tipo de alerta">
+              <option value="">Todas</option>
+              <option value="low">Bajo stock / ROP</option>
+              <option value="inbound">Con embarques en tránsito</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filter-supplier">Proveedor</label>
+            <input id="filter-supplier" type="search" placeholder="Nombre del proveedor" aria-label="Filtrar por proveedor" />
+          </div>
+        </div>
+      </section>
+
+      <section class="snapshot" aria-label="Resumen operativo">
+        <article class="stat-card">
+          <p class="label">SKU activos</p>
+          <p id="stat-total-skus" class="value">0</p>
+          <p class="meta">Productos visibles</p>
+        </article>
+        <article class="stat-card">
+          <p class="label">Unidades en stock</p>
+          <p id="stat-total-units" class="value">0</p>
+          <p class="meta">Inventario disponible</p>
+        </article>
+        <article class="stat-card warning">
+          <p class="label">Alertas críticas</p>
+          <p id="stat-low-stock" class="value">0</p>
+          <p class="meta">Necesitan reposición</p>
+        </article>
+        <article class="stat-card success">
+          <p class="label">Unidades en tránsito</p>
+          <p id="stat-inbound" class="value">0</p>
+          <p class="meta">PO confirmadas</p>
+        </article>
+        <article class="stat-card">
+          <p class="label">Valor estimado</p>
+          <p id="stat-stock-value" class="value">L 0</p>
+          <p class="meta">Precio x stock</p>
+        </article>
+      </section>
+
+      <section class="logistics-panels">
+        <article class="panel" aria-label="Alertas de inventario">
+          <header>
+            <div>
+              <p class="eyebrow sm">Alertas</p>
+              <h3>Reordenes y bloqueos</h3>
+            </div>
+            <span id="alerts-count" class="chip">0</span>
+          </header>
+          <ul id="alerts-list" class="panel-list"></ul>
+          <p class="panel-empty" id="alerts-empty">Sin alertas.</p>
+        </article>
+
+        <article class="panel" aria-label="Embarques en tránsito">
+          <header>
+            <div>
+              <p class="eyebrow sm">Transporte</p>
+              <h3>Entradas confirmadas</h3>
+            </div>
+            <span id="inbound-count" class="chip">0</span>
+          </header>
+          <ul id="inbound-list" class="panel-list"></ul>
+          <p class="panel-empty" id="inbound-empty">No hay embarques registrados.</p>
+        </article>
+      </section>
+
+      <section id="bulk-toolbar" class="bulk-toolbar" hidden aria-label="Acciones masivas sobre selección">
+        <div class="bulk-info">
+          <strong id="bulk-count">0</strong> seleccionados
+          <button id="clear-selection" type="button" class="btn-ghost">Limpiar selección</button>
+        </div>
+        <div class="bulk-actions" role="group" aria-label="Acciones masivas">
+          <button class="btn-ghost" data-bulk-action="mark-active" type="button">Marcar activos</button>
+          <button class="btn-ghost" data-bulk-action="mark-hold" type="button">Pausar (hold)</button>
+          <button class="btn-ghost" data-bulk-action="receive" type="button">Ingresar embarque</button>
+          <button class="btn-ghost" data-bulk-action="restock" type="button">Reposicionar stock</button>
+          <button class="btn" data-bulk-action="export" type="button">Exportar CSV</button>
         </div>
       </section>
 
@@ -182,6 +274,88 @@
         <div class="form-row">
           <label for="image-path">Ruta de almacenamiento (lectura)</label>
           <input id="image-path" name="image_path" type="text" readonly placeholder="products/CAMISA-001/camisa-blanca.png">
+        </div>
+
+        <div class="form-section-title">Logística &amp; operaciones</div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="status">Estado</label>
+            <select id="status" name="status">
+              <option value="activo">Activo</option>
+              <option value="borrador">Borrador</option>
+              <option value="agotado">Agotado/Bloqueado</option>
+              <option value="mantenimiento">En mantenimiento</option>
+            </select>
+          </div>
+          <div>
+            <label for="priority">Prioridad</label>
+            <select id="priority" name="priority">
+              <option value="normal">Normal</option>
+              <option value="alta">Alta</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="supplier">Proveedor</label>
+            <input id="supplier" name="supplier" type="text" placeholder="Nombre o empresa">
+          </div>
+          <div>
+            <label for="supplier-contact">Contacto proveedor</label>
+            <input id="supplier-contact" name="supplier_contact" type="text" placeholder="Correo / teléfono">
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="cost">Costo unitario</label>
+            <input id="cost" name="cost" type="number" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label for="lead-time">Lead time (días)</label>
+            <input id="lead-time" name="lead_time" type="number" min="0" placeholder="3">
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="warehouse-zone">Bodega / Zona</label>
+            <input id="warehouse-zone" name="warehouse_zone" type="text" placeholder="WH-A / Zona 3">
+          </div>
+          <div>
+            <label for="bin-code">Ubicación / Bin</label>
+            <input id="bin-code" name="bin_code" type="text" placeholder="R2-C4">
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="reorder-point">Punto de reorden (ROP)</label>
+            <input id="reorder-point" name="reorder_point" type="number" min="0" placeholder="10">
+          </div>
+          <div>
+            <label for="reorder-qty">Lote de reposición</label>
+            <input id="reorder-qty" name="reorder_qty" type="number" min="0" placeholder="25">
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="incoming-units">Unidades en tránsito</label>
+            <input id="incoming-units" name="incoming_units" type="number" min="0" placeholder="0">
+          </div>
+          <div>
+            <label for="incoming-eta">ETA (fecha estimada)</label>
+            <input id="incoming-eta" name="incoming_eta" type="date">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="logistics-notes">Notas operativas</label>
+          <textarea id="logistics-notes" name="logistics_notes" rows="3" placeholder="Observaciones de transporte, requisiciones o auditorías"></textarea>
         </div>
 
         <div class="form-actions">

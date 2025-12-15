@@ -16,7 +16,7 @@
 <body>
 
   <!-- Skip link (accesibilidad): visible al enfocar con teclado -->
-  <a class="skip-link" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+  <a class="skip-link visually-hidden" href="#main">
     Ir al contenido
   </a>
 
@@ -31,7 +31,7 @@
     </button>
 
     <ul class="menu" id="mainMenu" role="menubar" aria-label="Menú principal">
-      <li role="none"><a class="home-link" role="menuitem" href="index.html">Inicio</a></li>
+      <li role="none"><a class="home-link" role="menuitem" href="index.html" aria-current="page">Inicio</a></li>
       <li role="none"><a role="menuitem" href="services/services.html">Servicios</a></li>
       <li role="none"><a role="menuitem" href="products/products.html">Productos</a></li>
       <li role="none"><a role="menuitem" href="contact/contact.html">Contacto</a></li>

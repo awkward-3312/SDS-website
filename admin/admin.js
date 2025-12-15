@@ -135,6 +135,10 @@ const newProductBtn = $('new-product')
 const productListEl = $('product-list')
 const searchEl = $('search')
 const filterCategoryEl = $('filter-category')
+const filterStatusEl = $('filter-status')
+const filterWarehouseEl = $('filter-warehouse')
+const filterAlertsEl = $('filter-alerts')
+const filterSupplierEl = $('filter-supplier')
 
 /* Modal / form elements */
 const modal = $('modal')
@@ -163,10 +167,90 @@ const imageFilenameField = $('image-filename')
 const imagePathField = $('image-path')
 const saveProductBtn = $('save-product')
 
+/* Logistics form fields */
+const statusField = $('status')
+const priorityField = $('priority')
+const supplierField = $('supplier')
+const supplierContactField = $('supplier-contact')
+const costField = $('cost')
+const leadTimeField = $('lead-time')
+const warehouseZoneField = $('warehouse-zone')
+const binCodeField = $('bin-code')
+const reorderPointField = $('reorder-point')
+const reorderQtyField = $('reorder-qty')
+const incomingUnitsField = $('incoming-units')
+const incomingEtaField = $('incoming-eta')
+const logisticsNotesField = $('logistics-notes')
+
 /* NEW: toggles and dropzone elements */
 const toggleCompactBtn = $('toggle-compact')
 const toggleTableBtn = $('toggle-table')
 const uploaderDropzone = $('uploader-dropzone')
+
+/* Snapshot + alerts */
+const statTotalSkuEl = $('stat-total-skus')
+const statTotalUnitsEl = $('stat-total-units')
+const statLowStockEl = $('stat-low-stock')
+const statInboundEl = $('stat-inbound')
+const statStockValueEl = $('stat-stock-value')
+const alertsListEl = $('alerts-list')
+const alertsEmptyEl = $('alerts-empty')
+const alertsCountEl = $('alerts-count')
+const inboundListEl = $('inbound-list')
+const inboundEmptyEl = $('inbound-empty')
+const inboundCountEl = $('inbound-count')
+
+/* Bulk selection */
+const bulkToolbarEl = $('bulk-toolbar')
+const bulkCountEl = $('bulk-count')
+const clearSelectionBtn = $('clear-selection')
+
+const bulkActionButtons = () => Array.from(document.querySelectorAll('[data-bulk-action]'))
+
+const LOGISTICS_DEFAULTS = {
+  status: 'activo',
+  priority: 'normal',
+  supplier: '',
+  supplier_contact: '',
+  cost: 0,
+  lead_time_days: 0,
+  warehouse_zone: '',
+  bin_code: '',
+  reorder_point: 0,
+  reorder_qty: 0,
+  incoming_units: 0,
+  incoming_eta: '',
+  logistics_notes: '',
+}
+
+const selectedProducts = new Set()
+let lastRenderedProducts = []
+
+function toggleSelection(id, checked) {
+  if (!id) return
+  if (checked) selectedProducts.add(id)
+  else selectedProducts.delete(id)
+}
+
+function clearSelections() {
+  selectedProducts.clear()
+  updateBulkToolbar()
+  if (!productListEl) return
+  productListEl.querySelectorAll('.select-product').forEach((cb) => {
+    cb.checked = false
+  })
+}
+
+function updateBulkToolbar() {
+  if (!bulkToolbarEl) return
+  const count = selectedProducts.size
+  if (count === 0) {
+    bulkToolbarEl.hidden = true
+  } else {
+    bulkToolbarEl.hidden = false
+    setText(bulkCountEl, count)
+  }
+}
 
 /* ========== Filename helpers ========== */
 function slugifyFilename(name) {
@@ -191,6 +275,72 @@ function inferExtensionFromFile(file) {
   const dot = file.name.lastIndexOf('.')
   if (dot > -1) return file.name.slice(dot + 1).toLowerCase()
   return 'jpg'
+}
+
+function toId(value) {
+  return value === undefined || value === null ? '' : String(value)
+}
+
+function toNumber(value, fallback = 0) {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function parseLogisticsMeta(meta) {
+  if (!meta) return { ...LOGISTICS_DEFAULTS }
+  let source = meta
+  if (typeof meta === 'string') {
+    try {
+      source = JSON.parse(meta)
+    } catch {
+      source = {}
+    }
+  }
+  return { ...LOGISTICS_DEFAULTS, ...source }
+}
+
+function getStatusLabel(status) {
+  switch (status) {
+    case 'activo':
+      return 'Activo'
+    case 'agotado':
+      return 'Bloqueado'
+    case 'mantenimiento':
+      return 'Mantenimiento'
+    case 'borrador':
+      return 'Borrador'
+    default:
+      return status || 'Sin estado'
+  }
+}
+
+function getWarehouseLabel(meta) {
+  if (!meta) return ''
+  const parts = [meta.warehouse_zone, meta.bin_code].filter(Boolean)
+  return parts.join(' · ')
+}
+
+function formatDateLabel(str) {
+  if (!str) return ''
+  try {
+    const date = new Date(str)
+    if (Number.isNaN(date.getTime())) return str
+    return date.toLocaleDateString('es-HN', { day: '2-digit', month: 'short' })
+  } catch {
+    return str
+  }
+}
+
+function needsReorder(product) {
+  const meta = product?.logistics_meta || LOGISTICS_DEFAULTS
+  const rop = toNumber(meta.reorder_point)
+  if (!rop) return false
+  return toNumber(product?.stock) <= rop
+}
+
+function hasInbound(product) {
+  const meta = product?.logistics_meta || LOGISTICS_DEFAULTS
+  return toNumber(meta.incoming_units) > 0
 }
 
 /* ========== Storage helpers ========== */
@@ -327,7 +477,11 @@ async function fetchProducts() {
       toast('Error cargando productos: ' + (error.message || 'error'), 'danger')
       return []
     }
-    productsCache = data || []
+    const normalized = (data || []).map((item) => ({
+      ...item,
+      logistics_meta: parseLogisticsMeta(item.logistics_meta),
+    }))
+    productsCache = normalized
     return productsCache
   } catch (err) {
     console.error('fetchProducts unexpected', err)
@@ -356,8 +510,27 @@ function renderProductCard(p) {
   const safeTitle = escapeHtml(p.title || '')
   const safeSku = escapeHtml(p.sku || '')
   const safeDesc = escapeHtml((p.description || '').slice(0, 120))
+  const meta = p.logistics_meta || LOGISTICS_DEFAULTS
+  const statusTag = meta.status ? `<span class="tag status-${escapeHtml(meta.status)}">${escapeHtml(getStatusLabel(meta.status))}</span>` : ''
+  const priorityTag = meta.priority && meta.priority !== 'normal' ? `<span class="tag priority-${escapeHtml(meta.priority)}">Prioridad ${escapeHtml(meta.priority)}</span>` : ''
+  const warehouseTag = getWarehouseLabel(meta) ? `<span class="tag warehouse">${escapeHtml(getWarehouseLabel(meta))}</span>` : ''
+  const leadTag = meta.lead_time_days ? `<span class="tag">Lead ${escapeHtml(String(meta.lead_time_days))}d</span>` : ''
+  const reorderChip = needsReorder(p)
+    ? `<span class="alert-chip danger">ROP ${escapeHtml(String(meta.reorder_point || 0))}</span>`
+    : ''
+  const inboundChip = hasInbound(p)
+    ? `<span class="alert-chip success">${escapeHtml(String(meta.incoming_units))} en tránsito ${meta.incoming_eta ? `· ${escapeHtml(formatDateLabel(meta.incoming_eta))}` : ''}</span>`
+    : ''
+  const supplier = meta.supplier ? escapeHtml(meta.supplier) : 'Sin proveedor'
+  const costLabel = meta.cost ? formatCurrency(meta.cost) : 'N/D'
+  const notes = meta.logistics_notes ? escapeHtml(meta.logistics_notes.slice(0, 120)) : ''
+  const isSelected = selectedProducts.has(toId(p.id))
 
   wrapper.innerHTML = `
+    <label class="card-select">
+      <input type="checkbox" class="select-product" data-id="${escapeHtml(toId(p.id))}" ${isSelected ? 'checked' : ''}>
+      <span>Seleccionar</span>
+    </label>
     <div class="card-media">
       <img src="${imgUrl}" alt="${safeTitle}" loading="lazy"
            onerror="this.onerror=null;this.src='${placeholder}'; this.classList.add('img-broken')">
@@ -366,12 +539,27 @@ function renderProductCard(p) {
       <h3 class="card-title">${safeTitle}</h3>
       <div class="muted">SKU: ${safeSku}</div>
       <p class="card-desc">${safeDesc}</p>
+      <div class="card-logistics">
+        ${statusTag}
+        ${priorityTag}
+        ${warehouseTag}
+        ${leadTag}
+      </div>
+      <div class="card-alerts">
+        ${reorderChip}
+        ${inboundChip}
+      </div>
       <div class="meta">
         <div><strong>${formatCurrency ? formatCurrency(p.price) : '$' + Number(p.price || 0).toFixed(2)}</strong></div>
         <div class="stock-wrap" aria-hidden="false">
           <span class="stock-badge ${stockClass}" aria-label="Stock ${p.stock}">${p.stock}</span>
         </div>
       </div>
+      <div class="card-supplier">
+        <span>Proveedor: <strong>${supplier}</strong></span>
+        <span>Costo: ${costLabel}</span>
+      </div>
+      ${notes ? `<p class="card-notes">${notes}</p>` : ''}
       <div class="card-actions" role="group" aria-label="Acciones producto ${safeTitle}">
         <button data-edit="${p.id}" class="btn-ghost" type="button">Editar</button>
         <button data-delete="${p.id}" class="btn-ghost danger" type="button">Eliminar</button>
@@ -384,47 +572,226 @@ function renderProductCard(p) {
 async function refreshProducts() {
   if (productListEl) productListEl.innerHTML = '<div class="loading">Cargando...</div>'
   await fetchProducts()
-  const qVal = (searchEl?.value || '').trim().toLowerCase()
-  const cat = filterCategoryEl?.value || ''
+  updateInventorySnapshot(productsCache)
+  updateAlertsPanel(productsCache)
+  updateInboundPanel(productsCache)
+  populateCategoryOptions(productsCache)
+  updateDynamicFilters(productsCache)
+
   if (productListEl) productListEl.innerHTML = ''
-  const filtered = (productsCache || []).filter((p) => {
-    if (cat && (p.category || '') !== cat) return false
-    if (!qVal) return true
-    return (
-      (p.title || '').toLowerCase().includes(qVal) ||
-      (p.sku || '').toLowerCase().includes(qVal)
-    )
-  })
+  const filtered = filterProducts(productsCache || [])
+  lastRenderedProducts = filtered
   if (!productListEl) return
   if (filtered.length === 0) {
     productListEl.innerHTML = '<div class="empty-state">No hay productos</div>'
+    updateBulkToolbar()
     return
   }
   const fragment = document.createDocumentFragment()
   filtered.forEach((p) => fragment.appendChild(renderProductCard(p)))
   productListEl.appendChild(fragment)
+  updateBulkToolbar()
+}
+
+function filterProducts(list) {
+  const qVal = (searchEl?.value || '').trim().toLowerCase()
+  const cat = filterCategoryEl?.value || ''
+  const statusVal = filterStatusEl?.value || ''
+  const warehouseVal = filterWarehouseEl?.value || ''
+  const alertsVal = filterAlertsEl?.value || ''
+  const supplierVal = (filterSupplierEl?.value || '').trim().toLowerCase()
+
+  return (list || []).filter((p) => {
+    if (cat && (p.category || '') !== cat) return false
+    if (statusVal && (p.logistics_meta?.status || '') !== statusVal) return false
+    if (warehouseVal && (p.logistics_meta?.warehouse_zone || '') !== warehouseVal) return false
+    if (alertsVal === 'low' && !needsReorder(p)) return false
+    if (alertsVal === 'inbound' && !hasInbound(p)) return false
+    if (supplierVal) {
+      const supplier = (p.logistics_meta?.supplier || '').toLowerCase()
+      if (!supplier.includes(supplierVal)) return false
+    }
+    if (qVal) {
+      const matchesTitle = (p.title || '').toLowerCase().includes(qVal)
+      const matchesSku = (p.sku || '').toLowerCase().includes(qVal)
+      if (!matchesTitle && !matchesSku) return false
+    }
+    return true
+  })
+}
+
+function setText(el, text) {
+  if (el) el.textContent = text
+}
+
+function updateInventorySnapshot(list) {
+  const totalSku = list.length
+  const totalUnits = list.reduce((acc, item) => acc + toNumber(item.stock), 0)
+  const lowStock = list.filter((item) => needsReorder(item)).length
+  const inboundUnits = list.reduce(
+    (acc, item) => acc + toNumber(item.logistics_meta?.incoming_units),
+    0
+  )
+  const stockValue = list.reduce(
+    (acc, item) => acc + toNumber(item.price) * toNumber(item.stock),
+    0
+  )
+  setText(statTotalSkuEl, totalSku)
+  setText(statTotalUnitsEl, totalUnits)
+  setText(statLowStockEl, lowStock)
+  setText(statInboundEl, inboundUnits)
+  setText(statStockValueEl, formatCurrency ? formatCurrency(stockValue) : `L ${stockValue}`)
+}
+
+function updateAlertsPanel(list) {
+  if (!alertsListEl || !alertsEmptyEl) return
+  alertsListEl.innerHTML = ''
+  const alerts = list.filter((item) => needsReorder(item) || item.logistics_meta?.status === 'agotado')
+  setText(alertsCountEl, alerts.length)
+  if (!alerts.length) {
+    alertsEmptyEl.hidden = false
+    return
+  }
+  alertsEmptyEl.hidden = true
+  alerts.forEach((item) => {
+    const meta = item.logistics_meta || LOGISTICS_DEFAULTS
+    const li = document.createElement('li')
+    li.className = 'panel-item'
+    li.innerHTML = `
+      <strong>${escapeHtml(item.title || '')}</strong>
+      <div class="meta">
+        <span>Stock: ${toNumber(item.stock)}</span>
+        <span>ROP: ${meta.reorder_point || 0}</span>
+      </div>
+    `
+    alertsListEl.appendChild(li)
+  })
+}
+
+function updateInboundPanel(list) {
+  if (!inboundListEl || !inboundEmptyEl) return
+  inboundListEl.innerHTML = ''
+  const inbound = list.filter((item) => hasInbound(item))
+  setText(inboundCountEl, inbound.length)
+  if (!inbound.length) {
+    inboundEmptyEl.hidden = false
+    return
+  }
+  inboundEmptyEl.hidden = true
+  inbound.forEach((item) => {
+    const meta = item.logistics_meta || LOGISTICS_DEFAULTS
+    const li = document.createElement('li')
+    li.className = 'panel-item'
+    li.innerHTML = `
+      <strong>${escapeHtml(item.title || '')}</strong>
+      <div>Cantidad en tránsito: ${escapeHtml(String(meta.incoming_units || 0))}</div>
+      <div class="meta">
+        <span>Proveedor: ${escapeHtml(meta.supplier || 'N/D')}</span>
+        <span>ETA: ${escapeHtml(formatDateLabel(meta.incoming_eta) || 'Pendiente')}</span>
+      </div>
+    `
+    inboundListEl.appendChild(li)
+  })
 }
 
 /* ========== Categories ========== */
 async function loadCategories() {
   try {
+    if (productsCache.length) {
+      populateCategoryOptions(productsCache)
+      return
+    }
     const { data, error } = await supabase.from('products').select('category').neq('category', null)
     if (error) {
       console.warn('loadCategories', error)
       return
     }
-    const unique = Array.from(new Set((data || []).map((r) => r.category).filter(Boolean)))
-    if (filterCategoryEl)
-      filterCategoryEl.innerHTML =
-        `<option value="">Todas las categorías</option>` +
-        unique.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+    const list = (data || []).map((r) => ({ category: r.category }))
+    populateCategoryOptions(list)
   } catch (err) {
     console.warn('loadCategories unexpected', err)
   }
 }
 
+function populateCategoryOptions(list) {
+  if (!filterCategoryEl) return
+  const previous = filterCategoryEl.value
+  const unique = Array.from(new Set((list || []).map((r) => r.category).filter(Boolean)))
+  let html = `<option value="">Todas las categorías</option>`
+  unique.forEach((c) => {
+    html += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`
+  })
+  filterCategoryEl.innerHTML = html
+  if (previous && unique.includes(previous)) filterCategoryEl.value = previous
+}
+
+function populateSelectFromValues(selectEl, values, placeholder) {
+  if (!selectEl) return
+  const prev = selectEl.value
+  let html = `<option value="">${placeholder}</option>`
+  values.forEach((val) => {
+    html += `<option value="${escapeHtml(val)}">${escapeHtml(val)}</option>`
+  })
+  selectEl.innerHTML = html
+  if (prev && values.includes(prev)) selectEl.value = prev
+}
+
+function updateDynamicFilters(list) {
+  const statuses = Array.from(
+    new Set(
+      (list || [])
+        .map((p) => (p.logistics_meta && p.logistics_meta.status) || '')
+        .filter(Boolean)
+    )
+  )
+  const warehouses = Array.from(
+    new Set(
+      (list || [])
+        .map((p) => p.logistics_meta?.warehouse_zone)
+        .filter(Boolean)
+    )
+  )
+  populateSelectFromValues(filterStatusEl, statuses, 'Todos')
+  populateSelectFromValues(filterWarehouseEl, warehouses, 'Todas')
+}
+
 /* ========== Modal controls (accessibility) ========== */
 let currentModalProductIndex = -1
+
+function fillLogisticsFields(meta = LOGISTICS_DEFAULTS) {
+  const data = { ...LOGISTICS_DEFAULTS, ...(meta || {}) }
+  if (statusField) statusField.value = data.status || 'activo'
+  if (priorityField) priorityField.value = data.priority || 'normal'
+  if (supplierField) supplierField.value = data.supplier || ''
+  if (supplierContactField) supplierContactField.value = data.supplier_contact || ''
+  if (costField) costField.value = data.cost || ''
+  if (leadTimeField) leadTimeField.value = data.lead_time_days || ''
+  if (warehouseZoneField) warehouseZoneField.value = data.warehouse_zone || ''
+  if (binCodeField) binCodeField.value = data.bin_code || ''
+  if (reorderPointField) reorderPointField.value = data.reorder_point || ''
+  if (reorderQtyField) reorderQtyField.value = data.reorder_qty || ''
+  if (incomingUnitsField) incomingUnitsField.value = data.incoming_units || ''
+  if (incomingEtaField) incomingEtaField.value = data.incoming_eta || ''
+  if (logisticsNotesField) logisticsNotesField.value = data.logistics_notes || ''
+}
+
+function collectLogisticsMeta() {
+  return {
+    status: statusField ? statusField.value : LOGISTICS_DEFAULTS.status,
+    priority: priorityField ? priorityField.value : LOGISTICS_DEFAULTS.priority,
+    supplier: supplierField ? supplierField.value.trim() : '',
+    supplier_contact: supplierContactField ? supplierContactField.value.trim() : '',
+    cost: costField ? toNumber(costField.value) : 0,
+    lead_time_days: leadTimeField ? toNumber(leadTimeField.value) : 0,
+    warehouse_zone: warehouseZoneField ? warehouseZoneField.value.trim() : '',
+    bin_code: binCodeField ? binCodeField.value.trim() : '',
+    reorder_point: reorderPointField ? toNumber(reorderPointField.value) : 0,
+    reorder_qty: reorderQtyField ? toNumber(reorderQtyField.value) : 0,
+    incoming_units: incomingUnitsField ? toNumber(incomingUnitsField.value) : 0,
+    incoming_eta: incomingEtaField ? incomingEtaField.value : '',
+    logistics_notes: logisticsNotesField ? logisticsNotesField.value.trim() : '',
+  }
+}
 
 function openModal(data = null) {
   if (!modal || !modalOverlay) return
@@ -452,6 +819,7 @@ function openModal(data = null) {
       imgPreview.src = ''
     }
     if (previewPlaceholder) previewPlaceholder.hidden = false
+    fillLogisticsFields(LOGISTICS_DEFAULTS)
     currentModalProductIndex = -1
     setTimeout(() => titleEl && titleEl.focus(), 100)
   } else {
@@ -478,6 +846,7 @@ function openModal(data = null) {
       if (imgPreview) imgPreview.hidden = true
       if (previewPlaceholder) previewPlaceholder.hidden = false
     }
+    fillLogisticsFields(parseLogisticsMeta(data.logistics_meta))
 
     currentModalProductIndex = productsCache.findIndex((x) => x.id === data.id)
     setTimeout(() => titleEl && titleEl.focus(), 100)
@@ -740,6 +1109,7 @@ if (productForm) {
       image_path: imagePath ? normalizeBucketPath(imagePath) : null,
 
       updated_by: userId,
+      logistics_meta: collectLogisticsMeta(),
     }
 
     try {
@@ -817,6 +1187,7 @@ if (productListEl) {
           toast('Error eliminando: ' + error.message, 'danger')
           return
         }
+        selectedProducts.delete(toId(deleteId))
         toast('Producto eliminado', 'success')
         await refreshProducts()
       } catch (err) {
@@ -879,9 +1250,192 @@ if (newProductBtn) newProductBtn.addEventListener('click', () => openModal())
 if (refreshBtn) refreshBtn.addEventListener('click', refreshProducts)
 if (searchEl) searchEl.addEventListener('input', debounce(() => refreshProducts(), 300))
 if (filterCategoryEl) filterCategoryEl.addEventListener('change', () => refreshProducts())
+if (filterStatusEl) filterStatusEl.addEventListener('change', () => refreshProducts())
+if (filterWarehouseEl) filterWarehouseEl.addEventListener('change', () => refreshProducts())
+if (filterAlertsEl) filterAlertsEl.addEventListener('change', () => refreshProducts())
+if (filterSupplierEl) filterSupplierEl.addEventListener('input', debounce(() => refreshProducts(), 300))
 if (modalClose) modalClose.addEventListener('click', closeModal)
 if (cancelBtn) cancelBtn.addEventListener('click', closeModal)
 if (modalOverlay) modalOverlay.addEventListener('click', closeModal)
+if (productListEl) {
+  productListEl.addEventListener('change', (ev) => {
+    const input = ev.target
+    if (input && input.classList && input.classList.contains('select-product')) {
+      toggleSelection(toId(input.dataset.id), input.checked)
+      updateBulkToolbar()
+    }
+  })
+}
+if (clearSelectionBtn) clearSelectionBtn.addEventListener('click', () => clearSelections())
+bulkActionButtons().forEach((btn) => {
+  btn.addEventListener('click', () => handleBulkAction(btn.dataset.bulkAction))
+})
+
+async function handleBulkAction(action) {
+  if (!action) return
+  if (!selectedProducts.size && action !== 'export') {
+    toast('Selecciona productos primero', 'info')
+    return
+  }
+  try {
+    if (action === 'mark-active') {
+      await bulkUpdateStatus('activo')
+      toast('Estados actualizados', 'success')
+    } else if (action === 'mark-hold') {
+      await bulkUpdateStatus('mantenimiento')
+      toast('Productos pausados', 'success')
+    } else if (action === 'restock') {
+      await bulkRestock()
+    } else if (action === 'receive') {
+      await bulkReceiveShipments()
+    } else if (action === 'export') {
+      exportSelectionToCsv()
+      return
+    }
+    if (action !== 'export') {
+      clearSelections()
+      await refreshProducts()
+    }
+  } catch (err) {
+    console.error('bulk action error', err)
+    toast('Error en acción masiva: ' + (err.message || 'Error'), 'danger')
+  }
+}
+
+async function bulkUpdateStatus(newStatus) {
+  const ids = Array.from(selectedProducts)
+  for (const id of ids) {
+    const product = productsCache.find((p) => toId(p.id) === id)
+    if (!product) continue
+    const updatedMeta = { ...product.logistics_meta, status: newStatus }
+    const { error } = await supabase.from('products').update({ logistics_meta: updatedMeta }).eq('id', id)
+    if (error) throw error
+  }
+}
+
+async function bulkRestock() {
+  const ids = Array.from(selectedProducts)
+  if (!ids.length) {
+    toast('Selecciona productos para reponer', 'info')
+    return
+  }
+  let manualQuantity = null
+  if (Swal) {
+    const result = await Swal.fire({
+      title: 'Reposición',
+      text: 'Ingresa la cantidad final de stock (opcional). Si lo dejas vacío se usará el lote de reposición.',
+      input: 'number',
+      inputAttributes: { min: 0 },
+      showCancelButton: true,
+      confirmButtonText: 'Actualizar',
+      cancelButtonText: 'Cancelar',
+    })
+    if (result.isDismissed) return
+    manualQuantity = result.value ? Number(result.value) : null
+  }
+
+  for (const id of ids) {
+    const product = productsCache.find((p) => toId(p.id) === id)
+    if (!product) continue
+    const meta = { ...product.logistics_meta }
+    const fallbackTarget = toNumber(meta.reorder_qty) || toNumber(meta.reorder_point) || toNumber(product.stock)
+    const target = manualQuantity || fallbackTarget
+    if (!target && target !== 0) continue
+    meta.incoming_units = 0
+    meta.incoming_eta = ''
+    const { error } = await supabase
+      .from('products')
+      .update({ stock: target, logistics_meta: meta })
+      .eq('id', id)
+    if (error) throw error
+  }
+  toast('Stock actualizado', 'success')
+}
+
+async function bulkReceiveShipments() {
+  const ids = Array.from(selectedProducts)
+  if (!ids.length) {
+    toast('Selecciona productos', 'info')
+    return
+  }
+  for (const id of ids) {
+    const product = productsCache.find((p) => toId(p.id) === id)
+    if (!product) continue
+    const meta = { ...product.logistics_meta }
+    const incoming = toNumber(meta.incoming_units)
+    if (!incoming) continue
+    const newStock = toNumber(product.stock) + incoming
+    meta.incoming_units = 0
+    meta.incoming_eta = ''
+    const { error } = await supabase
+      .from('products')
+      .update({ stock: newStock, logistics_meta: meta })
+      .eq('id', id)
+    if (error) throw error
+  }
+  toast('Se registraron las entradas', 'success')
+}
+
+function exportSelectionToCsv() {
+  const source = selectedProducts.size
+    ? lastRenderedProducts.filter((p) => selectedProducts.has(toId(p.id)))
+    : lastRenderedProducts
+  if (!source.length) {
+    toast('No hay productos para exportar', 'info')
+    return
+  }
+  const headers = [
+    'ID',
+    'Título',
+    'SKU',
+    'Categoría',
+    'Precio',
+    'Stock',
+    'Estado',
+    'Proveedor',
+    'Bodega',
+    'ROP',
+    'Lote',
+    'Ingreso_en_transito',
+    'ETA',
+    'LeadTime',
+    'Costo',
+    'Notas',
+  ]
+  const rows = source.map((item) => {
+    const meta = item.logistics_meta || LOGISTICS_DEFAULTS
+    return [
+      toId(item.id),
+      item.title || '',
+      item.sku || '',
+      item.category || '',
+      toNumber(item.price),
+      toNumber(item.stock),
+      meta.status || '',
+      meta.supplier || '',
+      getWarehouseLabel(meta),
+      meta.reorder_point || 0,
+      meta.reorder_qty || 0,
+      meta.incoming_units || 0,
+      meta.incoming_eta || '',
+      meta.lead_time_days || 0,
+      meta.cost || 0,
+      meta.logistics_notes || '',
+    ]
+  })
+  const csv = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `productos-${Date.now()}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 /* ========== Init ========== */
 async function main() {
