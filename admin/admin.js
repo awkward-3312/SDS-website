@@ -1,4 +1,4 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 /* ========== CONFIG ========== */
 const SUPABASE_URL = 'https://rxerfllxwdalduuzndiv.supabase.co'
@@ -102,20 +102,18 @@ function debounce(fn, wait = 300) {
 }
 
 /* ===========================
-   ✅ NEW: image_url helpers
+   ✅ image_url helpers
    image_url = PATH dentro del bucket Products (public)
    Ej: "products/SKU123/foto.png"
    =========================== */
 function normalizeBucketPath(v) {
   const s = String(v || '').trim()
   if (!s) return ''
-  // si alguien guardó URL completa por error, extraemos el path relativo al bucket
-  // (intentamos ser tolerantes sin romper)
   if (/^https?:\/\//i.test(s)) {
     const marker = `/storage/v1/object/public/${BUCKET}/`
     const idx = s.indexOf(marker)
     if (idx !== -1) return s.slice(idx + marker.length).replace(/^\/+/, '')
-    return s // si no calza, lo devolvemos tal cual (se tratará como URL)
+    return s
   }
   return s.replace(/^\/+/, '')
 }
@@ -123,9 +121,7 @@ function normalizeBucketPath(v) {
 function getPublicUrlFromImageUrl(image_url) {
   const v = String(image_url || '').trim()
   if (!v) return null
-  // si ya es URL completa, úsala
   if (/^https?:\/\//i.test(v)) return v
-
   const clean = normalizeBucketPath(v)
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(clean)
   return data?.publicUrl || null
@@ -285,11 +281,15 @@ async function initAuth() {
     })
   }
 
+  // ✅ FIX: NO BORRAR authArea (para no romper Compacto/Tabla si están ahí)
   if (authArea && user) {
-    authArea.innerHTML = `<div class="admin-session">
+    const sessionEl = document.createElement('div')
+    sessionEl.className = 'admin-session'
+    sessionEl.innerHTML = `
       Conectado como <strong>${escapeHtml(user.email)}</strong> 
       <button id="sign-out-inline" class="btn-ghost">Salir</button>
-    </div>`
+    `
+    authArea.appendChild(sessionEl)
 
     const sbtn = $('sign-out-inline')
     if (sbtn)
@@ -487,7 +487,7 @@ function openModal(data = null) {
     imageFilenameField && (imageFilenameField.value = data.image_filename || '')
     imagePathField && (imagePathField.value = data.image_path || '')
 
-    // ✅ FIX: preview desde image_url (path en bucket Products)
+    // ✅ preview desde image_url
     const previewUrl = getPublicUrlFromImageUrl(data.image_url)
     if (previewUrl && imgPreview) {
       imgPreview.src = previewUrl
@@ -498,7 +498,6 @@ function openModal(data = null) {
       if (previewPlaceholder) previewPlaceholder.hidden = false
     }
 
-    // set currentModalProductIndex to match productsCache ordering (if present)
     currentModalProductIndex = productsCache.findIndex((x) => x.id === data.id)
     setTimeout(() => titleEl && titleEl.focus(), 100)
   }
@@ -595,14 +594,8 @@ if (uploaderDropzone && imageFileEl) {
 
 if (autoNameBtn) {
   autoNameBtn.addEventListener('click', () => {
-    const base =
-      (titleEl && titleEl.value.trim()) ||
-      (skuEl && skuEl.value.trim()) ||
-      'producto'
-    const ext =
-      imageFileEl && imageFileEl.files[0]
-        ? inferExtensionFromFile(imageFileEl.files[0])
-        : 'png'
+    const base = (titleEl && titleEl.value.trim()) || (skuEl && skuEl.value.trim()) || 'producto'
+    const ext = imageFileEl && imageFileEl.files[0] ? inferExtensionFromFile(imageFileEl.files[0]) : 'png'
     if (imageNameEl) imageNameEl.value = slugifyFilename(`${base}.${ext}`)
     toast('Nombre sugerido', 'info')
   })
@@ -710,7 +703,7 @@ if (startUploadBtn) {
         }
       }
 
-      // ✅ FIX: image_url = path dentro del bucket (fuente real)
+      // ✅ image_url = path dentro del bucket (fuente real)
       const finalFilePath = `${folder}/${finalName}`
 
       // Public URL solo para preview (bucket público)
@@ -748,7 +741,6 @@ if (productForm) {
     const id = productIdEl ? productIdEl.value || null : null
     const userId = (await supabase.auth.getUser()).data?.user?.id || null
 
-    // ✅ FIX: image_url debe venir del path (imagePathField)
     const imagePath = imagePathField ? (imagePathField.value || null) : null
 
     const payload = {
@@ -762,7 +754,7 @@ if (productForm) {
       // ✅ fuente real:
       image_url: imagePath ? normalizeBucketPath(imagePath) : null,
 
-      // (se dejan por compatibilidad con tu esquema actual, pero ya no son la “fuente real”)
+      // compat:
       image_filename: imageFilenameField ? imageFilenameField.value || null : null,
       image_path: imagePath ? normalizeBucketPath(imagePath) : null,
 
@@ -776,10 +768,9 @@ if (productForm) {
         toast('Producto actualizado', 'success')
       } else {
         payload.created_by = userId
-        const { data, error } = await supabase.from('products').insert(payload).select().single()
+        const { error } = await supabase.from('products').insert(payload).select().single()
         if (error) throw error
 
-        // try to call RPC to create initial movement (optional)
         try {
           await supabase.rpc('create_product_with_stock', {
             p_sku: payload.sku,
@@ -788,7 +779,7 @@ if (productForm) {
             p_category: payload.category,
             p_price: payload.price,
             p_stock: payload.stock,
-            p_image_path: payload.image_url, // mantenemos compatibilidad (si tu RPC usa image_path)
+            p_image_path: payload.image_url,
             p_performed_by: payload.created_by,
           })
         } catch (rpcErr) {
@@ -915,9 +906,6 @@ if (modalOverlay) modalOverlay.addEventListener('click', closeModal)
 async function main() {
   await loadSwal()
   await initAuth()
-
-  // ✅ FIX: NO sobrescribas la lista después de cargar productos
-  // (antes lo pisabas con el empty-state)
 }
 
 main().catch((err) => {
