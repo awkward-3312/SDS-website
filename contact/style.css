@@ -26,7 +26,28 @@
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
 }
-html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%,#ffffff 100%); }
+html,body{
+  height:100%;
+  background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%,#ffffff 100%);
+  scroll-behavior:smooth;
+}
+body{
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0,167,198,0.12), transparent 35%),
+    radial-gradient(circle at 82% 8%, rgba(255,207,36,0.15), transparent 40%),
+    linear-gradient(120deg, rgba(255,255,255,0.18), transparent 60%);
+  opacity:0.6;
+  pointer-events:none;
+  z-index:-1;
+}
+::selection{ background:rgba(0,167,198,0.18); color:#0f1f38; }
 
 /* Util — ocultar accesible (skip link) */
 .visually-hidden {
@@ -72,8 +93,19 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0,0,0,0.04);
   transition: box-shadow 0.18s ease, backdrop-filter 0.18s ease, transform 0.18s ease;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.08);
   backdrop-filter: blur(8px);
+  border-radius:0 0 24px 24px;
+  position:sticky;
+}
+.navbar::after{
+  content:"";
+  position:absolute;
+  left:24px;
+  right:24px;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(0,167,198,0.35),rgba(255,255,255,0));
 }
 .navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08); }
 
@@ -196,7 +228,7 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 
 /* ========== CONTACT / HERO / GRID / TARJETAS ========== */
 .contact-hero {
-    padding: 80px 40px;
+    padding: 90px 40px 110px;
     background: linear-gradient(135deg, #0aa1d5, #0ec5b5);
     color: var(--blanco);
     text-align: center;
@@ -212,6 +244,14 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
                 radial-gradient(circle at 35% 80%, rgba(0,0,0,0.08), transparent 46%);
     pointer-events: none;
 }
+.contact-hero::before{
+    content:"";
+    position:absolute;
+    inset:18px;
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:32px;
+    opacity:.7;
+}
 .contact-hero h1 {
     font-size: 46px;
     font-weight: 800;
@@ -221,12 +261,14 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 
 /* MAIN GRID */
 .contact-container {
-    padding: 60px 40px;
+    padding: 70px 40px 90px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: var(--gap);
     max-width: var(--container-max);
-    margin: 0 auto;
+    margin: -60px auto 0;
+    position:relative;
+    z-index:1;
 }
 
 /* Conserva estilos del formulario si existe (fallback) */
@@ -310,12 +352,29 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 }
 .contact-info-card {
     background: var(--blanco);
-    padding: 22px;
+    padding: 30px;
     border-radius: var(--card-radius);
     box-shadow: var(--card-shadow);
     display: flex;
     flex-direction: column;
     gap: 12px;
+    border:1px solid rgba(0,0,0,0.04);
+    position:relative;
+    overflow:hidden;
+}
+.contact-info-card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    padding:1px;
+    background:linear-gradient(135deg, rgba(0,167,198,0.25), rgba(255,255,255,0));
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity:.45;
 }
 .contact-info-card h2 { font-size: 22px; margin-bottom: 6px; color: var(--gris-texto); }
 .contact-info-card p { color: var(--gris-texto); font-size: 15px; line-height: 1.5; }
@@ -328,10 +387,10 @@ html,body{ height:100%; background:linear-gradient(180deg,#f6fbff 0%,#eef3ff 45%
 /* MAP */
 .contact-map-card { display:flex; flex-direction:column; gap:10px; }
 .map-wrapper {
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     background: linear-gradient(180deg, #f7f9fb, #eef4f8);
-    box-shadow: 0 14px 40px rgba(16, 30, 50, 0.06);
+    box-shadow: 0 30px 70px rgba(16, 30, 50, 0.08);
     border: 1px solid rgba(0,0,0,0.04);
     position: relative;
 }
@@ -372,7 +431,7 @@ body.contact-page .header-inner {
     .logo { height: 52px; }
     .map-wrapper { min-height: 220px; }
     .map-wrapper::before { padding-top: 78%; }
-    .contact-info-card { padding: 18px; }
+    .contact-info-card { padding: 22px; }
     .contact-info-map { gap: 16px; padding-bottom: 20px; }
     .contact-actions { display:flex; flex-direction:column; gap:12px; }
     .contact-actions .btn { width: 100%; min-width: auto; }

@@ -20,10 +20,37 @@
 
 /* Reset básico */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:"Poppins",sans-serif;color:var(--gris);background:linear-gradient(180deg,#f7fbff 0%,#f2f6ff 50%,#ffffff 100%);-webkit-font-smoothing:antialiased}
+html,body{
+  height:100%;
+  font-family:"Poppins",sans-serif;
+  color:var(--gris);
+  background:linear-gradient(180deg,#f7fbff 0%,#f2f6ff 50%,#ffffff 100%);
+  -webkit-font-smoothing:antialiased;
+  scroll-behavior:smooth;
+}
+body{
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(0,167,198,0.15), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(229,35,51,0.12), transparent 40%),
+    linear-gradient(120deg, rgba(255,255,255,0.08), transparent 60%);
+  pointer-events:none;
+  opacity:0.35;
+  z-index:-1;
+}
 img{max-width:100%;display:block;height:auto}
 
-main{padding:6px 0 24px;}
+main{
+  padding:6px 0 80px;
+  position:relative;
+  isolation:isolate;
+}
 
 /* NAVBAR */
 .navbar{
@@ -39,6 +66,16 @@ main{padding:6px 0 24px;}
   transition:box-shadow var(--transition-fast) ease, backdrop-filter var(--transition-fast) ease, transform var(--transition-fast);
   backdrop-filter: blur(12px);
   border-bottom:1px solid rgba(0,0,0,0.04);
+}
+.navbar::after{
+  content:"";
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(0,167,198,0.35),rgba(255,255,255,0));
+  opacity:.6;
 }
 .navbar.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,0.08) }
 
@@ -105,11 +142,11 @@ main{padding:6px 0 24px;}
 
 /* HERO */
 .hero{
-  display:flex;
+  display:grid;
+  grid-template-columns:minmax(280px,1fr) minmax(260px,420px);
   align-items:center;
-  justify-content:space-between;
   padding:90px var(--container-padding);
-  gap:40px;
+  gap:48px;
   background: linear-gradient(135deg, #0f9ad5, #0ec5cb);
   color:var(--blanco);
   min-height:420px; /* ayuda a evitar CLS al cargar */
@@ -132,11 +169,48 @@ main{padding:6px 0 24px;}
 .hero::before{ width:320px; height:320px; background:rgba(255,255,255,0.35); top:-80px; right:-120px; }
 .hero::after{ width:240px; height:240px; background:rgba(0,0,0,0.18); bottom:-120px; left:-60px; }
 
-/* Make hero responsive-safe using aspect-ratio on slider (no JS needed for height) */
 .hero-text{ max-width:640px }
-.hero-text h1{ font-size:48px; font-weight:800; line-height:1.02; margin-bottom:6px; text-wrap:balance }
+.hero-text h1{ font-size:clamp(32px,4vw,52px); font-weight:800; line-height:1.02; margin-bottom:6px; text-wrap:balance }
 .hero-text p{ margin-top:12px; font-size:18px; opacity:.95; max-width:60ch }
 .buttons{ margin-top:22px; display:flex; gap:14px; align-items:center }
+
+/* hero highlights */
+.hero-highlights{
+  list-style:none;
+  margin-top:34px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.hero-highlights li{
+  display:flex;
+  gap:12px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.25);
+  box-shadow:0 18px 28px rgba(0,0,0,0.16);
+}
+.hero-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  background:rgba(0,0,0,0.18);
+  font-weight:700;
+  font-size:16px;
+}
+.hero-highlight-title{
+  font-weight:700;
+  font-size:16px;
+}
+.hero-highlight-text{
+  opacity:0.8;
+  font-size:14px;
+}
 
 /* Buttons: ensure hit area and accessible contrast */
 .btn{
@@ -169,8 +243,8 @@ main{padding:6px 0 24px;}
 /* SLIDER HERO */
 .hero-slider {
   position: relative;
-  width: 420px;           /* ancho del contenedor del hero (ajusta si quieres) */
-  /* Use aspect-ratio to keep consistent height and avoid CLS */
+  width: 100%;
+  max-width: 420px;
   aspect-ratio: 420 / 360;
   display: flex;
   justify-content: center;
@@ -213,8 +287,8 @@ main{padding:6px 0 24px;}
 
 /* image inside slide */
 .hero-slider img{
-  width:100%;
-  height:100%;
+  width:94%;
+  height:94%;
   object-fit:contain;
   pointer-events:none;
   user-select:none;
@@ -297,9 +371,15 @@ main{padding:6px 0 24px;}
 
 /* RESPONSIVE */
 @media (max-width:1000px){
-  .hero-slider{ width:320px; aspect-ratio:320/300; margin-top:18px; }
-  .hero{ padding:70px 28px; flex-direction:column-reverse; text-align:center; gap:24px; min-height:unset }
-  .hero-text{ max-width:720px }
+  .hero{
+    padding:70px 28px;
+    grid-template-columns:1fr;
+    text-align:center;
+    gap:32px;
+  }
+  .hero-slider{ width:100%; max-width:320px; aspect-ratio:320/300; margin:0 auto; }
+  .hero-text{ max-width:720px; margin:0 auto }
+  .hero-highlights{ grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); text-align:left }
 }
 
 /* If you want to center slider on large screens */
@@ -332,6 +412,7 @@ main{padding:6px 0 24px;}
   :root{ --container-padding:18px }
   .hero-text h1{ font-size:32px }
   .hero{ padding:48px var(--container-padding) }
+  .hero-highlights li{ flex-direction:column; align-items:flex-start }
   .slider-control{ width:38px; height:38px; }
 }
 
@@ -349,4 +430,41 @@ main{padding:6px 0 24px;}
   height:1px;width:1px;
   overflow:hidden;clip:rect(1px,1px,1px,1px);
   white-space:nowrap;border:0;padding:0;margin:-1px;
+}
+
+.hero-floating-card{
+  width:min(340px, calc(100% - 40px));
+  padding:20px 22px;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 30px 60px rgba(10,20,40,0.18);
+  border:1px solid rgba(0,0,0,0.04);
+  margin:-70px auto 0;
+  position:relative;
+  z-index:2;
+  text-align:left;
+}
+.floating-label{
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  font-size:11px;
+  color:#7a8195;
+  margin-bottom:6px;
+}
+.floating-value{
+  font-size:32px;
+  font-weight:800;
+  color:#13263f;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.floating-note{
+  font-size:14px;
+  color:#4c5466;
+  margin-top:4px;
+}
+@media (max-width:600px){
+  .hero-floating-card{ text-align:center; }
+  .floating-value{ justify-content:center; }
 }
