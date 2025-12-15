@@ -2,7 +2,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 /* ========== CONFIG ========== */
 const SUPABASE_URL = 'https://rxerfllxwdalduuzndiv.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE'
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZXJmbGx4d2RhbGR1dXpuZGl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODYxNTcsImV4cCI6MjA3OTE2MjE1N30.7l_8QAWd16aL3iHrxrRn1hJiW4MnxlR7HEjIkCEQDTE'
 const BUCKET = 'Products'
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -15,7 +16,9 @@ let Swal = null
 // load SweetAlert2 dynamically (non-blocking)
 async function loadSwal() {
   try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js')
+    const mod = await import(
+      'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js'
+    )
     Swal = mod.default || window.Swal || mod
     // configure a default toast mixin
     Swal.toast = Swal.mixin({
@@ -41,7 +44,7 @@ function fallbackToast(msg, type = 'info', timeout = 3500) {
   el.textContent = msg
   el.setAttribute('role', 'status')
   toastRoot.appendChild(el)
-  requestAnimationFrame(() => el.style.opacity = 1)
+  requestAnimationFrame(() => (el.style.opacity = 1))
   setTimeout(() => {
     el.style.opacity = 0
     setTimeout(() => el.remove(), 300)
@@ -51,7 +54,14 @@ function fallbackToast(msg, type = 'info', timeout = 3500) {
 // unified toast: prefer Swal if loaded
 function toast(msg, type = 'info', timeout = 3500) {
   if (Swal && Swal.toast) {
-    const icon = type === 'danger' ? 'error' : (type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'info'))
+    const icon =
+      type === 'danger'
+        ? 'error'
+        : type === 'success'
+          ? 'success'
+          : type === 'warning'
+            ? 'warning'
+            : 'info'
     Swal.toast.fire({ icon, title: msg, timer: timeout })
   } else {
     fallbackToast(msg, type, timeout)
@@ -60,7 +70,10 @@ function toast(msg, type = 'info', timeout = 3500) {
 
 // simple escape helper
 function escapeHtml(s) {
-  return String(s || '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))
+  return String(s || '').replace(
+    /[&<>"']/g,
+    (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])
+  )
 }
 
 // Formateo de moneda local (Lempira, Honduras)
@@ -71,7 +84,7 @@ function formatCurrency(value) {
       style: 'currency',
       currency: 'HNL',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(v)
   } catch (err) {
     // fallback simple: "L 123.45"
@@ -86,6 +99,36 @@ function debounce(fn, wait = 300) {
     clearTimeout(t)
     t = setTimeout(() => fn(...args), wait)
   }
+}
+
+/* ===========================
+   ✅ NEW: image_url helpers
+   image_url = PATH dentro del bucket Products (public)
+   Ej: "products/SKU123/foto.png"
+   =========================== */
+function normalizeBucketPath(v) {
+  const s = String(v || '').trim()
+  if (!s) return ''
+  // si alguien guardó URL completa por error, extraemos el path relativo al bucket
+  // (intentamos ser tolerantes sin romper)
+  if (/^https?:\/\//i.test(s)) {
+    const marker = `/storage/v1/object/public/${BUCKET}/`
+    const idx = s.indexOf(marker)
+    if (idx !== -1) return s.slice(idx + marker.length).replace(/^\/+/, '')
+    return s // si no calza, lo devolvemos tal cual (se tratará como URL)
+  }
+  return s.replace(/^\/+/, '')
+}
+
+function getPublicUrlFromImageUrl(image_url) {
+  const v = String(image_url || '').trim()
+  if (!v) return null
+  // si ya es URL completa, úsala
+  if (/^https?:\/\//i.test(v)) return v
+
+  const clean = normalizeBucketPath(v)
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(clean)
+  return data?.publicUrl || null
 }
 
 /* ========== UI Elements (guarded) ========== */
@@ -164,7 +207,7 @@ async function fileExistsInBucket(folderPath, fileName) {
       console.warn('storage.list error', error)
       return false
     }
-    return (data || []).some(item => item.name === fileName)
+    return (data || []).some((item) => item.name === fileName)
   } catch (err) {
     console.error('fileExistsInBucket err', err)
     return false
@@ -199,7 +242,11 @@ async function getCurrentUserFromSession(session) {
 async function checkAdmin(user) {
   try {
     if (!user) return false
-    const { data, error } = await supabase.from('admins').select('id, display_name, is_active').eq('id', user.id).single()
+    const { data, error } = await supabase
+      .from('admins')
+      .select('id, display_name, is_active')
+      .eq('id', user.id)
+      .single()
     if (error) {
       console.error('checkAdmin error', error)
       return false
@@ -243,18 +290,19 @@ async function initAuth() {
       Conectado como <strong>${escapeHtml(user.email)}</strong> 
       <button id="sign-out-inline" class="btn-ghost">Salir</button>
     </div>`
-  
-    const sbtn = $('sign-out-inline')
-    if (sbtn) sbtn.addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      window.location.href = 'login.html'   // ← IMPORTANTE
-    })
-  }  
 
-  // reveal app (your HTML no longer hides app-shell by default)
+    const sbtn = $('sign-out-inline')
+    if (sbtn)
+      sbtn.addEventListener('click', async () => {
+        await supabase.auth.signOut()
+        window.location.href = 'login.html'
+      })
+  }
+
+  // reveal app
   revealApp()
 
-  // restore UI prefs (compact / table) before loading categories/products
+  // restore UI prefs
   restoreUiPreferences()
   await loadCategories()
   await refreshProducts()
@@ -277,10 +325,7 @@ async function initAuth() {
   })
 }
 
-/* ---------- APP SHELL reveal helper ----------
-   NOTE: removed the old behavior that forced aria-hidden at load.
-   We just expose a helper to remove aria-hidden when needed.
-*/
+/* ---------- APP SHELL reveal helper ---------- */
 const appShell = document.querySelector('.app-shell')
 function revealApp() {
   if (!appShell) return
@@ -292,10 +337,13 @@ let productsCache = []
 
 async function fetchProducts() {
   try {
-    const { data, error } = await supabase.from('products').select('*').order('updated_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('updated_at', { ascending: false })
     if (error) {
       console.error('fetchProducts error', error)
-      toast('Error cargando productos', 'danger')
+      toast('Error cargando productos: ' + (error.message || 'error'), 'danger')
       return []
     }
     productsCache = data || []
@@ -313,30 +361,15 @@ function stockBadgeClass(stock) {
   return 'badge-ok'
 }
 
-/* ---------- IMPORTANT: renderProductCard NO LONGER outputs the numeric input ----------
-   Only the visual stock badge is rendered. Editing stock is done inside the Edit modal.
-*/
+/* ✅ FIX: render usa image_url (fuente real) */
 function renderProductCard(p) {
   const wrapper = document.createElement('div')
   wrapper.className = 'card'
   wrapper.setAttribute('role', 'article')
   wrapper.setAttribute('aria-label', `Producto ${p.title || ''}`)
 
-  // Construir URL pública preferida (p.image_path tiene prioridad)
-  const bucketBase = `https://${SUPABASE_URL.replace('https://','')}/storage/v1/object/public/${BUCKET}`
-  let filePath = null
-
-  if (p.image_path && String(p.image_path).trim()) {
-    filePath = p.image_path
-  } else if (p.sku && p.image_filename) {
-    filePath = `products/${p.sku}/${p.image_filename}`
-  } else if (p.sku && p.title) {
-    const slug = String(p.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-    filePath = `products/${p.sku}/${slug}.png`
-  }
-
   const placeholder = 'https://via.placeholder.com/400x300?text=No+Image'
-  const imgUrl = filePath ? `${bucketBase}/${filePath}` : placeholder
+  const imgUrl = getPublicUrlFromImageUrl(p.image_url) || placeholder
 
   const stockClass = stockBadgeClass(p.stock || 0)
   const safeTitle = escapeHtml(p.title || '')
@@ -353,7 +386,7 @@ function renderProductCard(p) {
       <div class="muted">SKU: ${safeSku}</div>
       <p class="card-desc">${safeDesc}</p>
       <div class="meta">
-        <div><strong>${formatCurrency ? formatCurrency(p.price) : ('$' + Number(p.price||0).toFixed(2))}</strong></div>
+        <div><strong>${formatCurrency ? formatCurrency(p.price) : '$' + Number(p.price || 0).toFixed(2)}</strong></div>
         <div class="stock-wrap" aria-hidden="false">
           <span class="stock-badge ${stockClass}" aria-label="Stock ${p.stock}">${p.stock}</span>
         </div>
@@ -373,10 +406,13 @@ async function refreshProducts() {
   const qVal = (searchEl?.value || '').trim().toLowerCase()
   const cat = filterCategoryEl?.value || ''
   if (productListEl) productListEl.innerHTML = ''
-  const filtered = (productsCache || []).filter(p => {
+  const filtered = (productsCache || []).filter((p) => {
     if (cat && (p.category || '') !== cat) return false
     if (!qVal) return true
-    return (p.title||'').toLowerCase().includes(qVal) || (p.sku||'').toLowerCase().includes(qVal)
+    return (
+      (p.title || '').toLowerCase().includes(qVal) ||
+      (p.sku || '').toLowerCase().includes(qVal)
+    )
   })
   if (!productListEl) return
   if (filtered.length === 0) {
@@ -384,7 +420,7 @@ async function refreshProducts() {
     return
   }
   const fragment = document.createDocumentFragment()
-  filtered.forEach(p => fragment.appendChild(renderProductCard(p)))
+  filtered.forEach((p) => fragment.appendChild(renderProductCard(p)))
   productListEl.appendChild(fragment)
 }
 
@@ -392,9 +428,15 @@ async function refreshProducts() {
 async function loadCategories() {
   try {
     const { data, error } = await supabase.from('products').select('category').neq('category', null)
-    if (error) { console.warn('loadCategories', error); return }
-    const unique = Array.from(new Set((data||[]).map(r => r.category).filter(Boolean)))
-    if (filterCategoryEl) filterCategoryEl.innerHTML = `<option value="">Todas las categorías</option>` + unique.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+    if (error) {
+      console.warn('loadCategories', error)
+      return
+    }
+    const unique = Array.from(new Set((data || []).map((r) => r.category).filter(Boolean)))
+    if (filterCategoryEl)
+      filterCategoryEl.innerHTML =
+        `<option value="">Todas las categorías</option>` +
+        unique.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
   } catch (err) {
     console.warn('loadCategories unexpected', err)
   }
@@ -424,7 +466,10 @@ function openModal(data = null) {
     imageFileEl && (imageFileEl.value = '')
     imageFilenameField && (imageFilenameField.value = '')
     imagePathField && (imagePathField.value = '')
-    if (imgPreview) { imgPreview.hidden = true; imgPreview.src = '' }
+    if (imgPreview) {
+      imgPreview.hidden = true
+      imgPreview.src = ''
+    }
     if (previewPlaceholder) previewPlaceholder.hidden = false
     currentModalProductIndex = -1
     setTimeout(() => titleEl && titleEl.focus(), 100)
@@ -437,10 +482,15 @@ function openModal(data = null) {
     descriptionEl && (descriptionEl.value = data.description || '')
     priceEl && (priceEl.value = data.price || 0)
     stockEl && (stockEl.value = data.stock || 0)
+
+    // mantenemos estos campos por compatibilidad, pero la fuente real es image_url:
     imageFilenameField && (imageFilenameField.value = data.image_filename || '')
     imagePathField && (imagePathField.value = data.image_path || '')
-    if (data.image_path && imgPreview) {
-      imgPreview.src = `https://${SUPABASE_URL.replace('https://','')}/storage/v1/object/public/${BUCKET}/${data.image_path}`
+
+    // ✅ FIX: preview desde image_url (path en bucket Products)
+    const previewUrl = getPublicUrlFromImageUrl(data.image_url)
+    if (previewUrl && imgPreview) {
+      imgPreview.src = previewUrl
       imgPreview.hidden = false
       if (previewPlaceholder) previewPlaceholder.hidden = true
     } else {
@@ -449,7 +499,7 @@ function openModal(data = null) {
     }
 
     // set currentModalProductIndex to match productsCache ordering (if present)
-    currentModalProductIndex = productsCache.findIndex(x => x.id === data.id)
+    currentModalProductIndex = productsCache.findIndex((x) => x.id === data.id)
     setTimeout(() => titleEl && titleEl.focus(), 100)
   }
 }
@@ -462,12 +512,11 @@ function closeModal() {
   if (appShell) appShell.removeAttribute('aria-hidden')
 }
 
-/* keyboard navigation for modal: Esc closes, ArrowLeft/Right navigate prev/next product when editing */
+/* keyboard navigation for modal */
 document.addEventListener('keydown', (e) => {
   if (modal && modal.getAttribute('aria-hidden') === 'false') {
     if (e.key === 'Escape') closeModal()
     else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && currentModalProductIndex > -1) {
-      // navigate only when editing an existing product
       const dir = e.key === 'ArrowLeft' ? -1 : 1
       let idx = currentModalProductIndex + dir
       if (idx < 0) idx = productsCache.length - 1
@@ -483,9 +532,16 @@ if (imageFileEl) {
   imageFileEl.addEventListener('change', () => {
     resetUploadMessages()
     const f = imageFileEl.files && imageFileEl.files[0]
-    if (!f) { if (imgPreview) imgPreview.hidden = true; if (previewPlaceholder) previewPlaceholder.hidden = false; return }
+    if (!f) {
+      if (imgPreview) imgPreview.hidden = true
+      if (previewPlaceholder) previewPlaceholder.hidden = false
+      return
+    }
     const url = URL.createObjectURL(f)
-    if (imgPreview) { imgPreview.src = url; imgPreview.hidden = false }
+    if (imgPreview) {
+      imgPreview.src = url
+      imgPreview.hidden = false
+    }
     if (previewPlaceholder) previewPlaceholder.hidden = true
 
     if (imageNameEl && !imageNameEl.value.trim()) {
@@ -496,42 +552,37 @@ if (imageFileEl) {
   })
 }
 
-/* ---------- DROPZONE: connect uploader-dropzone to image-file input ---------- */
+/* ---------- DROPZONE ---------- */
 if (uploaderDropzone && imageFileEl) {
-  // helper to set input.files from a File object
   function setInputFileFromFile(file) {
     try {
       const dt = new DataTransfer()
       dt.items.add(file)
       imageFileEl.files = dt.files
-      // dispatch change so existing handlers run
       imageFileEl.dispatchEvent(new Event('change', { bubbles: true }))
     } catch (err) {
-      // fallback: cannot set files programmatically in some browsers -> inform user
       console.warn('Could not set input.files programmatically', err)
       toast('Selecciona el archivo manualmente (arrastre no soportado por este navegador).', 'warning')
     }
   }
 
-  uploaderDropzone.addEventListener('click', (e) => {
-    // open native file picker
-    imageFileEl.click()
-  })
+  uploaderDropzone.addEventListener('click', () => imageFileEl.click())
 
-  // keyboard accessibility: Enter / Space triggers click
   uploaderDropzone.addEventListener('keyup', (e) => {
     if (e.key === 'Enter' || e.key === ' ') imageFileEl.click()
   })
 
-  ;['dragenter','dragover'].forEach(ev => {
+  ;['dragenter', 'dragover'].forEach((ev) => {
     uploaderDropzone.addEventListener(ev, (e) => {
-      e.preventDefault(); e.stopPropagation()
+      e.preventDefault()
+      e.stopPropagation()
       uploaderDropzone.classList.add('dragover')
     })
   })
-  ;['dragleave','dragend','drop'].forEach(ev => {
+  ;['dragleave', 'dragend', 'drop'].forEach((ev) => {
     uploaderDropzone.addEventListener(ev, (e) => {
-      e.preventDefault(); e.stopPropagation()
+      e.preventDefault()
+      e.stopPropagation()
       uploaderDropzone.classList.remove('dragover')
     })
   })
@@ -544,8 +595,14 @@ if (uploaderDropzone && imageFileEl) {
 
 if (autoNameBtn) {
   autoNameBtn.addEventListener('click', () => {
-    const base = (titleEl && titleEl.value.trim()) || (skuEl && skuEl.value.trim()) || 'producto'
-    const ext = imageFileEl && imageFileEl.files[0] ? inferExtensionFromFile(imageFileEl.files[0]) : 'png'
+    const base =
+      (titleEl && titleEl.value.trim()) ||
+      (skuEl && skuEl.value.trim()) ||
+      'producto'
+    const ext =
+      imageFileEl && imageFileEl.files[0]
+        ? inferExtensionFromFile(imageFileEl.files[0])
+        : 'png'
     if (imageNameEl) imageNameEl.value = slugifyFilename(`${base}.${ext}`)
     toast('Nombre sugerido', 'info')
   })
@@ -560,18 +617,26 @@ if (imageNameEl) {
   })
 }
 
-function setUploadStatus(text) { if (uploadStatus) uploadStatus.textContent = `Estado: ${text}` }
+function setUploadStatus(text) {
+  if (uploadStatus) uploadStatus.textContent = `Estado: ${text}`
+}
 function resetUploadMessages() {
   if (uploadError) uploadError.hidden = true
   if (uploadSuccess) uploadSuccess.hidden = true
   setUploadStatus('idle')
 }
 function showUploadError(msg) {
-  if (uploadError) { uploadError.hidden = false; uploadError.textContent = msg }
+  if (uploadError) {
+    uploadError.hidden = false
+    uploadError.textContent = msg
+  }
   if (uploadSuccess) uploadSuccess.hidden = true
 }
 function showUploadSuccess(msg) {
-  if (uploadSuccess) { uploadSuccess.hidden = false; uploadSuccess.textContent = msg }
+  if (uploadSuccess) {
+    uploadSuccess.hidden = false
+    uploadSuccess.textContent = msg
+  }
   if (uploadError) uploadError.hidden = true
 }
 
@@ -583,7 +648,7 @@ if (startUploadBtn) {
     const file = imageFileEl && imageFileEl.files && imageFileEl.files[0]
     if (!file) return showUploadError('Selecciona un archivo primero.')
 
-    const allowed = ['image/jpeg','image/png','image/webp']
+    const allowed = ['image/jpeg', 'image/png', 'image/webp']
     if (!allowed.includes(file.type)) return showUploadError('Tipo no permitido. Usa JPG, PNG o WEBP.')
     const maxMB = 5
     if (file.size > maxMB * 1024 * 1024) return showUploadError(`Archivo demasiado grande. Máx ${maxMB} MB.`)
@@ -627,12 +692,17 @@ if (startUploadBtn) {
     if (autoNameBtn) autoNameBtn.disabled = true
 
     try {
-      const { error: uploadErr } = await supabase.storage.from(BUCKET).upload(filePath, file, { cacheControl: '3600', upsert: false })
+      const { error: uploadErr } = await supabase.storage
+        .from(BUCKET)
+        .upload(filePath, file, { cacheControl: '3600', upsert: false })
+
       if (uploadErr) {
         if (uploadErr.status === 409) {
           const newName = await generateNonCollidingName(folder, finalName)
           const newPath = `${folder}/${newName}`
-          const { error: uploadErr2 } = await supabase.storage.from(BUCKET).upload(newPath, file, { cacheControl: '3600', upsert: false })
+          const { error: uploadErr2 } = await supabase.storage
+            .from(BUCKET)
+            .upload(newPath, file, { cacheControl: '3600', upsert: false })
           if (uploadErr2) throw uploadErr2
           finalName = newName
         } else {
@@ -640,10 +710,11 @@ if (startUploadBtn) {
         }
       }
 
-      // get public url (bucket público)
+      // ✅ FIX: image_url = path dentro del bucket (fuente real)
       const finalFilePath = `${folder}/${finalName}`
-      const { data: publicData, error: publicErr } = await supabase.storage.from(BUCKET).getPublicUrl(finalFilePath)
-      if (publicErr) console.warn('getPublicUrl err', publicErr)
+
+      // Public URL solo para preview (bucket público)
+      const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(finalFilePath)
 
       if (imageFilenameField) imageFilenameField.value = finalName
       if (imagePathField) imagePathField.value = finalFilePath
@@ -676,6 +747,10 @@ if (productForm) {
     if (saveProductBtn) saveProductBtn.disabled = true
     const id = productIdEl ? productIdEl.value || null : null
     const userId = (await supabase.auth.getUser()).data?.user?.id || null
+
+    // ✅ FIX: image_url debe venir del path (imagePathField)
+    const imagePath = imagePathField ? (imagePathField.value || null) : null
+
     const payload = {
       title: titleEl ? titleEl.value.trim() : null,
       sku: skuEl ? skuEl.value.trim() || null : null,
@@ -683,9 +758,15 @@ if (productForm) {
       description: descriptionEl ? descriptionEl.value.trim() || null : null,
       price: priceEl ? parseFloat(priceEl.value) || 0 : 0,
       stock: stockEl ? parseInt(stockEl.value) || 0 : 0,
+
+      // ✅ fuente real:
+      image_url: imagePath ? normalizeBucketPath(imagePath) : null,
+
+      // (se dejan por compatibilidad con tu esquema actual, pero ya no son la “fuente real”)
       image_filename: imageFilenameField ? imageFilenameField.value || null : null,
-      image_path: imagePathField ? imagePathField.value || null : null,
-      updated_by: userId
+      image_path: imagePath ? normalizeBucketPath(imagePath) : null,
+
+      updated_by: userId,
     }
 
     try {
@@ -707,8 +788,8 @@ if (productForm) {
             p_category: payload.category,
             p_price: payload.price,
             p_stock: payload.stock,
-            p_image_path: payload.image_path,
-            p_performed_by: payload.created_by
+            p_image_path: payload.image_url, // mantenemos compatibilidad (si tu RPC usa image_path)
+            p_performed_by: payload.created_by,
           })
         } catch (rpcErr) {
           console.warn('RPC create_product_with_stock failed (ignored):', rpcErr)
@@ -722,7 +803,7 @@ if (productForm) {
     } catch (err) {
       console.error('save product error', err)
       toast('Error guardando producto: ' + (err.message || JSON.stringify(err)), 'danger')
-      if (Swal) Swal.fire({ icon: 'error', title: 'Error', text: (err.message || JSON.stringify(err)) })
+      if (Swal) Swal.fire({ icon: 'error', title: 'Error', text: err.message || JSON.stringify(err) })
     } finally {
       if (saveProductBtn) saveProductBtn.disabled = false
     }
@@ -737,10 +818,12 @@ if (productListEl) {
 
     if (editId) {
       const { data, error } = await supabase.from('products').select('*').eq('id', editId).single()
-      if (error) { toast('Error cargando producto', 'danger'); return }
+      if (error) {
+        toast('Error cargando producto: ' + error.message, 'danger')
+        return
+      }
       openModal(data)
     } else if (deleteId) {
-      // use Swal confirm if available
       if (Swal) {
         const res = await Swal.fire({
           title: '¿Eliminar producto?',
@@ -749,7 +832,7 @@ if (productListEl) {
           showCancelButton: true,
           confirmButtonText: 'Sí, eliminar',
           cancelButtonText: 'Cancelar',
-          reverseButtons: true
+          reverseButtons: true,
         })
         if (!res.isConfirmed) return
       } else {
@@ -758,7 +841,10 @@ if (productListEl) {
 
       try {
         const { error } = await supabase.from('products').delete().eq('id', deleteId)
-        if (error) { toast('Error eliminando: ' + error.message, 'danger'); return }
+        if (error) {
+          toast('Error eliminando: ' + error.message, 'danger')
+          return
+        }
         toast('Producto eliminado', 'success')
         await refreshProducts()
       } catch (err) {
@@ -774,7 +860,10 @@ function applyCompactMode(enabled) {
   if (!appShell) return
   if (enabled) appShell.classList.add('compact')
   else appShell.classList.remove('compact')
-  if (toggleCompactBtn) { toggleCompactBtn.setAttribute('aria-pressed', String(Boolean(enabled))); toggleCompactBtn.classList.toggle('active', Boolean(enabled)) }
+  if (toggleCompactBtn) {
+    toggleCompactBtn.setAttribute('aria-pressed', String(Boolean(enabled)))
+    toggleCompactBtn.classList.toggle('active', Boolean(enabled))
+  }
   localStorage.setItem('ui_compact', enabled ? '1' : '0')
 }
 
@@ -782,7 +871,10 @@ function applyTableView(enabled) {
   if (!productListEl) return
   if (enabled) productListEl.classList.add('table-view')
   else productListEl.classList.remove('table-view')
-  if (toggleTableBtn) { toggleTableBtn.setAttribute('aria-pressed', String(Boolean(enabled))); toggleTableBtn.classList.toggle('active', Boolean(enabled)) }
+  if (toggleTableBtn) {
+    toggleTableBtn.setAttribute('aria-pressed', String(Boolean(enabled)))
+    toggleTableBtn.classList.toggle('active', Boolean(enabled))
+  }
   localStorage.setItem('ui_table', enabled ? '1' : '0')
 }
 
@@ -821,12 +913,14 @@ if (modalOverlay) modalOverlay.addEventListener('click', closeModal)
 
 /* ========== Init ========== */
 async function main() {
-  await loadSwal() // attempt to load Swal early
+  await loadSwal()
   await initAuth()
-  if (productListEl) productListEl.innerHTML = '<div class="empty-state">Pulsa "Refrescar" para cargar productos</div>'
+
+  // ✅ FIX: NO sobrescribas la lista después de cargar productos
+  // (antes lo pisabas con el empty-state)
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('admin main error', err)
   toast('Error crítico arrancando admin', 'danger')
 })
