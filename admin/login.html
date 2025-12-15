@@ -19,31 +19,51 @@
       <div>
         <p class="eyebrow">Panel administrativo</p>
         <p class="title">Bienvenido</p>
-        <p class="subtitle">Autentícate para seguir gestionando el inventario y los productos.</p>
+        <p class="subtitle">
+          Autentícate para seguir gestionando el inventario y los productos.
+        </p>
       </div>
     </div>
 
-    <form id="login-form" class="form" autocomplete="on">
+    <!-- FORM LOGIN -->
+    <form id="login-form" class="form" autocomplete="on" novalidate>
 
       <div class="input-group">
         <label for="username">Correo electrónico</label>
-        <input type="email" name="username" id="username" placeholder="usuario@empresa.com" required inputmode="email">
-        <label for="username">Usuario</label>
-        <input type="text" name="username" id="username" placeholder="usuario@empresa.com" required>
+        <input
+          type="email"
+          id="username"
+          name="username"
+          placeholder="usuario@empresa.com"
+          required
+          autocomplete="email"
+          inputmode="email"
+        >
       </div>
 
       <div class="input-group">
         <label for="password">Contraseña</label>
-        <input type="password" name="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+        >
       </div>
 
-      <button id="btn-signin" class="sign" type="submit">Iniciar sesión</button>
+      <button id="btn-signin" class="sign" type="submit">
+        Iniciar sesión
+      </button>
     </form>
 
     <p id="status" class="status" role="status" aria-live="polite"></p>
 
     <div class="form-hint">
-      <span>Solo personal autorizado. Asegúrate de cerrar sesión al terminar.</span>
+      <span>
+        Solo personal autorizado. Asegúrate de cerrar sesión al terminar.
+      </span>
     </div>
   </div>
 
