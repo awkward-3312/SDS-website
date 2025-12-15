@@ -128,7 +128,6 @@ function getPublicUrlFromImageUrl(image_url) {
 }
 
 /* ========== UI Elements (guarded) ========== */
-const authArea = $('auth-area')
 const signOutBtn = $('sign-out')
 const adminNameEl = $('admin-name')
 const refreshBtn = $('refresh')
@@ -279,24 +278,6 @@ async function initAuth() {
       await supabase.auth.signOut()
       window.location.href = 'login.html'
     })
-  }
-
-  // ✅ FIX: NO BORRAR authArea (para no romper Compacto/Tabla si están ahí)
-  if (authArea && user) {
-    const sessionEl = document.createElement('div')
-    sessionEl.className = 'admin-session'
-    sessionEl.innerHTML = `
-      Conectado como <strong>${escapeHtml(user.email)}</strong> 
-      <button id="sign-out-inline" class="btn-ghost">Salir</button>
-    `
-    authArea.appendChild(sessionEl)
-
-    const sbtn = $('sign-out-inline')
-    if (sbtn)
-      sbtn.addEventListener('click', async () => {
-        await supabase.auth.signOut()
-        window.location.href = 'login.html'
-      })
   }
 
   // reveal app
